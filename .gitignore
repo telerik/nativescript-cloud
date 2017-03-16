@@ -35,3 +35,13 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+# Lib specific files:
+references.d.ts
+**/*.js
+**/*.js.map
+!Gruntfile.js
+.tscache/**/*
+references.d.ts
+test-reports.xml
+tscommand-*.tmp.txt

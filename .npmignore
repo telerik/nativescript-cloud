@@ -1,0 +1,11 @@
+**/*.ts
+**/*.js.map
+coverage
+.tscache
+test-reports.xml
+*.tgz
+.vscode
+.npmignore
+test/**/*
+test-reports.xml
+tscommand-*.tmp.txt
