@@ -130,7 +130,7 @@ module.exports = function (grunt) {
 		const pathToModule = path.join(__dirname, "node_modules", dirname);
 		try {
 			// grunt deps must be installed locally in the project where grunt will be called.
-			childProcess.execSync("npm i", { cwd: pathToModule, stdio: "ignore" });
+			childProcess.execSync("npm i --ignore-scripts", { cwd: pathToModule, stdio: "ignore" });
 		} catch (err) {
 
 		}
@@ -211,7 +211,9 @@ module.exports = function (grunt) {
 
 	grunt.registerTask("pack", [
 		"clean",
+		"generate_references",
 		"ts:release_build",
+		"transpile_additional_project",
 		"shell:ci_unit_tests",
 		"tslint:build",
 

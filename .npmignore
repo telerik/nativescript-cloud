@@ -9,3 +9,4 @@ test-reports.xml
 test/**/*
 test-reports.xml
 tscommand-*.tmp.txt
+.travis.yml

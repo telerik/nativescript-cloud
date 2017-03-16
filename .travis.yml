@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+- '6'
+git:
+  submodules: false
+install:
+- npm install grunt-cli
+- npm install --ignore-scripts
+script:
+- node_modules/.bin/grunt pack
