@@ -1,0 +1,19 @@
+{
+	"AB_SERVER_PROTO": "https",
+	"AB_SERVER": "sit-platform.telerik.rocks",
+	"DEBUG": false,
+	"USE_PROXY": true,
+	"ON_PREM": false,
+	"PROXY_HOSTNAME": "127.0.0.1",
+	"PROXY_PORT": 8888,
+	"DISABLE_HOOKS": false,
+	"DEFAULT_CORDOVA_PROJECT_TEMPLATE": "KendoUI.Blank",
+	"DEFAULT_NATIVESCRIPT_PROJECT_TEMPLATE": "Blank",
+	"CORDOVA_PLUGINS_REGISTRY": "http://registry.npmjs.org",
+	"USE_CDN_FOR_EXTENSION_DOWNLOAD": false,
+	"AUTO_UPGRADE_PROJECT_FILE": true,
+	"TYPESCRIPT_COMPILER_OPTIONS": {
+		"target": "ES5",
+		"module": "commonjs"
+	}
+}

@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "commonjs",
+		"sourceMap": true,
+		"declaration": false,
+		"removeComments": false,
+		"noImplicitAny": true,
+		"experimentalDecorators": true,
+		"noUnusedLocals": true,
+		"alwaysStrict": true,
+		"noEmitOnError": false
+	},
+	"exclude": [
+		"node_modules",
+		"scratch",
+		"coverage"
+	]
+}
