@@ -1,5 +1,5 @@
 {
-  "name": "ns-cloud",
+  "name": "nativescript-cloud",
   "version": "0.1.0",
   "description": "Used for cloud support in NativeScript CLI",
   "main": "lib/bootstrap.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NativeScript/ns-cloud.git"
+    "url": "git+https://github.com/NativeScript/nativescript-cloud.git"
   },
   "author": "Progress <support@telerik.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/NativeScript/ns-cloud/issues"
+    "url": "https://github.com/NativeScript/nativescript-cloud/issues"
   },
-  "homepage": "https://github.com/NativeScript/ns-cloud#readme",
+  "homepage": "https://github.com/NativeScript/nativescript-cloud#readme",
   "devDependencies": {
     "@types/chai": "3.4.34",
     "@types/chai-as-promised": "0.0.29",
