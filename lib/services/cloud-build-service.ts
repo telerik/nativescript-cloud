@@ -75,6 +75,14 @@ export class CloudBuildService implements ICloudBuildService {
 			if (!this.$fs.exists(androidBuildData.pathToCertificate)) {
 				this.$errors.failWithoutHelp(`The specified certificate: ${androidBuildData.pathToCertificate} does not exist. Verify the location is correct.`);
 			}
+
+			if (!androidBuildData.certificatePassword) {
+				this.$errors.failWithoutHelp(`No password specified for certificate ${androidBuildData.pathToCertificate}.`);
+			}
+
+			if (androidBuildData.certificatePassword.length < 6) {
+				this.$errors.failWithoutHelp("The password for Android certificate must be at least 6 characters long.");
+			}
 		} else if (this.$mobileHelper.isiOSPlatform(platform) && iOSBuildData.buildForDevice) {
 			if (!iOSBuildData || !iOSBuildData.pathToCertificate || !iOSBuildData.certificatePassword || !iOSBuildData.pathToProvision) {
 				this.$errors.failWithoutHelp("When building for iOS you must specify valid Mobile Provision, Certificate and its password.");
