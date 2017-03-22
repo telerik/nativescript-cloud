@@ -18,13 +18,16 @@ export class CloudBuildService implements ICloudBuildService {
 		private $errors: IErrors,
 		private $server: CloudService.IServer,
 		private $mobileHelper: Mobile.IMobileHelper,
-		private $projectHelper: IProjectHelper) { }
+		private $projectHelper: IProjectHelper,
+		private $logger: ILogger) { }
 
 	// We should decorate this method... hacks are needed!!!
 	public async build(projectSettings: IProjectSettings,
 		platform: string, buildConfiguration: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
+
+		this.$logger.info(`Starting cloud build for ${projectSettings.projectDir}. Platform is: ${platform}, configuration: ${buildConfiguration}.`);
 
 		// TODO: Add validation for all options before uploading the package to S3.
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
@@ -53,7 +56,11 @@ export class CloudBuildService implements ICloudBuildService {
 			this.$errors.failWithoutHelp(`Build failed. Reason is: ${buildResult.Errors}. Additional information: ${buildResult.Output}.`);
 		}
 
+		this.$logger.info(`Build for ${projectSettings.projectDir}, platform: ${platform}, configuration: ${buildConfiguration} finished successfully. Downloading result...`);
+
 		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir, outputFileName);
+
+		this.$logger.info(`Output of ${projectSettings.projectDir} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.Error}${EOL}* stdout: ${buildResult.Output}${EOL}* outputFilePath: ${localBuildResult}`);
 
 		return {
 			stderr: buildResult.Error,
