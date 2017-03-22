@@ -27,7 +27,8 @@ export class CloudBuildService implements ICloudBuildService {
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
 
-		this.$logger.info(`Starting cloud build for ${projectSettings.projectDir}. Platform is: ${platform}, configuration: ${buildConfiguration}.`);
+		const buildInformationString = `cloud build of '${projectSettings.projectDir}', platform: '${platform}', configuration: '${buildConfiguration}' `;
+		this.$logger.info(`Starting ${buildInformationString}.`);
 
 		// TODO: Add validation for all options before uploading the package to S3.
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
@@ -56,11 +57,11 @@ export class CloudBuildService implements ICloudBuildService {
 			this.$errors.failWithoutHelp(`Build failed. Reason is: ${buildResult.Errors}. Additional information: ${buildResult.Output}.`);
 		}
 
-		this.$logger.info(`Build for ${projectSettings.projectDir}, platform: ${platform}, configuration: ${buildConfiguration} finished successfully. Downloading result...`);
+		this.$logger.info(`Finished ${buildInformationString} successfully. Downloading result...`);
 
 		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir, outputFileName);
 
-		this.$logger.info(`Output of ${projectSettings.projectDir} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.Error}${EOL}* stdout: ${buildResult.Output}${EOL}* outputFilePath: ${localBuildResult}`);
+		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.Error}${EOL}* stdout: ${buildResult.Output}${EOL}* outputFilePath: ${localBuildResult}`);
 
 		return {
 			stderr: buildResult.Error,
