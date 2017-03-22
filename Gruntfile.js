@@ -137,7 +137,7 @@ module.exports = function (grunt) {
 
 		try {
 			// we need the .js file in the tests, so we can require them, for example in order to create a new instance of injector.
-			childProcess.execSync("grunt ts:devall", { cwd: pathToModule, stdio: "ignore" });
+			childProcess.execSync("grunt", { cwd: pathToModule, stdio: "ignore" });
 		} catch (err) {
 
 		}
