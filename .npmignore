@@ -10,3 +10,6 @@ test/**/*
 test-reports.xml
 tscommand-*.tmp.txt
 .travis.yml
+tsconfig.json
+tslint.json
+Gruntfile.js
