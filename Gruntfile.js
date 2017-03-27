@@ -34,11 +34,11 @@ module.exports = function (grunt) {
 			options: grunt.file.readJSON("tsconfig.json").compilerOptions,
 
 			devlib: {
-				src: ["lib/**/*.ts", "test/**/*.ts", "references.d.ts"]
+				src: ["lib/**/*.ts", "test/**/*.ts", "references.d.ts", "!node_modules/**/*"]
 			},
 
 			release_build: {
-				src: ["lib/**/*.ts", "test/**/*.ts", "references.d.ts"],
+				src: ["lib/**/*.ts", "test/**/*.ts", "references.d.ts", "!node_modules/**/*"],
 				options: {
 					sourceMap: false,
 					removeComments: true
@@ -128,19 +128,44 @@ module.exports = function (grunt) {
 
 	const transpileProject = function (dirname) {
 		const pathToModule = path.join(__dirname, "node_modules", dirname);
+		const packageJsonContent = grunt.file.readJSON(path.join(pathToModule, "package.json"));
+
+		try {
+			// Keep the --production flag - in case we skip it, we'll instal istanbul, chai, etc. and their .d.ts will conflict with ours.
+			childProcess.execSync("npm i --ignore-scripts --production", { cwd: pathToModule, stdio: "ignore" });
+		} catch (err) {
+		}
+
 		try {
 			// grunt deps must be installed locally in the project where grunt will be called.
-			childProcess.execSync("npm i --ignore-scripts", { cwd: pathToModule, stdio: "ignore" });
-		} catch (err) {
+			// also for transpilation we need typescript locally.
+			const searchedNames = ["grunt", "typescript"];
+			const dependenciesToInstall = _.map(packageJsonContent.devDependencies, (version, name) => {
+				for (let searchedName of searchedNames) {
+					if (name.indexOf(searchedName) !== -1 && !fs.existsSync(path.join(pathToModule, "node_modules", name))) {
+						return `${name}@${version}`
+					}
+				}
+			}).filter(a => !!a);
 
-		}
+			_.each(dependenciesToInstall, name => {
+				try {
+					childProcess.execSync(`npm i --ignore-scripts --production ${name}`, { cwd: pathToModule, stdio: "ignore" });
+				} catch (err) {
+				}
+			})
+
+
+		} catch (err) { }
 
 		try {
 			// we need the .js file in the tests, so we can require them, for example in order to create a new instance of injector.
-			childProcess.execSync("grunt", { cwd: pathToModule, stdio: "ignore" });
-		} catch (err) {
-
-		}
+			// if the main file is .js and it exists, no need to transpile it again
+			const pathToMain = path.join(pathToModule, packageJsonContent.main);
+			if (!fs.existsSync(pathToMain)) {
+				childProcess.execSync("grunt", { cwd: pathToModule, stdio: "ignore" });
+			}
+		} catch (err) { }
 	};
 
 	grunt.registerTask("transpile_additional_project", function () {
@@ -172,7 +197,7 @@ module.exports = function (grunt) {
 		});
 	});
 
-	grunt.registerTask("test", [ "transpile_additional_project", "ts:devlib", "shell:ci_unit_tests"]);
+	grunt.registerTask("test", ["transpile_additional_project", "generate_references", "ts:devlib", "shell:ci_unit_tests"]);
 
 	grunt.registerTask("generate_references", () => {
 		const referencesPath = path.join(__dirname, "references.d.ts");
@@ -201,7 +226,7 @@ module.exports = function (grunt) {
 			if (stat.isDirectory() && path.basename(d) !== "node_modules") {
 				// recursively check all dirs for .d.ts files.
 				pathsToDtsFiles = pathsToDtsFiles.concat(getReferencesFromDir(d));
-			} else if (stat.isFile() && d.endsWith(".d.ts")) {
+			} else if (stat.isFile() && d.endsWith(".d.ts") && path.basename(d) !== ".d.ts") {
 				pathsToDtsFiles.push(d);
 			}
 		});
