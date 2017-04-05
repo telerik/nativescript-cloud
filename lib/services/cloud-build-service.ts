@@ -17,6 +17,7 @@ export class CloudBuildService implements ICloudBuildService {
 		private $projectFilesManager: IProjectFilesManager,
 		private $errors: IErrors,
 		private $server: CloudService.IServer,
+		private $qr: IQrCodeGenerator,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $projectHelper: IProjectHelper,
 		private $logger: ILogger) { }
@@ -63,10 +64,16 @@ export class CloudBuildService implements ICloudBuildService {
 
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.Error}${EOL}* stdout: ${buildResult.Output}${EOL}* outputFilePath: ${localBuildResult}`);
 
+		const buildResultUrl = this.getBuildResultUrl(buildResult);
+
 		return {
 			stderr: buildResult.Error,
 			stdout: buildResult.Output,
-			outputFilePath: localBuildResult
+			outputFilePath: localBuildResult,
+			qrData: {
+				originalUrl: buildResultUrl,
+				imageData: await this.$qr.generateDataUri(buildResultUrl)
+			}
 		};
 	}
 
@@ -196,6 +203,9 @@ export class CloudBuildService implements ICloudBuildService {
 		};
 
 		requestOpts.body = this.$fs.readFile(localFilePath);
+		requestOpts.headers = requestOpts.headers || {};
+		// It is vital we set this, else the http request comes out as chunked and S3 doesn't support chunked requests
+		requestOpts.headers["Content-Length"] = requestOpts.body.length;
 
 		try {
 			await this.$httpClient.httpRequest(requestOpts);
@@ -315,8 +325,11 @@ export class CloudBuildService implements ICloudBuildService {
 		return result;
 	}
 
+	private getBuildResultUrl(buildResult: any): string {
+		return _.find(buildResult.BuildItems, (b: any) => b.Disposition === "BuildResult").FullPath;
+	}
+
 	private async downloadBuildResult(buildResult: any, projectDir: string, outputFileName: string): Promise<string> {
-		const buildResultUrl = _.find(buildResult.BuildItems, (b: any) => b.Disposition === "BuildResult").FullPath;
 		const destinationDir = path.join(projectDir, constants.CLOUD_TEMP_DIR_NAME);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
@@ -325,7 +338,7 @@ export class CloudBuildService implements ICloudBuildService {
 
 		// Download the output file.
 		await this.$httpClient.httpRequest({
-			url: buildResultUrl,
+			url: this.getBuildResultUrl(buildResult),
 			pipeTo: targetFile
 		});
 

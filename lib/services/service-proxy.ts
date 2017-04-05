@@ -10,6 +10,7 @@ export class ServiceProxy implements CloudService.IServiceProxy {
 		path = `appbuilder/${path}`;
 		headers = headers || Object.create(null);
 		headers["X-Icenium-SolutionSpace"] = headers["X-Icenium-SolutionSpace"] || "Private_Build_Folder";
+		headers["User-Agent"] = `fusion/${require("../../package.json").version} (Node.js ${process.versions.node}; ${process.platform}; ${process.arch})`;
 
 		if (accept) {
 			headers.Accept = accept;
