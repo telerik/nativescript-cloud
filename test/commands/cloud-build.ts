@@ -1,4 +1,5 @@
 import { CloudLibVersion } from "../../lib/commands/cloud-lib-version";
+import { PackageInfoService } from "../../lib/services/package-info-service";
 import { Yok } from "mobile-cli-lib/yok";
 import { FileSystem } from "mobile-cli-lib/file-system";
 import * as fs from "fs";
@@ -18,6 +19,7 @@ describe("cloud lib version command", () => {
 			info: loggerInfo
 		});
 
+		testInjector.register("packageInfoService", PackageInfoService);
 		testInjector.registerCommand("command", CloudLibVersion);
 
 		await testInjector.resolveCommand("command").execute([]);

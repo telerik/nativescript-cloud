@@ -2,6 +2,12 @@ interface IBuildResultData {
 	stderr: string;
 	stdout: string;
 	outputFilePath: string;
+	qrData: IQrData;
+}
+
+interface IQrData {
+	originalUrl: string;
+	imageData: string;
 }
 
 interface ICloudBuildService {

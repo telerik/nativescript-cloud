@@ -17,6 +17,7 @@ export class CloudBuildService implements ICloudBuildService {
 		private $projectFilesManager: IProjectFilesManager,
 		private $errors: IErrors,
 		private $server: CloudService.IServer,
+		private $qr: IQrCodeGenerator,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $projectHelper: IProjectHelper,
 		private $logger: ILogger) { }
@@ -34,19 +35,10 @@ export class CloudBuildService implements ICloudBuildService {
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
 		let buildProps = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration);
 
-		// TODO: Check with Nadya why we do not receive this information.
-		let outputFileName = projectSettings.projectName;
-
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {
 			buildProps = await this.getAndroidBuildProperties(projectSettings, buildProps, androidBuildData);
-			outputFileName += ".apk";
 		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
 			buildProps = await this.getiOSBuildProperties(projectSettings, buildProps, iOSBuildData);
-			if (iOSBuildData.buildForDevice) {
-				outputFileName += ".ipa";
-			} else {
-				outputFileName += ".zip";
-			}
 		}
 
 		const buildResult: any = await this.$server.appsBuild.buildProject(projectSettings.projectId, buildProps);
@@ -59,14 +51,21 @@ export class CloudBuildService implements ICloudBuildService {
 
 		this.$logger.info(`Finished ${buildInformationString} successfully. Downloading result...`);
 
-		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir, outputFileName);
+		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir);
 
-		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.Error}${EOL}* stdout: ${buildResult.Output}${EOL}* outputFilePath: ${localBuildResult}`);
+		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.Errors}${EOL}* stdout: ${buildResult.Output}${EOL}* outputFilePath: ${localBuildResult}`);
+
+		const buildResultUrl = this.getBuildResultUrl(buildResult);
 
 		return {
-			stderr: buildResult.Error,
+			stderr: buildResult.Errors,
 			stdout: buildResult.Output,
-			outputFilePath: localBuildResult
+			fullOutput: buildResult.FullOutput,
+			outputFilePath: localBuildResult,
+			qrData: {
+				originalUrl: buildResultUrl,
+				imageData: await this.$qr.generateDataUri(buildResultUrl)
+			}
 		};
 	}
 
@@ -196,6 +195,9 @@ export class CloudBuildService implements ICloudBuildService {
 		};
 
 		requestOpts.body = this.$fs.readFile(localFilePath);
+		requestOpts.headers = requestOpts.headers || {};
+		// It is vital we set this, else the http request comes out as chunked and S3 doesn't support chunked requests
+		requestOpts.headers["Content-Length"] = requestOpts.body.length;
 
 		try {
 			await this.$httpClient.httpRequest(requestOpts);
@@ -315,17 +317,25 @@ export class CloudBuildService implements ICloudBuildService {
 		return result;
 	}
 
-	private async downloadBuildResult(buildResult: any, projectDir: string, outputFileName: string): Promise<string> {
-		const buildResultUrl = _.find(buildResult.BuildItems, (b: any) => b.Disposition === "BuildResult").FullPath;
+	private getBuildResultUrl(buildResult: any): string {
+		return this.getBuildResult(buildResult).FullPath;
+	}
+
+	private getBuildResult(buildResult: any): any {
+		return _.find(buildResult.BuildItems, (b: any) => b.Disposition === "BuildResult");
+	}
+
+	private async downloadBuildResult(buildResult: any, projectDir: string): Promise<string> {
 		const destinationDir = path.join(projectDir, constants.CLOUD_TEMP_DIR_NAME);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
-		const targetFileName = path.join(destinationDir, outputFileName);
+		const buildResultObj = this.getBuildResult(buildResult);
+		const targetFileName = path.join(destinationDir, buildResultObj.Filename);
 		const targetFile = this.$fs.createWriteStream(targetFileName);
 
 		// Download the output file.
 		await this.$httpClient.httpRequest({
-			url: buildResultUrl,
+			url: buildResultObj.FullPath,
 			pipeTo: targetFile
 		});
 

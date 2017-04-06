@@ -1,0 +1,3 @@
+interface IPackageInfoService {
+	getVersion(): string;
+}
