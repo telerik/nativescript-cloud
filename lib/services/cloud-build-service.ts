@@ -22,7 +22,6 @@ export class CloudBuildService implements ICloudBuildService {
 		private $projectHelper: IProjectHelper,
 		private $logger: ILogger) { }
 
-	// We should decorate this method... hacks are needed!!!
 	public async build(projectSettings: IProjectSettings,
 		platform: string, buildConfiguration: string,
 		androidBuildData?: IAndroidBuildData,
@@ -31,7 +30,6 @@ export class CloudBuildService implements ICloudBuildService {
 		const buildInformationString = `cloud build of '${projectSettings.projectDir}', platform: '${platform}', configuration: '${buildConfiguration}' `;
 		this.$logger.info(`Starting ${buildInformationString}.`);
 
-		// TODO: Add validation for all options before uploading the package to S3.
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
 		let buildProps = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration);
 
