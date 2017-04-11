@@ -45,3 +45,8 @@ references.d.ts
 references.d.ts
 test-reports.xml
 tscommand-*.tmp.txt
+
+# Custom
+**/.vs
+**/.vscode
+.DS_Store
