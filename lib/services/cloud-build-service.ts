@@ -35,10 +35,14 @@ export class CloudBuildService implements ICloudBuildService {
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
 		let buildProps = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration);
 
+		let outputFileName = projectSettings.projectName;
+
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {
 			buildProps = await this.getAndroidBuildProperties(projectSettings, buildProps, androidBuildData);
+			outputFileName += ".apk";
 		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
 			buildProps = await this.getiOSBuildProperties(projectSettings, buildProps, iOSBuildData);
+			outputFileName += iOSBuildData.buildForDevice ? ".ipa" :".zip";
 		}
 
 		const buildResult: any = await this.$server.appsBuild.buildProject(projectSettings.projectId, buildProps);
@@ -51,7 +55,7 @@ export class CloudBuildService implements ICloudBuildService {
 
 		this.$logger.info(`Finished ${buildInformationString} successfully. Downloading result...`);
 
-		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir);
+		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir, outputFileName);
 
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.Errors}${EOL}* stdout: ${buildResult.Output}${EOL}* outputFilePath: ${localBuildResult}`);
 
@@ -325,12 +329,12 @@ export class CloudBuildService implements ICloudBuildService {
 		return _.find(buildResult.BuildItems, (b: any) => b.Disposition === "BuildResult");
 	}
 
-	private async downloadBuildResult(buildResult: any, projectDir: string): Promise<string> {
+	private async downloadBuildResult(buildResult: any, projectDir: string, outputFileName: string): Promise<string> {
 		const destinationDir = path.join(projectDir, constants.CLOUD_TEMP_DIR_NAME);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
 		const buildResultObj = this.getBuildResult(buildResult);
-		const targetFileName = path.join(destinationDir, buildResultObj.Filename);
+		const targetFileName = path.join(destinationDir, outputFileName);
 		const targetFile = this.$fs.createWriteStream(targetFileName);
 
 		// Download the output file.
