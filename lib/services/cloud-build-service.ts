@@ -4,6 +4,7 @@ import * as uuid from "uuid";
 import { EOL } from "os";
 import * as constants from "../constants";
 import * as forge from "node-forge";
+import * as minimatch from "minimatch";
 const plist = require("simple-plist");
 
 interface IAmazonStorageEntryData extends CloudService.AmazonStorageEntry {
@@ -14,7 +15,6 @@ export class CloudBuildService implements ICloudBuildService {
 
 	constructor(private $fs: IFileSystem,
 		private $httpClient: Server.IHttpClient,
-		private $projectFilesManager: IProjectFilesManager,
 		private $errors: IErrors,
 		private $server: CloudService.IServer,
 		private $qr: IQrCodeGenerator,
@@ -187,7 +187,6 @@ export class CloudBuildService implements ICloudBuildService {
 
 	private async uploadFileToS3(projectId: string, localFilePath: string, fileNameInS3?: string): Promise<IAmazonStorageEntryData> {
 		fileNameInS3 = fileNameInS3 || uuid.v4();
-		console.log("Uploading " + localFilePath + " with name: ", fileNameInS3);
 		const preSignedUrlData = await this.$server.appsBuild.getPresignedUploadUrlObject(projectId, fileNameInS3);
 
 		const requestOpts: any = {
@@ -332,12 +331,28 @@ export class CloudBuildService implements ICloudBuildService {
 		let projectZipFile = path.join(tempDir, "Build.zip");
 		this.$fs.deleteFile(projectZipFile);
 
-		let files = this.$projectFilesManager.getProjectFiles(projectDir, ["node_modules", "platforms", constants.CLOUD_TEMP_DIR_NAME]);
+		let files = this.getProjectFiles(projectDir, ["node_modules", "platforms", constants.CLOUD_TEMP_DIR_NAME, "**/.*"]);
 
 		await this.$fs.zipFiles(projectZipFile, files,
 			p => this.getProjectRelativePath(p, projectDir));
 
 		return projectZipFile;
+	}
+
+	private getProjectFiles(projectFilesPath: string, excludedProjectDirsAndFiles?: string[], filter?: (filePath: string, stat: IFsStats) => boolean, opts?: any): string[] {
+		const projectFiles = this.$fs.enumerateFilesInDirectorySync(projectFilesPath, (filePath, stat) => {
+			const isFileExcluded = this.isFileExcluded(path.relative(projectFilesPath, filePath), excludedProjectDirsAndFiles);
+			const isFileFiltered = filter ? filter(filePath, stat) : false;
+			return !isFileExcluded && !isFileFiltered;
+		}, opts);
+
+		this.$logger.trace("getProjectFiles for cloud build: ", projectFiles);
+
+		return projectFiles;
+	}
+
+	private isFileExcluded(filePath: string, excludedProjectDirsAndFiles?: string[]): boolean {
+		return !!_.find(excludedProjectDirsAndFiles, (pattern) => minimatch(filePath, pattern, { nocase: true }));
 	}
 
 	private getProjectRelativePath(fullPath: string, projectDir: string): string {
