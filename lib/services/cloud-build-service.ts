@@ -185,8 +185,9 @@ export class CloudBuildService implements ICloudBuildService {
 
 	}
 
-	private async uploadFileToS3(projectId: string, localFilePath: string, extension: string = ""): Promise<IAmazonStorageEntryData> {
-		const fileNameInS3 = uuid.v4() + extension;
+	private async uploadFileToS3(projectId: string, localFilePath: string, fileNameInS3?: string): Promise<IAmazonStorageEntryData> {
+		fileNameInS3 = fileNameInS3 || uuid.v4();
+		console.log("Uploading " + localFilePath + " with name: ", fileNameInS3);
 		const preSignedUrlData = await this.$server.appsBuild.getPresignedUploadUrlObject(projectId, fileNameInS3);
 
 		const requestOpts: any = {
@@ -242,8 +243,9 @@ export class CloudBuildService implements ICloudBuildService {
 		iOSBuildData: IIOSBuildData): Promise<any> {
 
 		if (iOSBuildData.buildForDevice) {
+			const provisionData = this.getMobileProvisionData(iOSBuildData.pathToProvision);
 			const certificateS3Data = await this.uploadFileToS3(projectSettings.projectId, iOSBuildData.pathToCertificate);
-			const provisonS3Data = await this.uploadFileToS3(projectSettings.projectId, iOSBuildData.pathToProvision, ".mobileprovision");
+			const provisonS3Data = await this.uploadFileToS3(projectSettings.projectId, iOSBuildData.pathToProvision, `${provisionData.UUID}.mobileprovision`);
 
 			buildProps.BuildFiles.push(
 				{
@@ -258,7 +260,7 @@ export class CloudBuildService implements ICloudBuildService {
 
 			buildProps.Properties.CertificatePassword = iOSBuildData.certificatePassword;
 			buildProps.Properties.CodeSigningIdentity = this.getCertificateInfo(iOSBuildData.pathToCertificate, iOSBuildData.certificatePassword).commonName;
-			const provisionData = this.getMobileProvisionData(iOSBuildData.pathToProvision);
+
 			const cloudProvisionsData: any[] = [{
 				SuffixId: "",
 				TemplateName: "PROVISION_",
