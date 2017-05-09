@@ -33,14 +33,10 @@ export class CloudBuildService implements ICloudBuildService {
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
 		let buildProps = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration);
 
-		let outputFileName = projectSettings.projectName;
-
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {
 			buildProps = await this.getAndroidBuildProperties(projectSettings, buildProps, androidBuildData);
-			outputFileName += ".apk";
 		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
 			buildProps = await this.getiOSBuildProperties(projectSettings, buildProps, iOSBuildData);
-			outputFileName += iOSBuildData.buildForDevice ? ".ipa" :".zip";
 		}
 
 		const buildResult: any = await this.$server.appsBuild.buildProject(projectSettings.projectId, buildProps);
@@ -53,7 +49,7 @@ export class CloudBuildService implements ICloudBuildService {
 
 		this.$logger.info(`Finished ${buildInformationString} successfully. Downloading result...`);
 
-		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir, outputFileName);
+		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir);
 
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.Errors}${EOL}* stdout: ${buildResult.Output}${EOL}* outputFilePath: ${localBuildResult}`);
 
@@ -162,6 +158,7 @@ export class CloudBuildService implements ICloudBuildService {
 		const coreModulesVersion = this.$fs.readJson(path.join(projectSettings.projectDir, "package.json")).dependencies["tns-core-modules"];
 		const runtimeVersion = this.getRuntimeVersion(platform, projectSettings.nativescriptData, coreModulesVersion);
 		const cliVersion = await this.getCliVersion(runtimeVersion);
+		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectSettings.projectName);
 
 		return {
 			Properties: {
@@ -173,7 +170,8 @@ export class CloudBuildService implements ICloudBuildService {
 				RuntimeVersion: runtimeVersion,
 				AcceptResults: "Url;LocalPath",
 				SessionKey: buildPreSignedUrlData.SessionKey,
-				TemplateAppName: this.$projectHelper.sanitizeName(projectSettings.projectName),
+				TemplateAppName: sanitizedProjectName,
+				ProjectName: sanitizedProjectName,
 				Framework: "tns"
 			},
 			BuildFiles: [
@@ -247,25 +245,6 @@ export class CloudBuildService implements ICloudBuildService {
 			const certificateS3Data = await this.uploadFileToS3(projectSettings.projectId, iOSBuildData.pathToCertificate);
 			const provisonS3Data = await this.uploadFileToS3(projectSettings.projectId, iOSBuildData.pathToProvision, ".mobileprovision");
 
-			// Add to buildProps.Properties some of these.
-			// "Simulator": "False",
-			// "BuildForiOSSimulator": false,
-
-			// "iOSCodesigningIdentity": certificateS3Data.fileNameInS3,
-			// "CodeSigningIdentity": "iPhone Developer: Dragon Telrrikov (J45P439R9U)",
-			// "TempKeychainName": uuid.v4(),
-			// "TempKeychainPassword": iOSBuildData.certificatePassword,
-			// "MobileProvisionIdentifiers": [{
-			// 	"SuffixId": "",
-			// 	"TemplateName": "PROVISION_",
-			// 	"Identifier": provisonS3Data.fileNameInS3,
-			// 	"IsDefault": true,
-			// 	"FileName": provisonS3Data.fileNameInS3,
-			// 	"AppGroups": [],
-			// 	"ProvisionType": "Development",
-			// 	"Name": provisonS3Data.fileNameInS3
-			// }],
-
 			buildProps.BuildFiles.push(
 				{
 					sourceUri: certificateS3Data.S3Url,
@@ -327,12 +306,12 @@ export class CloudBuildService implements ICloudBuildService {
 		return _.find(buildResult.BuildItems, (b: any) => b.Disposition === "BuildResult");
 	}
 
-	private async downloadBuildResult(buildResult: any, projectDir: string, outputFileName: string): Promise<string> {
+	private async downloadBuildResult(buildResult: any, projectDir: string): Promise<string> {
 		const destinationDir = path.join(projectDir, constants.CLOUD_TEMP_DIR_NAME);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
 		const buildResultObj = this.getBuildResult(buildResult);
-		const targetFileName = path.join(destinationDir, outputFileName);
+		const targetFileName = path.join(destinationDir, buildResultObj.Filename);
 		const targetFile = this.$fs.createWriteStream(targetFileName);
 
 		// Download the output file.
