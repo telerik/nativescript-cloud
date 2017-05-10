@@ -1,0 +1,14 @@
+{
+	"stage": "dev",
+	"cloudServices": {
+		"auth": {
+			"subdomain": "dev-authentication"
+		},
+		"build": {
+			"subdomain": "dev-build"
+		},
+		"emulators": {
+			"subdomain": "dev-emulators"
+		}
+	}
+}
