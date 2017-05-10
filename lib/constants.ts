@@ -18,3 +18,22 @@ export const PROVISION_TYPES = {
 	ADHOC: "AdHoc",
 	DEVELOPMENT: "Development",
 };
+
+export const AUTH_SERVICE_NAME = "auth";
+export const BUILD_SERVICE_NAME = "build";
+export const EMULATORS_SERVICE_NAME = "emulators";
+
+export const AUTH_EVENT_NAMES = {
+	LOGIN_URL: "loginUrl",
+	LOGIN_COMPLETE: "loginComplete"
+};
+
+export const CONTENT_TYPES = {
+	APPLICATION_JSON: "application/json",
+	TEXT_HTML: "text/html",
+	TEXT_JAVASCRIPT: "text/javascript",
+	TEXT_CSS: "text/css",
+	IMAGE_JPEG: "image/jpeg",
+	IMAGE_PNG: "image/png"
+};
+
