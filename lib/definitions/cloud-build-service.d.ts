@@ -79,6 +79,31 @@ interface ICloudBuildService {
 }
 
 /**
+ * Options that can be used to construct itms-services plist.
+ */
+interface IItmsPlistOptions {
+	/**
+	 * The path to the mobileprovision file on the file system.
+	 */
+	pathToProvision?: string;
+
+	/**
+	 * The url pointing the .ipa file which is to be installed on the device by itms-services.
+	 */
+	url: string;
+
+	/**
+	 * The aforementioned .ipa file's application identifier
+	 */
+	projectId: string;
+
+	/**
+	 * The aforementioned .ipa file's application's display name
+	 */
+	projectName: string;
+}
+
+/**
  * Describes the project settings required for different operations.
  */
 interface IProjectSettings {
