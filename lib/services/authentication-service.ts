@@ -8,7 +8,7 @@ import { isInteractive } from "../helpers";
 export class AuthenticationService extends EventEmitter implements IAuthenticationService {
 	private static DEFAULT_NONINTERACTIVE_LOGIN_TIMEOUT_MS: number = 15 * 60 * 1000;
 
-	constructor(private $cloudAuthService: ICloudAuthService,
+	constructor(private $authCloudService: ICloudAuthService,
 		private $fs: IFileSystem,
 		private $httpServer: IHttpServer,
 		private $logger: ILogger,
@@ -56,7 +56,7 @@ export class AuthenticationService extends EventEmitter implements IAuthenticati
 
 			const port = localhostServer.address().port;
 
-			loginUrl = this.$cloudAuthService.getLoginUrl(port);
+			loginUrl = this.$authCloudService.getLoginUrl(port);
 
 			this.$logger.debug("Login URL is '%s'", loginUrl);
 
@@ -97,7 +97,7 @@ export class AuthenticationService extends EventEmitter implements IAuthenticati
 	}
 
 	public async devLogin(username: string, password: string): Promise<IUser> {
-		const userData = await this.$cloudAuthService.devLogin(username, password);
+		const userData = await this.$authCloudService.devLogin(username, password);
 		this.$userService.setUserData(userData);
 
 		return userData.userInfo;
@@ -109,13 +109,13 @@ export class AuthenticationService extends EventEmitter implements IAuthenticati
 
 	public async refreshToken(): Promise<void> {
 		const userData = this.$userService.getUserData();
-		const token = await this.$cloudAuthService.refreshToken(userData.refresnToken);
+		const token = await this.$authCloudService.refreshToken(userData.refresnToken);
 		this.$userService.setToken(token);
 	}
 
 	public async getTokenState(): Promise<ITokenState> {
 		const userData = this.$userService.getUserData();
-		const tokenState = await this.$cloudAuthService.getTokenState(userData.accessToken);
+		const tokenState = await this.$authCloudService.getTokenState(userData.accessToken);
 		return tokenState;
 	}
 

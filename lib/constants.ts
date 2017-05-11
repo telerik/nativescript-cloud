@@ -28,6 +28,10 @@ export const AUTH_EVENT_NAMES = {
 	LOGIN_COMPLETE: "loginComplete"
 };
 
+export const CLOUD_BUILD_EVENT_NAMES = {
+	OUTPUT: "output"
+};
+
 export const CONTENT_TYPES = {
 	APPLICATION_JSON: "application/json",
 	TEXT_HTML: "text/html",
@@ -37,3 +41,9 @@ export const CONTENT_TYPES = {
 	IMAGE_PNG: "image/png"
 };
 
+export const HTTP_METHODS = {
+	GET: "GET",
+	POST: "POST",
+	PUT: "PUT",
+	DELETE: "DELETE"
+};

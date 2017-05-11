@@ -169,3 +169,32 @@ interface IIOSBuildData extends IBuildForDevice {
 	 */
 	deviceIdentifier?: string;
 }
+
+/**
+ * Describes the status of the build.
+ */
+interface IBuildStatus {
+	/**
+	 * The build status.
+	 */
+	status: string;
+}
+
+/**
+ * Describes the result from the build.
+ */
+interface IBuildResult {
+	errors: string[];
+	code: number;
+	stdout: string;
+	stderr: string;
+	buildItems: IBuildItem[];
+}
+
+interface IBuildItem {
+	disposition: string;
+	filename: string;
+	platform: string;
+	extension: string;
+	fullPath: string;
+}
