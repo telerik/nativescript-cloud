@@ -3,6 +3,7 @@ import * as path from "path";
 $injector.require("httpServer", path.join(__dirname, "http-server"));
 $injector.require("itmsServicesPlistHelper", path.join(__dirname, "itms-services-plist-helper"));
 $injector.require("serverConfigManager", path.join(__dirname, "server-config-manager"));
+$injector.require("logsFilter", path.join(__dirname, "logs-filter"));
 
 // Public API.
 $injector.requirePublicClass("authenticationService", path.join(__dirname, "services", "authentication-service"));

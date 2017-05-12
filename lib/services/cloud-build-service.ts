@@ -19,15 +19,16 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 	private static BUILD_IN_PROGRESS_STATUS = "Building";
 	private static BUILD_FAILED_STATUS = "Failed";
 
-	constructor(private $fs: IFileSystem,
+	constructor(private $buildCloudService: IBuildCloudService,
+		private $errors: IErrors,
+		private $fs: IFileSystem,
 		private $itmsServicesPlistHelper: IItmsServicesPlistHelper,
 		private $httpClient: Server.IHttpClient,
-		private $errors: IErrors,
-		private $buildCloudService: IBuildCloudService,
-		private $qr: IQrCodeGenerator,
+		private $logger: ILogger,
+		private $logsFilter: ILogsFilter,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $projectHelper: IProjectHelper,
-		private $logger: ILogger) {
+		private $qr: IQrCodeGenerator) {
 		super();
 	}
 
@@ -35,8 +36,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		platform: string, buildConfiguration: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
-		debugger;
-		const buildInformationString = `cloud build of '${projectSettings.projectDir}', platform: '${platform}', configuration: '${buildConfiguration}' `;
+		const buildInformationString = `cloud build of '${projectSettings.projectDir}', platform: '${platform}', configuration: '${buildConfiguration}'`;
 		this.$logger.info(`Starting ${buildInformationString}.`);
 
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
@@ -59,8 +59,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		this.$logger.trace(buildResult);
 
 		if (!buildResult.buildItems || !buildResult.buildItems.length) {
-			// Something failed
-			// Fail with combination of Errors and Output:
+			// Something failed.
 			this.$errors.failWithoutHelp(`Build failed. Reason is: ${buildResult.errors}. Additional information: ${buildResult.stderr}.`);
 		}
 
@@ -68,7 +67,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir);
 
-		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.errors}${EOL}* stdout: ${buildResult.stdout}${EOL}* outputFilePath: ${localBuildResult}`);
+		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. OutputFilePath: ${localBuildResult}`);
 
 		const buildResultUrl = this.getBuildResultUrl(buildResult);
 		const itmsOptions = {
@@ -175,12 +174,12 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 	}
 
 	private async getContentOfS3File(pathToFile: string): Promise<string> {
-		return (await this.$httpClient.httpRequest(pathToFile)).body
+		return (await this.$httpClient.httpRequest(pathToFile)).body;
 	}
 
 	private waitForBuildToFinish(buildInformation: IBuildResponse): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
-			let fullBuildLogs = "";
+			let outputCursorPosition = 0;
 			let hasCheckedForBuildStatus = false;
 			const buildIntervalId = setInterval(async () => {
 				const buildStatus: IBuildStatus = await this.getObjectFromS3File<IBuildStatus>(buildInformation.statusUrl);
@@ -215,13 +214,13 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 					try {
 						const logs: string = await this.getContentOfS3File(buildInformation.outputUrl);
 						// The logs variable will contain the full build log and we need to log only the logs that we don't have.
-						const contentToLog = logs.substr(fullBuildLogs.length).replace(new RegExp("(\\\\r\\\\n)|(\\\\n)", "gm"), EOL);
-						if (contentToLog.length) {
+						const contentToLog = this.$logsFilter.filterLogs(logs.substr(outputCursorPosition));
+						if (contentToLog) {
 							this.emit(constants.CLOUD_BUILD_EVENT_NAMES.OUTPUT, contentToLog);
 							this.$logger.info(contentToLog);
 						}
 
-						fullBuildLogs = logs;
+						outputCursorPosition = logs.length <= 0 ? 0 : logs.length - 1;
 					} catch (err) {
 						// Ignore the error from getting the build output because the build can finish even if there is error.
 						this.$logger.trace("Error while getting build logs:");
@@ -539,4 +538,5 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		return inputString.split(find).join(replace);
 	}
 }
+
 $injector.register("cloudBuildService", CloudBuildService);
