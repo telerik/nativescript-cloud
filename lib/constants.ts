@@ -11,3 +11,10 @@ export const CRYPTO = {
 };
 
 export const APPLE_INC = "Apple Inc.";
+
+export const PROVISION_TYPES = {
+	ENTERPRISE: "Enterprise",
+	APP_STORE: "App Store",
+	ADHOC: "AdHoc",
+	DEVELOPMENT: "Development",
+};

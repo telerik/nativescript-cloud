@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as semver from "semver";
 import * as uuid from "uuid";
+import { escape } from "querystring";
 import { EOL } from "os";
 import * as constants from "../constants";
 import * as forge from "node-forge";
@@ -14,6 +15,7 @@ interface IAmazonStorageEntryData extends CloudService.AmazonStorageEntry {
 export class CloudBuildService implements ICloudBuildService {
 
 	constructor(private $fs: IFileSystem,
+		private $itmsServicesPlistHelper: IItmsServicesPlistHelper,
 		private $httpClient: Server.IHttpClient,
 		private $errors: IErrors,
 		private $server: CloudService.IServer,
@@ -54,6 +56,12 @@ export class CloudBuildService implements ICloudBuildService {
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. Log from cloud build is:${EOL}* stderr: ${buildResult.Errors}${EOL}* stdout: ${buildResult.Output}${EOL}* outputFilePath: ${localBuildResult}`);
 
 		const buildResultUrl = this.getBuildResultUrl(buildResult);
+		const itmsOptions = {
+			pathToProvision: iOSBuildData && iOSBuildData.pathToProvision,
+			projectId: projectSettings.projectId,
+			projectName: projectSettings.projectName,
+			url: buildResultUrl
+		};
 
 		return {
 			stderr: buildResult.Errors,
@@ -62,7 +70,7 @@ export class CloudBuildService implements ICloudBuildService {
 			outputFilePath: localBuildResult,
 			qrData: {
 				originalUrl: buildResultUrl,
-				imageData: await this.$qr.generateDataUri(buildResultUrl)
+				imageData: await this.getImageData(buildResultUrl, itmsOptions)
 			}
 		};
 	}
@@ -185,7 +193,7 @@ export class CloudBuildService implements ICloudBuildService {
 
 	}
 
-	private async uploadFileToS3(projectId: string, localFilePath: string, fileNameInS3?: string): Promise<IAmazonStorageEntryData> {
+	private async uploadFileToS3(projectId: string, filePathOrContent: string, fileNameInS3?: string): Promise<IAmazonStorageEntryData> {
 		fileNameInS3 = fileNameInS3 || uuid.v4();
 		const preSignedUrlData = await this.$server.appsBuild.getPresignedUploadUrlObject(projectId, fileNameInS3);
 
@@ -194,7 +202,12 @@ export class CloudBuildService implements ICloudBuildService {
 			method: "PUT"
 		};
 
-		requestOpts.body = this.$fs.readFile(localFilePath);
+		if (this.$fs.exists(filePathOrContent)) {
+			requestOpts.body = this.$fs.readFile(filePathOrContent);
+		} else {
+			requestOpts.body = filePathOrContent;
+		}
+
 		requestOpts.headers = requestOpts.headers || {};
 		// It is vital we set this, else the http request comes out as chunked and S3 doesn't support chunked requests
 		requestOpts.headers["Content-Length"] = requestOpts.body.length;
@@ -202,7 +215,7 @@ export class CloudBuildService implements ICloudBuildService {
 		try {
 			await this.$httpClient.httpRequest(requestOpts);
 		} catch (err) {
-			this.$errors.failWithoutHelp(`Error while uploading ${localFilePath} to S3. Errors is:`, err.message);
+			this.$errors.failWithoutHelp(`Error while uploading ${filePathOrContent} to S3. Errors is:`, err.message);
 		}
 
 		const amazonStorageEntryData: IAmazonStorageEntryData = _.merge({ fileNameInS3 }, preSignedUrlData, );
@@ -280,19 +293,18 @@ export class CloudBuildService implements ICloudBuildService {
 	}
 
 	private getProvisionType(provisionData: IMobileProvisionData): string {
-		// TODO: Discuss whether this code should be moved to the Tooling
 		let result = "";
 		if (provisionData.Entitlements['get-task-allow']) {
-			result = "Development";
+			result = constants.PROVISION_TYPES.DEVELOPMENT;
 		} else {
-			result = "AdHoc";
+			result = constants.PROVISION_TYPES.ADHOC;
 		}
 
 		if (!provisionData.ProvisionedDevices || !provisionData.ProvisionedDevices.length) {
 			if (provisionData.ProvisionsAllDevices) {
-				result = "Enterprise";
+				result = constants.PROVISION_TYPES.ENTERPRISE;
 			} else {
-				result = "App Store";
+				result = constants.PROVISION_TYPES.APP_STORE;
 			}
 		}
 
@@ -407,6 +419,21 @@ export class CloudBuildService implements ICloudBuildService {
 		}
 
 		this.$errors.failWithoutHelp(`Could not read ${certificatePath}. Please make sure there is a certificate inside.`);
+	}
+
+	private async getImageData(buildResultUrl: string, options: IItmsPlistOptions): Promise<string> {
+		if (options.pathToProvision) {
+			const provisionData = this.getMobileProvisionData(options.pathToProvision);
+			const provisionType = this.getProvisionType(provisionData);
+			if (provisionType !== constants.PROVISION_TYPES.ADHOC) {
+				return null;
+			}
+
+			const amazonPlistEntry = await this.uploadFileToS3(options.projectId, this.$itmsServicesPlistHelper.createPlistContent(options));
+			return this.$qr.generateDataUri(`itms-services://?action=download-manifest&amp;url=${escape(amazonPlistEntry.PublicDownloadUrl)}`);
+		}
+
+		return this.$qr.generateDataUri(buildResultUrl);
 	}
 
 	private getMobileProvisionData(provisionPath: string): IMobileProvisionData {
