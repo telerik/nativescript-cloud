@@ -49,13 +49,13 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		}
 
 		const buildResponse: IBuildResponse = await this.$buildCloudService.startBuild(projectSettings.projectId, buildProps);
-		this.$logger.trace("Build response: ");
+		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
 
 		await this.waitForBuildToFinish(buildResponse);
 
 		const buildResult: IBuildResult = await this.getObjectFromS3File<IBuildResult>(buildResponse.resultUrl);
-		this.$logger.trace("Build result: ");
+		this.$logger.trace("Build result:");
 		this.$logger.trace(buildResult);
 
 		if (!buildResult.buildItems || !buildResult.buildItems.length) {
@@ -77,7 +77,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			url: buildResultUrl
 		};
 
-		return {
+		const result = {
 			stderr: buildResult.stderr,
 			stdout: buildResult.stdout,
 			fullOutput: buildResult.stdout,
@@ -87,6 +87,8 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				imageData: await this.getImageData(buildResultUrl, itmsOptions)
 			}
 		};
+
+		return result;
 	}
 
 	public async validateBuildProperties(platform: string,
@@ -182,7 +184,13 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			let outputCursorPosition = 0;
 			let hasCheckedForBuildStatus = false;
 			const buildIntervalId = setInterval(async () => {
-				const buildStatus: IBuildStatus = await this.getObjectFromS3File<IBuildStatus>(buildInformation.statusUrl);
+				let buildStatus: IBuildStatus;
+				try {
+					buildStatus = await this.getObjectFromS3File<IBuildStatus>(buildInformation.statusUrl);
+				} catch (err) {
+					this.$logger.trace(err);
+				}
+
 				if (!hasCheckedForBuildStatus) {
 					hasCheckedForBuildStatus = true;
 				} else if (!buildStatus) {
@@ -383,7 +391,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		return result;
 	}
 
-	private getBuildResultUrl(buildResult: any): string {
+	private getBuildResultUrl(buildResult: IBuildResult): string {
 		return this.getBuildResult(buildResult).fullPath;
 	}
 
@@ -507,7 +515,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			}
 
 			const amazonPlistEntry = await this.uploadFileToS3(options.projectId, this.$itmsServicesPlistHelper.createPlistContent(options));
-			return this.$qr.generateDataUri(`itms-services://?action=download-manifest&amp;url=${escape(amazonPlistEntry.PublicDownloadUrl)}`);
+			return this.$qr.generateDataUri(`itms-services://?action=download-manifest&amp;url=${escape(amazonPlistEntry.publicDownloadUrl)}`);
 		}
 
 		return this.$qr.generateDataUri(buildResultUrl);
