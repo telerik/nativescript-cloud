@@ -103,6 +103,187 @@ tns.cloudBuildService
 	.catch(err => console.error("Data is invalid:", err));
 ```
 
+### Module authenticationService
+The `authenticationService` is used for authentication related operations (login, logout etc.). You can call the following methods </br>
+* `login` - Starts localhost server on which the login response will be returned. After that opens the login url or emits it if the `options.skipUi` is true.
+After successful login returns the user information.
+</br>
+Definition:
+
+```TypeScript
+/**
+ * Opens login page and after successfull login saves the user information.
+ * If options.skipUi is set to true the service will emit the login url with "loginUrl" event.
+ * @param {ILoginOptions} options Optional settings for the login method.
+ * @returns {Promise<IUser>} Returns the user information after successful login.
+ */
+login(options?: ILoginOptions): Promise<IUser>;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/authentication-service.d.ts).
+</br>
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.authenticationService
+	.login()
+	.then(userInfo => console.log(userInfo))
+	.catch(err => console.error(err));
+```
+
+```JavaScript
+const tns = require("nativescript");
+const childProcess = require("child_process");
+
+const authenticatioNService = tns.authenticationService;
+authenticationService.on("loginUrl", url => {
+	const isWin = /^win/.test(process.platform);
+	const openCommand = isWin ? "start" : "open";
+	childProcess.execSync(`${openCommand} ${url}`);
+});
+
+const loginOptions = { skipUi: true };
+tns.authenticationService
+	.login(loginOptions)
+	.then(userInfo => console.log(userInfo))
+	.catch(err => console.error(err));
+```
+
+* `logout` - Invalidates the current user authentication data.
+</br>
+Definition:
+
+```TypeScript
+/**
+ * Invalidates the current user authentication data.
+ * @returns {void}
+ */
+logout(): void;
+```
+</br>
+Usage:
+
+```JavaScript
+const tns = require("nativescript");
+
+tns.authenticationService.logout();
+```
+
+* `getCurrentUserTokenState` - Calls the server with the token of the user and returns the token state.
+</br>
+
+Definition:
+
+```TypeScript
+/**
+ * Checks the token state of the current user.
+ * @returns {Promise<ITokenState>} Returns the token state
+ */
+getCurrentUserTokenState(): Promise<ITokenState>;
+```
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.authenticationService
+	.getCurrentUserTokenState()
+	.then(tokenState => console.log(tokenState))
+	.catch(err => console.error(err));
+```
+
+* `refreshCurrentUserToken` - Uses the refresh token of the current user to issue new access token.
+</br>
+
+Definition:
+
+```TypeScript
+/**
+ * Uses the refresh token of the current user to issue new access token. 
+ */
+refreshCurrentUserToken(): Promise<void>;
+```
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.authenticationService.refreshCurrentUserToken()
+	.then(() => console.log("Success"))
+	.catch(err => console.error(err));
+```
+
+#### Interfaces:
+```TypeScript
+interface IUser {
+	email: string;
+	firstName: string;
+	lastName: string;
+}
+
+interface IAuthenticationService {
+	/**
+	 * Uses username and password for login and after successfull login saves the user information.
+	 * @param {string} username The username of the user.
+	 * @param {string} password The password of the user.
+	 * @returns {Promise<IUser>} Returns the user information after successful login.
+	 */
+	devLogin(username: string, password: string): Promise<IUser>;
+
+	/**
+	 * Opens login page and after successfull login saves the user information.
+	 * If options.skipUi is set to true the service will emit the login url with "loginUrl" event.
+	 * @param {ILoginOptions} options Optional settings for the login method.
+	 * @returns {Promise<IUser>} Returns the user information after successful login.
+	 */
+	login(options?: ILoginOptions): Promise<IUser>;
+
+
+	/**
+	 * Invalidates the current user authentication data.
+	 * @returns {void}
+	 */
+	logout(): void;
+
+	/**
+	 * Uses the refresh token of the current user to issue new access token. 
+	 */
+	refreshCurrentUserToken(): Promise<void>;
+
+	/**
+	 * Checks the token state of the current user.
+	 * @returns {Promise<ITokenState>} Returns the token state
+	 */
+	getCurrentUserTokenState(): Promise<ITokenState>;
+}
+
+interface ILoginOptions {
+	/**
+	 * If true the login method will emit the login url instead of opening it in the browser.
+	 */
+	skipUi?: boolean;
+
+	/**
+	 * Sets the ammount of time which the login method will wait for login response in non-interactive terminal.
+	 */
+	timeout?: string;
+}
+
+interface ITokenState {
+	/**
+	 * True if the access token is valid.
+	 */
+	isTokenValid: boolean;
+
+	/**
+	 * The expiration timestamp. (1494.923982727)
+	 */
+	expirationTimestamp: number;
+}
+```
+
 ### Development
 The project is written in TypeScript. After cloning it, you can set it up by executing the following commands in your terminal:
 * `$ npm i --ignore-scripts` - NOTE: `--ignore-scripts` is a must.

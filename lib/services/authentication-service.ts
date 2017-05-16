@@ -107,13 +107,13 @@ export class AuthenticationService extends EventEmitter implements IAuthenticati
 		this.$userService.clearUserData();
 	}
 
-	public async refreshToken(): Promise<void> {
+	public async refreshCurrentUserToken(): Promise<void> {
 		const userData = this.$userService.getUserData();
 		const token = await this.$authCloudService.refreshToken(userData.refresnToken);
 		this.$userService.setToken(token);
 	}
 
-	public async getTokenState(): Promise<ITokenState> {
+	public async getCurrentUserTokenState(): Promise<ITokenState> {
 		const userData = this.$userService.getUserData();
 		const tokenState = await this.$authCloudService.getTokenState(userData.accessToken);
 		return tokenState;
