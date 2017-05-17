@@ -27,6 +27,17 @@ export const CLOUD_BUILD_EVENT_NAMES = {
 	OUTPUT: "output"
 };
 
+export const DEVICE_DISCOVERY_EVENTS = {
+	DEVICE_FOUND: "deviceFound",
+	DEVICE_LOST: "deviceLost"
+};
+
+export const DEVICE_INFO = {
+	TYPE: "Emulator",
+	STATUS: "Connected",
+	VENDOR: "Appetize"
+};
+
 export const CONTENT_TYPES = {
 	APPLICATION_JSON: "application/json",
 	TEXT_HTML: "text/html",
