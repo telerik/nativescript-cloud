@@ -1,4 +1,4 @@
-import { CONTENT_TYPES, HEADERS } from "../../constants";
+import { CONTENT_TYPES, HTTP_HEADERS } from "../../constants";
 
 export class CloudServicesProxy implements ICloudServicesProxy {
 	private serverConfig: IServerConfig;
@@ -11,37 +11,37 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 		this.serverConfig = this.$serverConfigManager.getCurrentConfigData();
 	}
 
-	public async call<T>(serviceName: string, method: string, urlPath: string, bodyValues: IRequestBodyElement[], accept: string, headers: any, resultStream: NodeJS.WritableStream): Promise<T> {
-		const host = this.getServiceAddress(serviceName);
-		const finalUrlPath = this.getUrlPath(serviceName, urlPath);
+	public async call<T>(options: ICloudRequestOptions): Promise<T> {
+		const host = this.getServiceAddress(options.serviceName);
+		const finalUrlPath = this.getUrlPath(options.serviceName, options.urlPath);
 
-		headers = headers || Object.create(null);
+		const headers = options.headers || Object.create(null);
 
-		if (!_.has(headers, HEADERS.AUTHORIZATION) && this.$userService.hasUser()) {
-			headers[HEADERS.AUTHORIZATION] = `Bearer ${this.$userService.getUserData().accessToken}`;
+		if (!_.has(headers, HTTP_HEADERS.AUTHORIZATION) && this.$userService.hasUser()) {
+			headers[HTTP_HEADERS.AUTHORIZATION] = `Bearer ${this.$userService.getUserData().accessToken}`;
 		}
 
-		if (accept) {
-			headers[HEADERS.ACCEPT] = accept;
+		if (options.accept) {
+			headers[HTTP_HEADERS.ACCEPT] = options.accept;
 		}
 
 		let requestOpts: any = {
-			proto: this.getServiceProto(serviceName),
+			proto: this.getServiceProto(options.serviceName),
 			host: host,
 			path: finalUrlPath,
-			method: method,
+			method: options.method,
 			headers: headers,
-			pipeTo: resultStream
+			pipeTo: options.resultStream
 		};
 
-		if (bodyValues) {
-			if (bodyValues.length > 1) {
+		if (options.bodyValues) {
+			if (options.bodyValues.length > 1) {
 				throw new Error("TODO: CustomFormData not implemented");
 			}
 
-			let theBody = bodyValues[0];
+			let theBody = options.bodyValues[0];
 			requestOpts.body = theBody.value;
-			requestOpts.headers[HEADERS.CONTENT_TYPE] = theBody.contentType;
+			requestOpts.headers[HTTP_HEADERS.CONTENT_TYPE] = theBody.contentType;
 		}
 
 		let response: Server.IResponse;
@@ -55,9 +55,9 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 			throw err;
 		}
 
-		this.$logger.debug("%s (%s %s) returned %d", finalUrlPath, method, urlPath, response.response.statusCode);
+		this.$logger.debug("%s (%s %s) returned %d", finalUrlPath, options.method, options.urlPath, response.response.statusCode);
 
-		const resultValue: T = accept === CONTENT_TYPES.APPLICATION_JSON ? JSON.parse(response.body) : response.body;
+		const resultValue: T = options.accept === CONTENT_TYPES.APPLICATION_JSON ? JSON.parse(response.body) : response.body;
 
 		return resultValue;
 	}

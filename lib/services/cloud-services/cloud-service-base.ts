@@ -3,16 +3,20 @@ import { CONTENT_TYPES } from "../../constants";
 export abstract class CloudServiceBase {
 	protected abstract serviceName: string;
 
-	constructor(protected $cloudServicesProxy: ICloudServicesProxy) { }
+	constructor(protected requestService: ICloudRequestService) { }
 
 	protected sendRequest<T>(method: string, urlPath: string, body: any, headers?: any, resultStream?: NodeJS.WritableStream): Promise<T> {
-		return this.$cloudServicesProxy.call<T>(this.serviceName,
-			method,
-			urlPath,
-			this.createJsonBody(body),
-			CONTENT_TYPES.APPLICATION_JSON,
-			headers,
-			resultStream);
+		const requestOptions: ICloudRequestOptions = {
+			serviceName: this.serviceName,
+			method: method,
+			urlPath: urlPath,
+			bodyValues: this.createJsonBody(body),
+			accept: CONTENT_TYPES.APPLICATION_JSON,
+			headers: headers,
+			resultStream: resultStream
+		};
+
+		return this.requestService.call<T>(requestOptions);
 	}
 
 	private createJsonBody(body: any): IRequestBodyElement[] {

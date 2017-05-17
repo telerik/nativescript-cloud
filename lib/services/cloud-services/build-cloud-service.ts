@@ -5,8 +5,8 @@ import { CloudServiceBase } from "./cloud-service-base";
 export class BuildCloudService extends CloudServiceBase implements IBuildCloudService {
 	protected serviceName: string = BUILD_SERVICE_NAME;
 
-	constructor(protected $cloudServicesProxy: ICloudServicesProxy) {
-		super($cloudServicesProxy);
+	constructor(protected $cloudRequestService: ICloudRequestService) {
+		super($cloudRequestService);
 	}
 
 	public startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IBuildResponse> {

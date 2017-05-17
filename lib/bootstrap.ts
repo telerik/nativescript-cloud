@@ -13,6 +13,7 @@ $injector.requirePublicClass("cloudBuildService", path.join(__dirname, "services
 $injector.require("authCloudService", path.join(__dirname, "services", "cloud-services", "auth-cloud-service"));
 $injector.require("buildCloudService", path.join(__dirname, "services", "cloud-services", "build-cloud-service"));
 $injector.require("cloudServicesProxy", path.join(__dirname, "services", "cloud-services", "cloud-services-proxy"));
+$injector.require("cloudRequestService", path.join(__dirname, "services", "cloud-services", "cloud-request-service"));
 $injector.require("packageInfoService", path.join(__dirname, "services", "package-info-service"));
 $injector.require("userService", path.join(__dirname, "services", "user-service"));
 

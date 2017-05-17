@@ -1,7 +1,7 @@
 import { AUTH_SERVICE_NAME, HTTP_METHODS } from "../../constants";
 import { CloudServiceBase } from "./cloud-service-base";
 
-export class AuthCloudService extends CloudServiceBase implements ICloudAuthService {
+export class AuthCloudService extends CloudServiceBase implements IAuthCloudService {
 	protected serviceName: string = AUTH_SERVICE_NAME;
 
 	constructor(protected $cloudServicesProxy: ICloudServicesProxy) {

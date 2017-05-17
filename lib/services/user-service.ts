@@ -24,15 +24,24 @@ export class UserService implements IUserService {
 	}
 
 	public getUser(): IUser {
-		return this.readAndCache(this.getUserFilePath(),
-			() => this.userData && this.userData.userInfo,
-			this.setUserDataCallback.bind(this));
+		const userData = this.getUserData();
+
+		return userData.userInfo;
 	}
 
 	public getUserData(): IUserData {
-		return this.readAndCache(this.getUserFilePath(),
-			() => this.userData,
-			this.setUserDataCallback.bind(this));
+		const filePath = this.getUserFilePath();
+		let data: IUserData;
+
+		try {
+			data = this.$fs.readJson(filePath);
+		} catch (err) {
+			this.$logger.trace("Error while getting current user info:");
+			this.$logger.trace(err);
+			this.$errors.failWithoutHelp("Not logged in.");
+		}
+
+		return data;
 	}
 
 	public setToken(token: ITokenData): void {
@@ -58,30 +67,6 @@ export class UserService implements IUserService {
 	public clearUserData(): void {
 		this.userData = null;
 		this.$fs.deleteFile(this.getUserFilePath());
-	}
-
-	private readAndCache<T>(sourceFile: string, getter: () => T, setter: (value: string) => void): T {
-		if (!getter()) {
-			let contents: any;
-			try {
-				contents = this.$fs.readText(sourceFile);
-				setter(contents);
-			} catch (err) {
-				this.$logger.debug("Error while reading user data file '%s':\n%s\n\nContents:\n%s",
-					sourceFile,
-					err.toString(),
-					contents);
-				this.clearUserData();
-				this.$errors.failWithoutHelp("Not logged in.");
-			}
-		}
-
-		return getter();
-	}
-
-	private setUserDataCallback(value: string): void {
-		const userData: IUserData = JSON.parse(value);
-		this.userData = userData;
 	}
 
 	private getUserFilePath(): string {

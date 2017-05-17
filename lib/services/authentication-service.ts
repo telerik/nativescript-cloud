@@ -8,7 +8,7 @@ import { isInteractive } from "../helpers";
 export class AuthenticationService extends EventEmitter implements IAuthenticationService {
 	private static DEFAULT_NONINTERACTIVE_LOGIN_TIMEOUT_MS: number = 15 * 60 * 1000;
 
-	constructor(private $authCloudService: ICloudAuthService,
+	constructor(private $authCloudService: IAuthCloudService,
 		private $fs: IFileSystem,
 		private $httpServer: IHttpServer,
 		private $logger: ILogger,

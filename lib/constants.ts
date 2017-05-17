@@ -48,9 +48,15 @@ export const HTTP_METHODS = {
 	DELETE: "DELETE"
 };
 
-export const HEADERS = {
+export const HTTP_HEADERS = {
 	ACCEPT: "Accept",
 	AUTHORIZATION: "Authorization",
 	CONNECTION: "Connection",
 	CONTENT_TYPE: "Content-Type"
+};
+
+export const HTTP_STATUS_CODES = {
+	SUCCESS: 200,
+	UNAUTHORIZED: 401,
+	PAYMENT_REQUIRED: 402
 };
