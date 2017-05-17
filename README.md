@@ -105,15 +105,14 @@ tns.cloudBuildService
 
 ### Module authenticationService
 The `authenticationService` is used for authentication related operations (login, logout etc.). You can call the following methods </br>
-* `login` - Starts localhost server on which the login response will be returned. After that opens the login url or emits it if the `options.skipUi` is true.
-After successful login returns the user information.
+* `login` - Starts localhost server on which the login response will be returned. After that if there is `options.openAction` it will be used to open the login url. If this option is not defined the default opener will be used. After successful login returns the user information.
 </br>
 Definition:
 
 ```TypeScript
 /**
  * Opens login page and after successfull login saves the user information.
- * If options.skipUi is set to true the service will emit the login url with "loginUrl" event.
+ * If options.openAction is provided, it will be used to open the login url instead of the default opener.
  * @param {ILoginOptions} options Optional settings for the login method.
  * @returns {Promise<IUser>} Returns the user information after successful login.
  */
@@ -135,14 +134,13 @@ tns.authenticationService
 const tns = require("nativescript");
 const childProcess = require("child_process");
 
-const authenticatioNService = tns.authenticationService;
-authenticationService.on("loginUrl", url => {
-	const isWin = /^win/.test(process.platform);
-	const openCommand = isWin ? "start" : "open";
-	childProcess.execSync(`${openCommand} ${url}`);
-});
+const openAction = url => {
+		const isWin = /^win/.test(process.platform);
+		const openCommand = isWin ? "start" : "open";
+		childProcess.execSync(`${openCommand} ${url}`);
+	};
+const loginOptions = { openAction: openAction };
 
-const loginOptions = { skipUi: true };
 tns.authenticationService
 	.login(loginOptions)
 	.then(userInfo => console.log(userInfo))
@@ -169,17 +167,17 @@ const tns = require("nativescript");
 tns.authenticationService.logout();
 ```
 
-* `getCurrentUserTokenState` - Calls the server with the token of the user and returns the token state.
+* `isUserLoggedIn` - Checks if the access token of the current user is valid. If it is - the method will return true. If it isn't - the method will try to issue new access token. If the method can't issue new token it will return false.
 </br>
 
 Definition:
 
 ```TypeScript
 /**
- * Checks the token state of the current user.
- * @returns {Promise<ITokenState>} Returns the token state
+ * CheChecks if there is user info and the access token of the current user is valid. The method will try to issue new access token if the current is not valid.
+ * @returns {Promise<boolean>} Returns true if the user is logged in.
  */
-getCurrentUserTokenState(): Promise<ITokenState>;
+isUserLoggedIn(): Promise<boolean>;
 ```
 </br>
 
@@ -188,8 +186,8 @@ Usage:
 const tns = require("nativescript");
 
 tns.authenticationService
-	.getCurrentUserTokenState()
-	.then(tokenState => console.log(tokenState))
+	.isUserLoggedIn()
+	.then(isLoggedIn => console.log(isLoggedIn))
 	.catch(err => console.error(err));
 ```
 
@@ -234,7 +232,7 @@ interface IAuthenticationService {
 
 	/**
 	 * Opens login page and after successfull login saves the user information.
-	 * If options.skipUi is set to true the service will emit the login url with "loginUrl" event.
+	 * If options.openAction is provided, it will be used to open the login url instead of the default opener.
 	 * @param {ILoginOptions} options Optional settings for the login method.
 	 * @returns {Promise<IUser>} Returns the user information after successful login.
 	 */
@@ -261,9 +259,9 @@ interface IAuthenticationService {
 
 interface ILoginOptions {
 	/**
-	 * If true the login method will emit the login url instead of opening it in the browser.
+	 * Action which will be used to open the login url.
 	 */
-	skipUi?: boolean;
+	openAction?: (loginUrl: string) => void;
 
 	/**
 	 * Sets the ammount of time which the login method will wait for login response in non-interactive terminal.
@@ -281,6 +279,216 @@ interface ITokenState {
 	 * The expiration timestamp. (1494.923982727)
 	 */
 	expirationTimestamp: number;
+}
+```
+
+### Module userService
+The `userService` is used to get information aboud the current user or modify it. You can call the following methods </br>
+* `hasUser` - Checks if there is user information.
+</br>
+Definition:
+
+```TypeScript
+/**
+ * Checks if there is user information.
+ * @returns {boolean} Returns true if there is user information.
+ */
+hasUser(): boolean;
+```
+</br>
+Usage:
+
+```JavaScript
+const tns = require("nativescript");
+
+const hasUser = tns.userService.hasUser();
+console.log(hasUser);
+```
+
+* `getUser` - Returns the current user information.
+</br>
+Definition:
+
+```TypeScript
+/**
+ * Returns the current user information.
+ * @returns {IUser} The current user information.
+ */
+getUser(): IUser;
+```
+</br>
+Usage:
+
+```JavaScript
+const tns = require("nativescript");
+
+const user = tns.userService.getUser();
+console.log(user);
+```
+
+Sample result for `user` will be:
+```JSON
+{
+	"email": "some@mail.bg",
+	"firstName": "First",
+	"lastName": "Last"
+}
+```
+
+* `getUserData` - Returns the user information and the authentication data for the current user.
+</br>
+
+Definition:
+
+```TypeScript
+/**
+ * Returns the user information and the authentication data for the current user.
+ * @returns {IUserData} The user information and the authentication data for the current user.
+ */
+getUserData(): IUserData;
+```
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+const userData = tns.userService.getUserData();
+console.log(userData);
+```
+
+Sample result for `userData` will be:
+```JSON
+{
+	"accessToken": "some token",
+	"refreshToken": "some refresh token",
+	"userInfo": {
+		"email": "some@mail.bg",
+		"firstName": "First",
+		"lastName": "Last"
+	}
+}
+```
+
+* `setUserData` - Sets the user information and the authentication data for the current user.
+</br>
+
+Definition:
+
+```TypeScript
+/**
+ * Sets the user information and the authentication data for the current user.
+ * @param {IUserdata} userData The user data to set.
+ * @returns {void}
+ */
+setUserData(userData: IUserData): void;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/user-service.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+const userData = {
+	accessToken: "some token",
+	refreshToken: "some refresh token",
+	userInfo: {
+		email: "some@mail.bg",
+		firstName: "First",
+		lastName: "Last"
+	}
+};
+
+tns.userService.setUserData(userData);
+```
+
+* `setToken` - Sets only the token of the current user.
+</br>
+
+Definition:
+
+```TypeScript
+/**
+ * Sets only the token of the current user.
+ * @param {ITokenData} token The token data.
+ * @returns void
+ */
+setToken(token: ITokenData): void;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/user-service.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+const token = {
+	accessToken: "some token"
+};
+
+tns.userService.setToken(token);
+```
+
+* `clearUserData` - Removes the current user data.
+</br>
+
+Definition:
+
+```TypeScript
+/**
+ * Removes the current user data.
+ */
+clearUserData(): void;
+```
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.userService.clearUserData();
+```
+
+#### Interfaces:
+```TypeScript
+interface IUserService {
+	/**
+	 * Checks if there is user information.
+	 * @returns {boolean} Returns true if there is user information.
+	 */
+	hasUser(): boolean;
+
+	/**
+	 * Returns the current user information.
+	 * @returns {IUser} The current user information.
+	 */
+	getUser(): IUser;
+
+	/**
+	 * Returns the user information and the authentication data for the current user.
+	 * @returns {IUserData} The user information and the authentication data for the current user.
+	 */
+	getUserData(): IUserData;
+
+	/**
+	 * Sets the user information and the authentication data for the current user.
+	 * @param {IUserdata} userData The user data to set.
+	 * @returns {void}
+	 */
+	setUserData(userData: IUserData): void;
+
+	/**
+	 * Sets only the token of the current user.
+	 * @param {ITokenData} token The token data.
+	 * @returns void
+	 */
+	setToken(token: ITokenData): void;
+
+	/**
+	 * Removes the current user data.
+	 */
+	clearUserData(): void;
 }
 ```
 

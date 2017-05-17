@@ -20,10 +20,10 @@ export class ServerConfigManager implements IServerConfigManager {
 	}
 
 	public reset(): void {
-		this.apply("production");
+		this.applyConfig("production");
 	}
 
-	public apply(configName: string, options?: IConfigOptions): void {
+	public applyConfig(configName: string, options?: IConfigOptions): void {
 		const baseConfig = this.loadConfig(ServerConfigManager.BASE_CONFIG_FILE_NAME);
 		const newConfig = this.loadConfig(`${ServerConfigManager.CONFIG_FILE_NAME}-${configName}`, options);
 		this.mergeConfig(baseConfig, newConfig);

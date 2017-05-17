@@ -9,7 +9,7 @@ interface IAuthenticationService {
 
 	/**
 	 * Opens login page and after successfull login saves the user information.
-	 * If options.skipUi is set to true the service will emit the login url with "loginUrl" event.
+	 * If options.openAction is provided, it will be used to open the login url instead of the default opener.
 	 * @param {ILoginOptions} options Optional settings for the login method.
 	 * @returns {Promise<IUser>} Returns the user information after successful login.
 	 */
@@ -27,17 +27,17 @@ interface IAuthenticationService {
 	refreshCurrentUserToken(): Promise<void>;
 
 	/**
-	 * Checks the token state of the current user.
-	 * @returns {Promise<ITokenState>} Returns the token state
+	 * Checks if there is user info and the access token of the current user is valid. The method will try to issue new access token if the current is not valid.
+	 * @returns {Promise<boolean>} Returns true if the user is logged in.
 	 */
-	getCurrentUserTokenState(): Promise<ITokenState>;
+	isUserLoggedIn(): Promise<boolean>;
 }
 
 interface ILoginOptions {
 	/**
-	 * If true the login method will emit the login url instead of opening it in the browser.
+	 * Action which will be used to open the login url.
 	 */
-	skipUi?: boolean;
+	openAction?: (loginUrl: string) => void;
 
 	/**
 	 * Sets the ammount of time which the login method will wait for login response in non-interactive terminal.

@@ -1,11 +1,9 @@
-import { EventEmitter } from "events";
 import { ServerRequest, ServerResponse } from "http";
 import { parse } from "url";
 import { join } from "path";
-import { AUTH_EVENT_NAMES } from "../constants";
 import { isInteractive } from "../helpers";
 
-export class AuthenticationService extends EventEmitter implements IAuthenticationService {
+export class AuthenticationService implements IAuthenticationService {
 	private static DEFAULT_NONINTERACTIVE_LOGIN_TIMEOUT_MS: number = 15 * 60 * 1000;
 
 	constructor(private $authCloudService: IAuthCloudService,
@@ -13,9 +11,7 @@ export class AuthenticationService extends EventEmitter implements IAuthenticati
 		private $httpServer: IHttpServer,
 		private $logger: ILogger,
 		private $opener: IOpener,
-		private $userService: IUserService) {
-		super();
-	}
+		private $userService: IUserService) { }
 
 	public async login(options?: ILoginOptions): Promise<IUser> {
 		options = options || {};
@@ -61,9 +57,10 @@ export class AuthenticationService extends EventEmitter implements IAuthenticati
 
 			this.$logger.debug("Login URL is '%s'", loginUrl);
 
-			this.emit(AUTH_EVENT_NAMES.LOGIN_URL, loginUrl);
-			if (!options.skipUi) {
+			if (!options.openAction) {
 				this.$opener.open(loginUrl);
+			} else {
+				options.openAction(loginUrl);
 			}
 
 			if (!isInteractive()) {
@@ -92,7 +89,6 @@ export class AuthenticationService extends EventEmitter implements IAuthenticati
 		this.$userService.setUserData(userData);
 
 		let userInfo = userData.userInfo;
-		this.emit(AUTH_EVENT_NAMES.LOGIN_COMPLETE, userInfo);
 
 		return userInfo;
 	}
@@ -114,7 +110,29 @@ export class AuthenticationService extends EventEmitter implements IAuthenticati
 		this.$userService.setToken(token);
 	}
 
-	public async getCurrentUserTokenState(): Promise<ITokenState> {
+	public async isUserLoggedIn(): Promise<boolean> {
+		if (this.$userService.hasUser()) {
+			const tokenState = await this.getCurrentUserTokenState();
+			if (tokenState.isTokenValid) {
+				return true;
+			}
+
+			try {
+				this.$logger.trace("The access token of the user has expired. Trying to issue new one.");
+				await this.refreshCurrentUserToken();
+
+				// We don't want to check the state of the new access token because it will be valid.
+				return true;
+			} catch (err) {
+				this.$logger.trace("Error while trying to issue new access token:");
+				this.$logger.trace(err);
+			}
+		}
+
+		return false;
+	}
+
+	private async getCurrentUserTokenState(): Promise<ITokenState> {
 		const userData = this.$userService.getUserData();
 		const tokenState = await this.$authCloudService.getTokenState(userData.accessToken);
 		return tokenState;

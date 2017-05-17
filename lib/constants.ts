@@ -23,11 +23,6 @@ export const AUTH_SERVICE_NAME = "auth";
 export const BUILD_SERVICE_NAME = "build";
 export const EMULATORS_SERVICE_NAME = "emulators";
 
-export const AUTH_EVENT_NAMES = {
-	LOGIN_URL: "loginUrl",
-	LOGIN_COMPLETE: "loginComplete"
-};
-
 export const CLOUD_BUILD_EVENT_NAMES = {
 	OUTPUT: "output"
 };

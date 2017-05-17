@@ -11,7 +11,7 @@ interface IServerConfigManager {
 	 * @param optional {IConfigOptions} options The config options.
 	 * @returns {void}
 	 */
-	apply(configName: string, options?: IConfigOptions): void;
+	applyConfig(configName: string, options?: IConfigOptions): void;
 
 	getCurrentConfigData(): IServerConfig;
 

@@ -6,7 +6,7 @@ export class ConfigApplyCommand implements ICommand {
 
 	public async execute(args: string[]): Promise<void> {
 		const configurationFile = args[0];
-		this.$serverConfigManager.apply(null, { configurationFile: configurationFile });
+		this.$serverConfigManager.applyConfig(null, { configurationFile: configurationFile });
 		this.$serverConfigManager.printConfigData();
 	}
 }

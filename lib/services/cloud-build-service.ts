@@ -25,7 +25,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		private $itmsServicesPlistHelper: IItmsServicesPlistHelper,
 		private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
-		private $logsFilter: ILogsFilter,
+		private $cloudBuildOutputFilter: ICloudBuildOutputFilter,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $projectHelper: IProjectHelper,
 		private $qr: IQrCodeGenerator) {
@@ -222,7 +222,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 					try {
 						const logs: string = await this.getContentOfS3File(buildInformation.outputUrl);
 						// The logs variable will contain the full build log and we need to log only the logs that we don't have.
-						const contentToLog = this.$logsFilter.filterLogs(logs.substr(outputCursorPosition));
+						const contentToLog = this.$cloudBuildOutputFilter.filter(logs.substr(outputCursorPosition));
 						if (contentToLog) {
 							this.emit(constants.CLOUD_BUILD_EVENT_NAMES.OUTPUT, contentToLog);
 							this.$logger.info(contentToLog);

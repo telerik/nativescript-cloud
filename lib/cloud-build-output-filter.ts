@@ -1,7 +1,7 @@
 import { EOL } from "os";
 
-export class LogsFilter implements ILogsFilter {
-	public filterLogs(logs: string): string {
+export class CloudBuildOutputFilter implements ICloudBuildOutputFilter {
+	public filter(logs: string): string {
 		let result = logs.replace(new RegExp("(\\\\r\\\\n)|(\\\\n)", "gm"), EOL) // Unescape new lines.
 			.replace(/(\\\\t)/g, "\t") // Unescape tabs.
 			.replace(/((\n)|(\r\n)){1,}/gm, EOL) // Replace consecutive blank lines.
@@ -24,4 +24,4 @@ export class LogsFilter implements ILogsFilter {
 	}
 }
 
-$injector.register("logsFilter", LogsFilter);
+$injector.register("cloudBuildOutputFilter", CloudBuildOutputFilter);
