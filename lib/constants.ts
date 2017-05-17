@@ -47,3 +47,10 @@ export const HTTP_METHODS = {
 	PUT: "PUT",
 	DELETE: "DELETE"
 };
+
+export const HEADERS = {
+	ACCEPT: "Accept",
+	AUTHORIZATION: "Authorization",
+	CONNECTION: "Connection",
+	CONTENT_TYPE: "Content-Type"
+};

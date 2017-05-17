@@ -18,6 +18,7 @@ export class AuthenticationService extends EventEmitter implements IAuthenticati
 	}
 
 	public async login(options?: ILoginOptions): Promise<IUser> {
+		options = options || {};
 		// Start the localhost server to wait for the login response.
 		let timeoutID: NodeJS.Timer | number = undefined;
 		let authCompleteResolveAction: (value?: any | PromiseLike<any>) => void;

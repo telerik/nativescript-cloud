@@ -1,4 +1,4 @@
-import { CONTENT_TYPES } from "../../constants";
+import { CONTENT_TYPES, HEADERS } from "../../constants";
 
 export class CloudServicesProxy implements ICloudServicesProxy {
 	private serverConfig: IServerConfig;
@@ -6,8 +6,8 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 	constructor(private $errors: IErrors,
 		private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
-		private $packageInfoService: IPackageInfoService,
-		private $serverConfigManager: IServerConfigManager) {
+		private $serverConfigManager: IServerConfigManager,
+		private $userService: IUserService) {
 		this.serverConfig = this.$serverConfigManager.getCurrentConfigData();
 	}
 
@@ -16,10 +16,13 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 		const finalUrlPath = this.getUrlPath(serviceName, urlPath);
 
 		headers = headers || Object.create(null);
-		headers["User-Agent"] = `fusion/${this.$packageInfoService.getVersion()} (Node.js ${process.versions.node}; ${process.platform}; ${process.arch})`;
+
+		if (!_.has(headers, HEADERS.AUTHORIZATION) && this.$userService.hasUser()) {
+			headers[HEADERS.AUTHORIZATION] = `Bearer ${this.$userService.getUserData().accessToken}`;
+		}
 
 		if (accept) {
-			headers.Accept = accept;
+			headers[HEADERS.ACCEPT] = accept;
 		}
 
 		let requestOpts: any = {
@@ -38,7 +41,7 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 
 			let theBody = bodyValues[0];
 			requestOpts.body = theBody.value;
-			requestOpts.headers["Content-Type"] = theBody.contentType;
+			requestOpts.headers[HEADERS.CONTENT_TYPE] = theBody.contentType;
 		}
 
 		let response: Server.IResponse;

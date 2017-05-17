@@ -1,7 +1,7 @@
 import * as http from "http";
 import * as url from "url";
 import * as path from "path";
-import { CONTENT_TYPES } from "./constants";
+import { CONTENT_TYPES, HEADERS } from "./constants";
 
 export class HttpServer implements IHttpServer {
 	constructor(private $logger: ILogger,
@@ -20,7 +20,7 @@ export class HttpServer implements IHttpServer {
 
 			this.$logger.debug("Serving '%s'", uriPath);
 
-			response.setHeader("Connection", "close");
+			response.setHeader(HEADERS.CONNECTION, "close");
 
 			if (!configuration.routes[uriPath]) {
 				configuration.catchAll(request, response);
@@ -48,7 +48,7 @@ export class HttpServer implements IHttpServer {
 
 				let mimeType = mimeTypes[path.extname(fileName)];
 				response.statusCode = 200;
-				response.setHeader("Content-Type", mimeType);
+				response.setHeader(HEADERS.CONTENT_TYPE, mimeType);
 
 				this.$fs.createReadStream(fileName).pipe(response);
 
