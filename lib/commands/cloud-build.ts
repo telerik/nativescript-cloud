@@ -1,5 +1,7 @@
 import * as path from "path";
 export class CloudBuild implements ICommand {
+	public allowedParameters: ICommandParameter[];
+
 	constructor(private $errors: IErrors,
 		private $logger: ILogger,
 		private $mobileHelper: Mobile.IMobileHelper,
@@ -43,7 +45,6 @@ export class CloudBuild implements ICommand {
 
 		return true;
 	}
-
-	allowedParameters: ICommandParameter[];
 }
+
 $injector.registerCommand("build|cloud", CloudBuild);

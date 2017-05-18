@@ -1,7 +1,4 @@
 {
-	"apiVersion": "v1",
-	"domainName": "digitalfactory.rocks",
-	"serverProto": "https",
 	"stage": "production",
 	"cloudServices": {
 		"auth": {

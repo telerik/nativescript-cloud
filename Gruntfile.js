@@ -171,7 +171,6 @@ module.exports = function (grunt) {
 	grunt.registerTask("transpile_additional_project", function () {
 		transpileProject("nativescript");
 		transpileProject("mobile-cli-lib");
-		transpileProject("ios-device-lib");
 	});
 
 	grunt.registerTask("setPackageName", function (version) {

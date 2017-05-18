@@ -1,0 +1,15 @@
+{
+	"apiVersion": null,
+	"serverProto": "http",
+	"cloudServices": {
+		"auth": {
+			"fullHostName": "localhost:8000"
+		},
+		"build": {
+			"fullHostName": "localhost:8001"
+		},
+		"emulators": {
+			"fullHostName": "localhost:8002"
+		}
+	}
+}

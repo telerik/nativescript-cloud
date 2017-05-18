@@ -45,6 +45,7 @@ references.d.ts
 references.d.ts
 test-reports.xml
 tscommand-*.tmp.txt
+nativescript-cloud-*.tgz
 
 # Custom
 **/.vs

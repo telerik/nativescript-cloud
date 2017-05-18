@@ -18,3 +18,40 @@ export const PROVISION_TYPES = {
 	ADHOC: "AdHoc",
 	DEVELOPMENT: "Development",
 };
+
+export const AUTH_SERVICE_NAME = "auth";
+export const BUILD_SERVICE_NAME = "build";
+export const EMULATORS_SERVICE_NAME = "emulators";
+
+export const CLOUD_BUILD_EVENT_NAMES = {
+	OUTPUT: "output"
+};
+
+export const CONTENT_TYPES = {
+	APPLICATION_JSON: "application/json",
+	TEXT_HTML: "text/html",
+	TEXT_JAVASCRIPT: "text/javascript",
+	TEXT_CSS: "text/css",
+	IMAGE_JPEG: "image/jpeg",
+	IMAGE_PNG: "image/png"
+};
+
+export const HTTP_METHODS = {
+	GET: "GET",
+	POST: "POST",
+	PUT: "PUT",
+	DELETE: "DELETE"
+};
+
+export const HTTP_HEADERS = {
+	ACCEPT: "Accept",
+	AUTHORIZATION: "Authorization",
+	CONNECTION: "Connection",
+	CONTENT_TYPE: "Content-Type"
+};
+
+export const HTTP_STATUS_CODES = {
+	SUCCESS: 200,
+	UNAUTHORIZED: 401,
+	PAYMENT_REQUIRED: 402
+};
