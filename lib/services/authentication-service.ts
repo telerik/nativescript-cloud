@@ -27,8 +27,8 @@ export class AuthenticationService implements IAuthenticationService {
 			routes: {
 				"/": async (request: ServerRequest, response: ServerResponse) => {
 					this.$logger.debug("Login complete: " + request.url);
-					let parsedUrl = parse(request.url, true);
-					let loginResponse = parsedUrl.query.response;
+					const parsedUrl = parse(request.url, true);
+					const loginResponse = parsedUrl.query.response;
 					if (loginResponse) {
 						await this.serveLoginFile("end.html")(request, response);
 						localhostServer.close();
@@ -64,7 +64,7 @@ export class AuthenticationService implements IAuthenticationService {
 			}
 
 			if (!isInteractive()) {
-				let timeout = options.hasOwnProperty("timeout")
+				const timeout = options.hasOwnProperty("timeout")
 					? + options.timeout
 					: AuthenticationService.DEFAULT_NONINTERACTIVE_LOGIN_TIMEOUT_MS;
 
@@ -72,7 +72,7 @@ export class AuthenticationService implements IAuthenticationService {
 					timeoutID = setTimeout(() => {
 						if (!isResolved) {
 							this.$logger.debug("Aborting login procedure due to inactivity.");
-							process.exit();
+							process.exit(408);
 						}
 					}, timeout);
 				}
@@ -85,10 +85,10 @@ export class AuthenticationService implements IAuthenticationService {
 			clearTimeout(<NodeJS.Timer>timeoutID);
 		}
 
-		let userData: IUserData = JSON.parse(loginResponse);
+		const userData: IUserData = JSON.parse(loginResponse);
 		this.$userService.setUserData(userData);
 
-		let userInfo = userData.userInfo;
+		const userInfo = userData.userInfo;
 
 		return userInfo;
 	}

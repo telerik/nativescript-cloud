@@ -16,7 +16,7 @@ export class HttpServer implements IHttpServer {
 		}
 
 		const server = http.createServer((request: http.ServerRequest, response: http.ServerResponse) => {
-			let uriPath = url.parse(request.url).pathname;
+			const uriPath = url.parse(request.url).pathname;
 
 			this.$logger.debug("Serving '%s'", uriPath);
 
@@ -35,7 +35,7 @@ export class HttpServer implements IHttpServer {
 	public serveFile(fileName: string): (_request: http.ServerRequest, _response: http.ServerResponse) => Promise<void> {
 		return (request: http.ServerRequest, response: http.ServerResponse): Promise<void> => {
 			return new Promise<void>((resolve, reject) => {
-				let mimeTypes: IStringDictionary = {
+				const mimeTypes: IStringDictionary = {
 					".html": CONTENT_TYPES.TEXT_HTML,
 					".jpeg": CONTENT_TYPES.IMAGE_JPEG,
 					".jpg": CONTENT_TYPES.IMAGE_JPEG,
@@ -46,7 +46,7 @@ export class HttpServer implements IHttpServer {
 
 				this.$logger.debug("Returning '%s'", fileName);
 
-				let mimeType = mimeTypes[path.extname(fileName)];
+				const mimeType = mimeTypes[path.extname(fileName)];
 				response.statusCode = HTTP_STATUS_CODES.SUCCESS;
 				response.setHeader(HTTP_HEADERS.CONTENT_TYPE, mimeType);
 

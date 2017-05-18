@@ -135,9 +135,11 @@ const tns = require("nativescript");
 const childProcess = require("child_process");
 
 const openAction = url => {
-		const isWin = /^win/.test(process.platform);
-		const openCommand = isWin ? "start" : "open";
-		childProcess.execSync(`${openCommand} ${url}`);
+		return new Promise((resolve, reject) => {
+			const isWin = /^win/.test(process.platform);
+			const openCommand = isWin ? "start" : "open";
+			childProcess.exec(`${openCommand} ${url}`, (err, result) => err ? reject(err) : resolve(result));
+		});
 	};
 const loginOptions = { openAction: openAction };
 
@@ -261,7 +263,7 @@ interface ILoginOptions {
 	/**
 	 * Action which will be used to open the login url.
 	 */
-	openAction?: (loginUrl: string) => void;
+	openAction?: (loginUrl: string) => Promise<void>;
 
 	/**
 	 * Sets the ammount of time which the login method will wait for login response in non-interactive terminal.
@@ -329,7 +331,7 @@ console.log(user);
 Sample result for `user` will be:
 ```JSON
 {
-	"email": "some@mail.bg",
+	"email": "some@mail.com",
 	"firstName": "First",
 	"lastName": "Last"
 }
@@ -363,7 +365,7 @@ Sample result for `userData` will be:
 	"accessToken": "some token",
 	"refreshToken": "some refresh token",
 	"userInfo": {
-		"email": "some@mail.bg",
+		"email": "some@mail.com",
 		"firstName": "First",
 		"lastName": "Last"
 	}
