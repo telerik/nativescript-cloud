@@ -6,6 +6,7 @@ import { values } from "lodash";
 
 export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDeviceDiscovery {
 	private devices: IDictionary<Mobile.IDevice> = {};
+	private _hasStartedLookingForDevices = false;
 
 	constructor(private $injector: IInjector) {
 		super();
@@ -27,18 +28,21 @@ export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDev
 	}
 
 	public async startLookingForDevices(): Promise<void> {
-		values(deviceEmitter.getCurrentlyAttachedDevices()).forEach(basicInfo => {
-			this.addAppetizeDevice(basicInfo);
-		});
+		if (!this._hasStartedLookingForDevices) {
+			this._hasStartedLookingForDevices = true;
+			values(deviceEmitter.getCurrentlyAttachedDevices()).forEach(basicInfo => {
+				this.addAppetizeDevice(basicInfo);
+			});
 
-		deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (basicInfo: IAppetizeDeviceBasicInfo) => {
-			this.addAppetizeDevice(basicInfo);
-		});
+			deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (basicInfo: IAppetizeDeviceBasicInfo) => {
+				this.addAppetizeDevice(basicInfo);
+			});
 
-		deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (basicInfo: IAppetizeDeviceBasicInfo) => {
-			const device: Mobile.IDevice = this.$injector.resolve(AppetizeDevice, { basicInfo: basicInfo });
-			this.removeDevice(device.deviceInfo.identifier);
-		});
+			deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (basicInfo: IAppetizeDeviceBasicInfo) => {
+				const device: Mobile.IDevice = this.$injector.resolve(AppetizeDevice, { basicInfo: basicInfo });
+				this.removeDevice(device.deviceInfo.identifier);
+			});
+		}
 	}
 
 	public async checkForDevices(): Promise<void> { /* currently empty */ }
