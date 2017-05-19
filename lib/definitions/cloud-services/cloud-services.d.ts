@@ -14,11 +14,13 @@ interface IUploadService {
 	updloadToS3(localFilePath: string): Promise<string>;
 }
 
+interface IEmulatorCredentials {
+	[key: string]: ICloudEmulatorKeys;
+}
+
 interface ICloudEmulatorService {
 	startEmulator(publicKey: string, platform: string, deviceType: string): Promise<any>;
-	createApp(url: string, platform: string, ): Promise<ICloudEmulatorResponse>;
-	updateApp(url: string, platform: string, publicKey: string, privateKey: string): Promise<ICloudEmulatorResponse>;
-	deployApp(fileName: string, platform: string): Promise<ICloudEmulatorResponse>;
+	deployApp(fileLocation: string, platform: string): Promise<ICloudEmulatorResponse>;
 	refereshEmulator(deviceIdentifier: string): Promise<void>;
 }
 
@@ -27,7 +29,7 @@ interface IAmazonStorageEntryData extends IAmazonStorageEntry {
 }
 
 interface ICloudEmulatorResponse {
-	appPermissions: {};
+	appPermissions: any;
 	appURL: string;
 	architectures: [string];
 	created: Date;

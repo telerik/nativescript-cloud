@@ -31,7 +31,7 @@ export class AppetizeDevice implements Mobile.IDevice {
 
 	private init(): void {
 		this.applicationManager = this.$injector.resolve(AppetizeApplicationManager, { basicInfo: this.basicInfo });
-		this.fileSystem = this.$injector.resolve(AppetizeDeviceFileSystem, {});
+		this.fileSystem = this.$injector.resolve(AppetizeDeviceFileSystem);
 		this.deviceInfo = {
 			identifier: this.basicInfo.identifier,
 			model: this.basicInfo.model,

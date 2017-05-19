@@ -2,7 +2,6 @@ import { EventEmitter } from "events";
 import { DEVICE_DISCOVERY_EVENTS } from "../../constants";
 import { deviceEmitter } from "cloud-device-emulator";
 import { AppetizeDevice } from "../device/appetize-device";
-import { values } from "lodash";
 
 export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDeviceDiscovery {
 	private devices: IDictionary<Mobile.IDevice> = {};
@@ -30,7 +29,7 @@ export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDev
 	public async startLookingForDevices(): Promise<void> {
 		if (!this._hasStartedLookingForDevices) {
 			this._hasStartedLookingForDevices = true;
-			values(deviceEmitter.getCurrentlyAttachedDevices()).forEach(basicInfo => {
+			_.values(deviceEmitter.getCurrentlyAttachedDevices()).forEach(basicInfo => {
 				this.addAppetizeDevice(basicInfo);
 			});
 
@@ -39,8 +38,7 @@ export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDev
 			});
 
 			deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (basicInfo: IAppetizeDeviceBasicInfo) => {
-				const device: Mobile.IDevice = this.$injector.resolve(AppetizeDevice, { basicInfo: basicInfo });
-				this.removeDevice(device.deviceInfo.identifier);
+				this.removeDevice(basicInfo.identifier);
 			});
 		}
 	}

@@ -26,8 +26,8 @@ export class AppetizeApplicationManager extends EventEmitter implements Mobile.I
 
 	public async stopApplication(appIdentifier: string): Promise<void> { /* currently empty */ }
 
-	public getApplicationInfo(applicationIdentifier: string): Promise<Mobile.IApplicationInfo> {
-		return Promise.resolve(null);
+	public async getApplicationInfo(applicationIdentifier: string): Promise<Mobile.IApplicationInfo> {
+		return null;
 	}
 
 	public canStartApplication(): boolean {
