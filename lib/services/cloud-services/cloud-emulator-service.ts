@@ -56,7 +56,7 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 	}
 
 	private getEmulatorCredentials(platform: string): ICloudEmulatorKeys {
-		return <ICloudEmulatorKeys>this.loadCredentials()[platform];
+		return this.loadCredentials()[platform];
 	}
 
 	private loadCredentials(): IEmulatorCredentials {
