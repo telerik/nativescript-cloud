@@ -202,10 +202,16 @@ module.exports = function (grunt) {
 		const referencesPath = path.join(__dirname, "references.d.ts");
 
 		// get all .d.ts files from nativescript-cli and mobile-cli-lib
-		const nodeModulesDirPath = path.join(__dirname, "node_modules");
-		const pathsOfDtsFiles = getReferencesFromDir(path.join(nodeModulesDirPath, "nativescript"))
+		const node_modules = "node_modules";
+		const nativescript = "nativescript";
+		const iOSDeviceLib = "ios-device-lib";
+		const nodeModulesDirPath = path.join(__dirname, node_modules);
+		const rootPathToIosDeviceLib = path.join(nodeModulesDirPath, iOSDeviceLib);
+		const pathToIosDeviceLib = fs.existsSync(rootPathToIosDeviceLib) ? rootPathToIosDeviceLib : path.join(nodeModulesDirPath, nativescript, node_modules, iOSDeviceLib);
+
+		const pathsOfDtsFiles = getReferencesFromDir(path.join(nodeModulesDirPath, nativescript))
 			.concat(getReferencesFromDir(path.join(nodeModulesDirPath, "mobile-cli-lib")))
-			.concat(getReferencesFromDir(path.join(nodeModulesDirPath, "ios-device-lib")));
+			.concat(getReferencesFromDir(pathToIosDeviceLib));
 
 		const lines = pathsOfDtsFiles.map(file => `/// <reference path="${fromWindowsRelativePathToUnix(path.relative(__dirname, file))}" />`);
 
