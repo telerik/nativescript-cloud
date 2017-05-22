@@ -18,6 +18,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 	private static BUILD_COMPLETE_STATUS = "Success";
 	private static BUILD_IN_PROGRESS_STATUS = "Building";
 	private static BUILD_FAILED_STATUS = "Failed";
+	private static DEFAULT_VERSION = "3.0.0";
 
 	constructor(private $buildCloudService: IBuildCloudService,
 		private $errors: IErrors,
@@ -248,7 +249,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		// HACK just for this version. After that we'll have UI for getting runtime version.
 		// Until then, use the coreModulesVersion.
 		const coreModulesVersion = this.$fs.readJson(path.join(projectSettings.projectDir, "package.json")).dependencies["tns-core-modules"];
-		const runtimeVersion = this.getRuntimeVersion(platform, projectSettings.nativescriptData, coreModulesVersion);
+		const runtimeVersion = await this.getRuntimeVersion(platform, projectSettings.nativescriptData, coreModulesVersion);
 		const cliVersion = await this.getCliVersion(runtimeVersion);
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectSettings.projectName);
 
@@ -461,24 +462,49 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		return fullPath.substring(projectDir.length);
 	}
 
-	private getRuntimeVersion(platform: string, nativescriptData: any, coreModulesVersion: string): string {
+	private async getRuntimeVersion(platform: string, nativescriptData: any, coreModulesVersion: string): Promise<string> {
 		const runtimePackageName = `tns-${platform.toLowerCase()}`;
 		let runtimeVersion = nativescriptData && nativescriptData[runtimePackageName] && nativescriptData[runtimePackageName].version;
-		if (!runtimeVersion && coreModulesVersion && semver.valid(coreModulesVersion)) {
+		if (!runtimeVersion && coreModulesVersion) {
 			// no runtime added. Let's find out which one we need based on the tns-core-modules.
-			runtimeVersion = `${semver.major(coreModulesVersion)}.${semver.minor(coreModulesVersion)}.*`;
+			if (semver.valid(coreModulesVersion)) {
+				runtimeVersion = `${semver.major(coreModulesVersion)}.${semver.minor(coreModulesVersion)}.*`;
+			} else if (semver.validRange(coreModulesVersion)) {
+				// In case tns-core-modules in package.json are referred as `~x.x.x` - this is not a valid version, but is valid range.
+				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, coreModulesVersion);
+			}
 		}
 
-		return runtimeVersion || "2.5.0";
+		return runtimeVersion || CloudBuildService.DEFAULT_VERSION;
 	}
 
 	private async getCliVersion(runtimeVersion: string): Promise<string> {
 		try {
-			const response = await this.$httpClient.httpRequest("http://registry.npmjs.org/nativescript");
-			const versions = _.keys(JSON.parse(response.body).versions);
-			return "2.5.0" || semver.maxSatisfying(versions, `~${runtimeVersion}`);
+			const latestMatchingVersion = await this.getLatestMatchingVersion("nativescript", `~${runtimeVersion}`);
+			return latestMatchingVersion || CloudBuildService.DEFAULT_VERSION;
 		} catch (err) {
+			this.$logger.trace(`Unable to get information about CLI versions. Error is: ${err.message}`);
 			return `${semver.major(runtimeVersion)}.${semver.minor(runtimeVersion)}.0`;
+		}
+	}
+
+	private async getLatestMatchingVersion(packageName: string, range: string): Promise<string> {
+		const versions = await this.getVersionsFromNpm(packageName);
+		if (versions.length) {
+			return semver.maxSatisfying(versions, range);
+		}
+
+		return null;
+	}
+
+	private async getVersionsFromNpm(packageName: string): Promise<string[]> {
+		try {
+			const response = await this.$httpClient.httpRequest(`http://registry.npmjs.org/${packageName}`);
+			const versions = _.keys(JSON.parse(response.body).versions);
+			return versions;
+		} catch (err) {
+			this.$logger.trace(`Unable to get versions of ${packageName} from npm. Error is: ${err.message}.`);
+			return [];
 		}
 	}
 
