@@ -22,6 +22,7 @@ describe("cloud emulator service", () => {
 			testInjector.register("uploadService", {
 				updloadToS3: async (url: string) => url
 			});
+			testInjector.register("cloudDeviceEmulator", { /* empty */ });
 			testInjector.register("options", {
 				profileDir: "test"
 			});

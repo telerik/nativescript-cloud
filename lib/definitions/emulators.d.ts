@@ -28,3 +28,26 @@ interface IAppetizeEmulatorLauncher {
 	 */
 	startEmulator(data: IAppetizeEmulatorStartData): Promise<string>;
 }
+
+/**
+ * Describes service for interaction with server which communicates with cloud emulators.
+ */
+interface ICloudDeviceEmulator {
+	/**
+	 * Event emitter instance that raises events upon finding/losing a device.
+	 */
+	deviceEmitter: CloudDeviceEmitter;
+
+	/**
+	 * Retrieves information about the currently running server for communication with cloud emulators.
+	 * @returns {Promise<ICloudDeviceServerInfo>} Information about the server.
+	 */
+	getSeverAddress(): Promise<ICloudDeviceServerInfo>;
+
+	/**
+	 * Refreshes a cloud emulator.
+	 * @param {string} deviceIdentifier The device's identifier.
+	 * @returns {Promise<void>}
+	 */
+	refresh(deviceIdentifier: string): Promise<void>;
+}

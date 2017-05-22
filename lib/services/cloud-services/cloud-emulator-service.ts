@@ -1,6 +1,5 @@
 import * as path from "path";
 
-import { getSeverAddress, refresh } from "cloud-device-emulator";
 import { EMULATORS_SERVICE_NAME, HTTP_METHODS } from "../../constants";
 import { CloudServiceBase } from "./cloud-service-base";
 
@@ -8,7 +7,8 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 
 	protected serviceName = EMULATORS_SERVICE_NAME;
 
-	constructor(protected $cloudRequestService: ICloudRequestService,
+	constructor(private $cloudDeviceEmulator: ICloudDeviceEmulator,
+		protected $cloudRequestService: ICloudRequestService,
 		private $uploadService: IUploadService,
 		private $fs: IFileSystem,
 		protected $options: IProfileDir) {
@@ -17,7 +17,7 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 	}
 
 	public async startEmulator(publicKey: string, platform: string, deviceType: string): Promise<string> {
-		const serverInfo = await getSeverAddress();
+		const serverInfo = await this.$cloudDeviceEmulator.getSeverAddress();
 		return `http://${serverInfo.host}:${serverInfo.port}?publicKey=${publicKey}&device=${deviceType}`;
 	}
 
@@ -35,7 +35,7 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 	}
 
 	public refereshEmulator(deviceIdentifier: string): Promise<void> {
-		return refresh(deviceIdentifier);
+		return this.$cloudDeviceEmulator.refresh(deviceIdentifier);
 	}
 
 	private async createApp(url: string, platform: string): Promise<ICloudEmulatorResponse> {

@@ -1,13 +1,13 @@
 import { EventEmitter } from "events";
 import { DEVICE_DISCOVERY_EVENTS } from "../../constants";
-import { deviceEmitter } from "cloud-device-emulator";
 import { AppetizeDevice } from "../device/appetize-device";
 
 export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDeviceDiscovery {
 	private devices: IDictionary<Mobile.IDevice> = {};
 	private _hasStartedLookingForDevices = false;
 
-	constructor(private $injector: IInjector) {
+	constructor(private $cloudDeviceEmulator: ICloudDeviceEmulator,
+		private $injector: IInjector) {
 		super();
 	}
 
@@ -29,15 +29,15 @@ export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDev
 	public async startLookingForDevices(): Promise<void> {
 		if (!this._hasStartedLookingForDevices) {
 			this._hasStartedLookingForDevices = true;
-			_.values(deviceEmitter.getCurrentlyAttachedDevices()).forEach(basicInfo => {
+			_.values(this.$cloudDeviceEmulator.deviceEmitter.getCurrentlyAttachedDevices()).forEach(basicInfo => {
 				this.addAppetizeDevice(basicInfo);
 			});
 
-			deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (basicInfo: IAppetizeDeviceBasicInfo) => {
+			this.$cloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (basicInfo: IAppetizeDeviceBasicInfo) => {
 				this.addAppetizeDevice(basicInfo);
 			});
 
-			deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (basicInfo: IAppetizeDeviceBasicInfo) => {
+			this.$cloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (basicInfo: IAppetizeDeviceBasicInfo) => {
 				this.removeDevice(basicInfo.identifier);
 			});
 		}

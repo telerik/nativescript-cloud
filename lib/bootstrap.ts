@@ -4,6 +4,7 @@ $injector.require("httpServer", path.join(__dirname, "http-server"));
 $injector.require("itmsServicesPlistHelper", path.join(__dirname, "itms-services-plist-helper"));
 $injector.require("serverConfigManager", path.join(__dirname, "server-config-manager"));
 $injector.require("cloudBuildOutputFilter", path.join(__dirname, "cloud-build-output-filter"));
+$injector.require("cloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
 
 // Mobile.
 $injector.require("appetizeDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "appetize-device-discovery"));
