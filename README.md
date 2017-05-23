@@ -187,12 +187,10 @@ const tns = require("nativescript");
 const childProcess = require("child_process");
 
 const openAction = url => {
-		return new Promise((resolve, reject) => {
-			const isWin = /^win/.test(process.platform);
-			const openCommand = isWin ? "start" : "open";
-			childProcess.exec(`${openCommand} ${url}`, (err, result) => err ? reject(err) : resolve(result));
-		});
-	};
+	const isWin = /^win/.test(process.platform);
+	const openCommand = isWin ? "start" : "open";
+	childProcess.execSync(`${openCommand} ${url}`);
+};
 const loginOptions = { openAction: openAction };
 
 tns.authenticationService
@@ -315,7 +313,7 @@ interface ILoginOptions {
 	/**
 	 * Action which will be used to open the login url.
 	 */
-	openAction?: (loginUrl: string) => Promise<void>;
+	openAction?: (loginUrl: string) => void;
 
 	/**
 	 * Sets the ammount of time which the login method will wait for login response in non-interactive terminal.
