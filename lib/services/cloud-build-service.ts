@@ -9,10 +9,6 @@ import { EventEmitter } from "events";
 import * as constants from "../constants";
 const plist = require("simple-plist");
 
-interface IAmazonStorageEntryData extends IAmazonStorageEntry {
-	fileNameInS3: string;
-}
-
 export class CloudBuildService extends EventEmitter implements ICloudBuildService {
 	private static BUILD_STATUS_CHECK_INTERVAL = 1500;
 	private static BUILD_COMPLETE_STATUS = "Success";

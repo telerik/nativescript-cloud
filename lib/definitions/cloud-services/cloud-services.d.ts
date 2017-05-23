@@ -10,6 +10,51 @@ interface ICloudServicesProxy extends ICloudRequestService {
 	getUrlPath(serviceName: string, urlPath: string): string;
 }
 
+interface IUploadService {
+	updloadToS3(localFilePath: string): Promise<string>;
+}
+
+interface IEmulatorCredentials {
+	[key: string]: ICloudEmulatorKeys;
+}
+
+interface ICloudEmulatorService {
+	startEmulator(publicKey: string, platform: string, deviceType: string): Promise<any>;
+	deployApp(fileLocation: string, platform: string): Promise<ICloudEmulatorResponse>;
+	refereshEmulator(deviceIdentifier: string): Promise<void>;
+}
+
+interface IAmazonStorageEntryData extends IAmazonStorageEntry {
+	fileNameInS3: string;
+}
+
+interface ICloudEmulatorResponse {
+	appPermissions: any;
+	appURL: string;
+	architectures: [string];
+	created: Date;
+	email: string;
+	manageURL: string;
+	platform: string;
+	privateKey: string;
+	publicKey: string;
+	publicURL: string;
+	updated: Date;
+	versionCode: Number;
+}
+
+interface IPresignURLResponse {
+	uploadPreSignedUrl: string;
+	publicDownloadUrl: string;
+	s3Url: string;
+	sessionKey: string;
+}
+
+interface ICloudEmulatorKeys {
+	publicKey: string;
+	privateKey: string;
+}
+
 interface ICloudRequestService {
 	call<T>(options: ICloudRequestOptions): Promise<T>;
 }

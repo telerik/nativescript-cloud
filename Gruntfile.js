@@ -211,7 +211,8 @@ module.exports = function (grunt) {
 
 		const pathsOfDtsFiles = getReferencesFromDir(path.join(nodeModulesDirPath, nativescript))
 			.concat(getReferencesFromDir(path.join(nodeModulesDirPath, "mobile-cli-lib")))
-			.concat(getReferencesFromDir(pathToIosDeviceLib));
+			.concat(getReferencesFromDir(pathToIosDeviceLib))
+			.concat(getReferencesFromDir(path.join(nodeModulesDirPath, "cloud-device-emulator")));
 
 		const lines = pathsOfDtsFiles.map(file => `/// <reference path="${fromWindowsRelativePathToUnix(path.relative(__dirname, file))}" />`);
 
