@@ -37,7 +37,7 @@ interface ILoginOptions {
 	/**
 	 * Action which will be used to open the login url.
 	 */
-	openAction?: (loginUrl: string) => Promise<void>;
+	openAction?: (loginUrl: string) => void;
 
 	/**
 	 * Sets the ammount of time which the login method will wait for login response in non-interactive terminal.
