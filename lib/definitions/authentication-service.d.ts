@@ -31,6 +31,12 @@ interface IAuthenticationService {
 	 * @returns {Promise<boolean>} Returns true if the user is logged in.
 	 */
 	isUserLoggedIn(): Promise<boolean>;
+
+	/**
+	 * Stops the current login process and rejects the login promise with an error.
+	 * @returns {void}
+	 */
+	cancelLogin(): void;
 }
 
 interface ILoginOptions {

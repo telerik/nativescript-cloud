@@ -265,6 +265,32 @@ tns.authenticationService.refreshCurrentUserToken()
 	.catch(err => console.error(err));
 ```
 
+* `cancelLogin` - Stops the current login process and rejects the login promise with an error.
+</br>
+
+Definition:
+
+```TypeScript
+/**
+ * Stops the current login process and rejects the login promise with an error.
+ * @returns {void}
+ */
+cancelLogin(): void;
+```
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.authenticationService
+	.login()
+	.then(userInfo => console.log(userInfo))
+	.catch(err => console.error(err));
+
+tns.authenticationService.cancelLogin();
+```
+
 #### Interfaces:
 ```TypeScript
 interface IUser {
@@ -307,6 +333,12 @@ interface IAuthenticationService {
 	 * @returns {Promise<ITokenState>} Returns the token state
 	 */
 	getCurrentUserTokenState(): Promise<ITokenState>;
+
+	/**
+	 * Stops the current login process and rejects the login promise with an error.
+	 * @returns {void}
+	 */
+	cancelLogin(): void;
 }
 
 interface ILoginOptions {
