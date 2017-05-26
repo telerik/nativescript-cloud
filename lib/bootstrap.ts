@@ -35,6 +35,7 @@ $injector.requireCommand("login", path.join(__dirname, "commands", "login"));
 $injector.requireCommand("logout", path.join(__dirname, "commands", "logout"));
 
 $injector.requireCommand("user", path.join(__dirname, "commands", "user"));
+$injector.requireCommand("kill-server", path.join(__dirname, "commands", "kill-server"));
 
 $injector.requireCommand("build|cloud", path.join(__dirname, "commands", "cloud-build"));
 $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "cloud-lib-version"));

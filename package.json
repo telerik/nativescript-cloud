@@ -45,7 +45,7 @@
     "typescript": "2.1.5"
   },
   "dependencies": {
-    "cloud-device-emulator": "~0.1.0",
+    "cloud-device-emulator": "~0.2.0",
     "cookie": "0.3.1",
     "lodash": "4.17.4",
     "minimatch": "3.0.4",
