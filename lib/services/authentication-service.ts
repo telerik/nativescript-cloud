@@ -124,7 +124,18 @@ export class AuthenticationService implements IAuthenticationService {
 		}
 	}
 
-	public logout(): void {
+	public logout(options?: IOpenActionOptions): void {
+		options = options || {};
+
+		const logoutUrl = this.$authCloudService.getLogoutUrl();
+		this.$logger.trace(`Logging out. Logotu url is: ${logoutUrl}`);
+
+		if (options.openAction) {
+			options.openAction(logoutUrl);
+		} else {
+			this.$opener.open(logoutUrl);
+		}
+
 		this.$userService.clearUserData();
 	}
 

@@ -3,6 +3,7 @@ interface IAuthCloudService {
 	getLoginUrl(port: number): string;
 	refreshToken(refreshToken: string): Promise<ITokenData>;
 	getTokenState(token: string): Promise<ITokenState>;
+	getLogoutUrl(): string;
 }
 
 interface ITokenState {

@@ -17,9 +17,11 @@ interface IAuthenticationService {
 
 	/**
 	 * Invalidates the current user authentication data.
+	 * If options.openAction is provided, it will be used to open the logout url instead of the default opener.
+	 * @param {IOpenActionOptions} options Optional settings for the logout method.
 	 * @returns {void}
 	 */
-	logout(): void;
+	logout(options?: IOpenActionOptions): void;
 
 	/**
 	 * Uses the refresh token of the current user to issue new access token.
@@ -39,12 +41,14 @@ interface IAuthenticationService {
 	cancelLogin(): void;
 }
 
-interface ILoginOptions {
+interface IOpenActionOptions {
 	/**
-	 * Action which will be used to open the login url.
+	 * Action which will receive url and decide how to open it.
 	 */
-	openAction?: (loginUrl: string) => void;
+	openAction?: (url: string) => void;
+}
 
+interface ILoginOptions extends IOpenActionOptions {
 	/**
 	 * Sets the ammount of time which the login method will wait for login response in non-interactive terminal.
 	 */
