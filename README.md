@@ -206,9 +206,11 @@ Definition:
 ```TypeScript
 /**
  * Invalidates the current user authentication data.
+ * If options.openAction is provided, it will be used to open the logout url instead of the default opener.
+ * @param {IOpenActionOptions} options Optional settings for the logout method.
  * @returns {void}
  */
-logout(): void;
+logout(options?: IOpenActionOptions): void;
 ```
 </br>
 Usage:
@@ -217,6 +219,20 @@ Usage:
 const tns = require("nativescript");
 
 tns.authenticationService.logout();
+```
+
+```JavaScript
+const tns = require("nativescript");
+const childProcess = require("child_process");
+
+const openAction = url => {
+	const isWin = /^win/.test(process.platform);
+	const openCommand = isWin ? "start" : "open";
+	childProcess.execSync(`${openCommand} ${url}`);
+};
+const logoutOptions = { openAction: openAction };
+
+tns.authenticationService.logout(logoutOptions);
 ```
 
 * `isUserLoggedIn` - Checks if the access token of the current user is valid. If it is - the method will return true. If it isn't - the method will try to issue new access token. If the method can't issue new token it will return false.
@@ -265,6 +281,32 @@ tns.authenticationService.refreshCurrentUserToken()
 	.catch(err => console.error(err));
 ```
 
+* `cancelLogin` - Stops the current login process and rejects the login promise with an error.
+</br>
+
+Definition:
+
+```TypeScript
+/**
+ * Stops the current login process and rejects the login promise with an error.
+ * @returns {void}
+ */
+cancelLogin(): void;
+```
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.authenticationService
+	.login()
+	.then(userInfo => console.log(userInfo))
+	.catch(err => console.error(err));
+
+tns.authenticationService.cancelLogin();
+```
+
 #### Interfaces:
 ```TypeScript
 interface IUser {
@@ -293,9 +335,11 @@ interface IAuthenticationService {
 
 	/**
 	 * Invalidates the current user authentication data.
+	 * If options.openAction is provided, it will be used to open the logout url instead of the default opener.
+	 * @param {IOpenActionOptions} options Optional settings for the logout method.
 	 * @returns {void}
 	 */
-	logout(): void;
+	logout(options?: IOpenActionOptions): void;
 
 	/**
 	 * Uses the refresh token of the current user to issue new access token.
@@ -307,14 +351,22 @@ interface IAuthenticationService {
 	 * @returns {Promise<ITokenState>} Returns the token state
 	 */
 	getCurrentUserTokenState(): Promise<ITokenState>;
+
+	/**
+	 * Stops the current login process and rejects the login promise with an error.
+	 * @returns {void}
+	 */
+	cancelLogin(): void;
 }
 
-interface ILoginOptions {
+interface IOpenActionOptions {
 	/**
-	 * Action which will be used to open the login url.
+	 * Action which will receive url and decide how to open it.
 	 */
-	openAction?: (loginUrl: string) => void;
+	openAction?: (url: string) => void;
+}
 
+interface ILoginOptions extends IOpenActionOptions {
 	/**
 	 * Sets the ammount of time which the login method will wait for login response in non-interactive terminal.
 	 */

@@ -1,10 +1,12 @@
-import { ServerRequest, ServerResponse } from "http";
+import { ServerRequest, ServerResponse, Server } from "http";
 import { parse } from "url";
 import { join } from "path";
 import { isInteractive } from "../helpers";
 
 export class AuthenticationService implements IAuthenticationService {
 	private static DEFAULT_NONINTERACTIVE_LOGIN_TIMEOUT_MS: number = 15 * 60 * 1000;
+	private localhostServer: Server;
+	private rejectLoginPromiseAction: (data: any) => void;
 
 	constructor(private $authCloudService: IAuthCloudService,
 		private $fs: IFileSystem,
@@ -15,6 +17,11 @@ export class AuthenticationService implements IAuthenticationService {
 
 	public async login(options?: ILoginOptions): Promise<IUser> {
 		options = options || {};
+
+		if (this.localhostServer) {
+			this.cancelLogin();
+		}
+
 		// Start the localhost server to wait for the login response.
 		let timeoutID: NodeJS.Timer | number = undefined;
 		let authCompleteResolveAction: (value?: any | PromiseLike<any>) => void;
@@ -23,7 +30,7 @@ export class AuthenticationService implements IAuthenticationService {
 		this.$logger.info("Launching login page in browser.");
 
 		let loginUrl: string;
-		let localhostServer = this.$httpServer.createServer({
+		this.localhostServer = this.$httpServer.createServer({
 			routes: {
 				"/": async (request: ServerRequest, response: ServerResponse) => {
 					this.$logger.debug("Login complete: " + request.url);
@@ -31,11 +38,12 @@ export class AuthenticationService implements IAuthenticationService {
 					const loginResponse = parsedUrl.query.response;
 					if (loginResponse) {
 						await this.serveLoginFile("end.html")(request, response);
-						localhostServer.close();
+						this.killLocalhostServer();
 
 						isResolved = true;
 
 						const decodedResponse = new Buffer(loginResponse, "base64").toString();
+						this.rejectLoginPromiseAction = null;
 						authCompleteResolveAction(decodedResponse);
 					} else {
 						this.$httpServer.redirect(response, loginUrl);
@@ -44,14 +52,15 @@ export class AuthenticationService implements IAuthenticationService {
 			}
 		});
 
-		localhostServer.listen(0);
+		this.localhostServer.listen(0);
 
-		await this.$fs.futureFromEvent(localhostServer, "listening");
+		await this.$fs.futureFromEvent(this.localhostServer, "listening");
 
 		const authComplete = new Promise<string>((resolve, reject) => {
 			authCompleteResolveAction = resolve;
+			this.rejectLoginPromiseAction = reject;
 
-			const port = localhostServer.address().port;
+			const port = this.localhostServer.address().port;
 
 			loginUrl = this.$authCloudService.getLoginUrl(port);
 
@@ -100,7 +109,32 @@ export class AuthenticationService implements IAuthenticationService {
 		return userData.userInfo;
 	}
 
-	public logout(): void {
+	public cancelLogin(): void {
+		this.$logger.trace("Cancel login.");
+		if (this.localhostServer) {
+			this.$logger.trace("Stopping localhost server.");
+			this.killLocalhostServer();
+		}
+
+		if (this.rejectLoginPromiseAction) {
+			this.$logger.trace("Rejecting login promise.");
+			this.rejectLoginPromiseAction(new Error("Login canceled."));
+			this.rejectLoginPromiseAction = null;
+		}
+	}
+
+	public logout(options?: IOpenActionOptions): void {
+		options = options || {};
+
+		const logoutUrl = this.$authCloudService.getLogoutUrl();
+		this.$logger.trace(`Logging out. Logout url is: ${logoutUrl}`);
+
+		if (options.openAction) {
+			options.openAction(logoutUrl);
+		} else {
+			this.$opener.open(logoutUrl);
+		}
+
 		this.$userService.clearUserData();
 	}
 
@@ -140,6 +174,11 @@ export class AuthenticationService implements IAuthenticationService {
 
 	private serveLoginFile(relPath: string): (request: ServerRequest, response: ServerResponse) => Promise<void> {
 		return this.$httpServer.serveFile(join(__dirname, "..", "..", "resources", "login", relPath));
+	}
+
+	private killLocalhostServer(): void {
+		this.localhostServer.close();
+		this.localhostServer = null;
 	}
 }
 

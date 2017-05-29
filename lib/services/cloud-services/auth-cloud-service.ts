@@ -9,10 +9,8 @@ export class AuthCloudService extends CloudServiceBase implements IAuthCloudServ
 	}
 
 	public getLoginUrl(port: number): string {
-		const proto = this.$cloudServicesProxy.getServiceProto(AUTH_SERVICE_NAME);
-		const host = this.$cloudServicesProxy.getServiceAddress(AUTH_SERVICE_NAME);
-		const urlPath = this.$cloudServicesProxy.getUrlPath(AUTH_SERVICE_NAME, "api/login");
-		return `${proto}://${host}${urlPath}?port=${port}`;
+		const loginUrl = this.getAuthUrl("api/login");
+		return `${loginUrl}?port=${port}`;
 	}
 
 	public refreshToken(refreshToken: string): Promise<ITokenData> {
@@ -25,6 +23,17 @@ export class AuthCloudService extends CloudServiceBase implements IAuthCloudServ
 
 	public getTokenState(token: string): Promise<ITokenState> {
 		return this.sendRequest<ITokenState>(HTTP_METHODS.POST, "api/token-state", { token });
+	}
+
+	public getLogoutUrl(): string {
+		return this.getAuthUrl("api/logout");
+	}
+
+	private getAuthUrl(urlPath: string): string {
+		const proto = this.$cloudServicesProxy.getServiceProto(AUTH_SERVICE_NAME);
+		const host = this.$cloudServicesProxy.getServiceAddress(AUTH_SERVICE_NAME);
+		const url = this.$cloudServicesProxy.getUrlPath(AUTH_SERVICE_NAME, urlPath);
+		return `${proto}://${host}${url}`;
 	}
 }
 
