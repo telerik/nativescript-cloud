@@ -38,7 +38,7 @@ export class AuthenticationService implements IAuthenticationService {
 					const loginResponse = parsedUrl.query.response;
 					if (loginResponse) {
 						await this.serveLoginFile("end.html")(request, response);
-						this.localhostServer.close();
+						this.killLocalhostServer();
 
 						isResolved = true;
 
@@ -113,8 +113,7 @@ export class AuthenticationService implements IAuthenticationService {
 		this.$logger.trace("Cancel login.");
 		if (this.localhostServer) {
 			this.$logger.trace("Stopping localhost server.");
-			this.localhostServer.close();
-			this.localhostServer = null;
+			this.killLocalhostServer();
 		}
 
 		if (this.rejectLoginPromiseAction) {
@@ -128,7 +127,7 @@ export class AuthenticationService implements IAuthenticationService {
 		options = options || {};
 
 		const logoutUrl = this.$authCloudService.getLogoutUrl();
-		this.$logger.trace(`Logging out. Logotu url is: ${logoutUrl}`);
+		this.$logger.trace(`Logging out. Logout url is: ${logoutUrl}`);
 
 		if (options.openAction) {
 			options.openAction(logoutUrl);
@@ -175,6 +174,11 @@ export class AuthenticationService implements IAuthenticationService {
 
 	private serveLoginFile(relPath: string): (request: ServerRequest, response: ServerResponse) => Promise<void> {
 		return this.$httpServer.serveFile(join(__dirname, "..", "..", "resources", "login", relPath));
+	}
+
+	private killLocalhostServer(): void {
+		this.localhostServer.close();
+		this.localhostServer = null;
 	}
 }
 

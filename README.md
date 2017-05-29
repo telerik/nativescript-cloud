@@ -336,7 +336,7 @@ interface IAuthenticationService {
 	/**
 	 * Invalidates the current user authentication data.
 	 * If options.openAction is provided, it will be used to open the logout url instead of the default opener.
-	 * @param {ILoginOptions} options Optional settings for the logout method.
+	 * @param {IOpenActionOptions} options Optional settings for the logout method.
 	 * @returns {void}
 	 */
 	logout(options?: IOpenActionOptions): void;
