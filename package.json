@@ -1,6 +1,6 @@
 {
   "name": "nativescript-cloud",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Used for cloud support in NativeScript CLI",
   "main": "lib/bootstrap.js",
   "scripts": {
@@ -45,7 +45,7 @@
     "typescript": "2.1.5"
   },
   "dependencies": {
-    "cloud-device-emulator": "~0.1.0",
+    "cloud-device-emulator": "~0.2.0",
     "cookie": "0.3.1",
     "lodash": "4.17.4",
     "minimatch": "3.0.4",

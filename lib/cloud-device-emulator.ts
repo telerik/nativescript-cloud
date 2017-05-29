@@ -16,6 +16,10 @@ export class CloudDeviceEmulatorWrapper implements ICloudDeviceEmulator {
 	public refresh(deviceIdentifier: string): Promise<void> {
 		return this.cloudDeviceEmulatorInstance.refresh(deviceIdentifier);
 	}
+
+	public killServer(): Promise<any> {
+		return this.cloudDeviceEmulatorInstance.killServer();
+	}
 }
 
 $injector.register("cloudDeviceEmulator", CloudDeviceEmulatorWrapper);

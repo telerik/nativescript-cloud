@@ -50,4 +50,10 @@ interface ICloudDeviceEmulator {
 	 * @returns {Promise<void>}
 	 */
 	refresh(deviceIdentifier: string): Promise<void>;
+
+	/**
+	 * Disposes the cloud-device-emulator package.
+	 * @returns {Promise<any>}
+	 */
+	killServer(): Promise<any>;
 }
