@@ -26,7 +26,7 @@ export class CloudBuild implements ICommand {
 		}
 
 		const pathToProvision = this.$options.provision ? path.resolve(this.$options.provision) : "";
-		const projectSettings = { projectDir: this.$projectData.projectDir, projectId: this.$projectData.projectId, projectName: this.$projectData.projectName, nativescriptData };
+		const projectSettings = { projectDir: this.$projectData.projectDir, projectId: this.$projectData.projectId, projectName: this.$projectData.projectName, nativescriptData, clean: this.$options.clean };
 		const buildConfiguration = this.$options.release ? "Release" : "Debug";
 		await this.$cloudBuildService.build(projectSettings,
 			platform, buildConfiguration,

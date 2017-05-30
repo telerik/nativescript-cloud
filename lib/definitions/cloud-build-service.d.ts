@@ -126,6 +126,11 @@ interface IProjectSettings {
 	 * The value of `nativescript` key from project's package.json.
 	 */
 	nativescriptData: any;
+
+	/**
+	 *  Whether to clean & build. By default incremental build without clean is performed.
+	 */
+	clean: boolean;
 }
 
 /**

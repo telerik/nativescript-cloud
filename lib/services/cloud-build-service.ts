@@ -236,7 +236,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		});
 	}
 
-	private async prepareBuildRequest(projectSettings: { projectDir: string, projectId: string, projectName: string, nativescriptData: any },
+	private async prepareBuildRequest(projectSettings: IProjectSettings,
 		platform: string, buildConfiguration: string): Promise<any> {
 
 		const projectZipFile = await this.zipProject(projectSettings.projectDir);
@@ -249,6 +249,11 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		const cliVersion = await this.getCliVersion(runtimeVersion);
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectSettings.projectName);
 
+		/** Although the nativescript-cloud is an extension that is used only with nativescript projects,
+		 * current implementation of the builder daemon will not add default framework. This breaks tooling when incremental build is
+		 * performed. Passing the framework=tns here is more consistent that adding conditional
+		 * behavior in the tooling.
+		 */
 		return {
 			properties: {
 				buildConfiguration: buildConfiguration,
@@ -258,7 +263,9 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				runtimeVersion: runtimeVersion,
 				sessionKey: buildPreSignedUrlData.sessionKey,
 				templateAppName: sanitizedProjectName,
-				projectName: sanitizedProjectName
+				projectName: sanitizedProjectName,
+				framework: "tns",
+				useIncrementalBuild: !projectSettings.clean
 			},
 			buildFiles: [
 				{
