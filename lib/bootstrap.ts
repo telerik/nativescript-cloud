@@ -13,6 +13,7 @@ $injector.require("appetizeDeviceDiscovery", path.join(__dirname, "mobile", "mob
 $injector.requirePublicClass("authenticationService", path.join(__dirname, "services", "authentication-service"));
 $injector.requirePublicClass("cloudBuildService", path.join(__dirname, "services", "cloud-build-service"));
 $injector.requirePublicClass("appetizeEmulatorLauncher", path.join(__dirname, "services", "appetize-emulator-launcher"));
+$injector.requirePublicClass("userService", path.join(__dirname, "services", "user-service"));
 
 // Services.
 $injector.require("uploadService", path.join(__dirname, "services", "cloud-services", "upload-service"));
@@ -22,7 +23,6 @@ $injector.require("cloudServicesProxy", path.join(__dirname, "services", "cloud-
 $injector.require("cloudRequestService", path.join(__dirname, "services", "cloud-services", "cloud-request-service"));
 $injector.require("cloudEmulatorService", path.join(__dirname, "services", "cloud-services", "cloud-emulator-service"));
 $injector.require("packageInfoService", path.join(__dirname, "services", "package-info-service"));
-$injector.require("userService", path.join(__dirname, "services", "user-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
