@@ -193,7 +193,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				} else if (!buildStatus) {
 					// We will get here if there is no build status twice in a row.
 					clearInterval(buildIntervalId);
-					return reject("Failed to start cloud build.");
+					return reject(new Error("Failed to start cloud build."));
 				}
 
 				if (!buildStatus) {
@@ -212,7 +212,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 				if (buildStatus.status === CloudBuildService.BUILD_FAILED_STATUS) {
 					clearInterval(buildIntervalId);
-					return reject("Build failed.");
+					return reject(new Error("Build failed."));
 				}
 
 				if (buildStatus.status === CloudBuildService.BUILD_IN_PROGRESS_STATUS) {
