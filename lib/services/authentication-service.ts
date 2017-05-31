@@ -81,7 +81,7 @@ export class AuthenticationService implements IAuthenticationService {
 					timeoutID = setTimeout(() => {
 						if (!isResolved) {
 							this.$logger.debug("Aborting login procedure due to inactivity.");
-							reject("Aborting login procedure due to inactivity.");
+							reject(new Error("Aborting login procedure due to inactivity."));
 						}
 					}, timeout);
 				}
