@@ -76,6 +76,13 @@ interface ICloudBuildService {
 		projectId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<void>;
+
+	/**
+	 * Returns the path to the directory where the build output may be found.
+	 * @param {ICloudBuildOutputDirectoryOptions} options Options that are used to determine the build output directory.
+	 * @returns {string} The build output directory.
+	 */
+	getBuildOutputDirectory(options: ICloudBuildOutputDirectoryOptions): string;
 }
 
 /**
@@ -183,6 +190,26 @@ interface IBuildStatus {
 	 * The build status.
 	 */
 	status: string;
+}
+
+/**
+ * Describes options that can be passed in order to specify the exact location of the built package.
+ */
+interface ICloudBuildOutputDirectoryOptions {
+	/**
+	 * Android or iOS
+	 */
+	platform: string;
+
+	/**
+	 * Directory where the project is located.
+	 */
+	projectDir: string;
+
+	/**
+	 * Whether the build is for emulator or not.
+	 */
+	emulator?: boolean;
 }
 
 /**

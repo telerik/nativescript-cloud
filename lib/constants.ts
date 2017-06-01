@@ -32,6 +32,11 @@ export const DEVICE_DISCOVERY_EVENTS = {
 	DEVICE_LOST: "deviceLost"
 };
 
+export const CLOUD_BUILD_DIRECTORY_NAMES = {
+	DEVICE: "device",
+	EMULATOR: "emulator"
+};
+
 export const DEVICE_INFO = {
 	TYPE: "Emulator",
 	STATUS: "Connected",
