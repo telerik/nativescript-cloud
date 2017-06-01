@@ -25,6 +25,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		private $cloudBuildOutputFilter: ICloudBuildOutputFilter,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $projectHelper: IProjectHelper,
+		private $projectDataService: IProjectDataService,
 		private $qr: IQrCodeGenerator) {
 		super();
 	}
@@ -51,7 +52,13 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 		await this.waitForBuildToFinish(buildResponse);
 
+		const runtimePropertyName = `tns-${platform.toLowerCase()}`;
+		if (!this.$projectDataService.getNSValue(projectSettings.projectDir, runtimePropertyName)) {
+			this.$projectDataService.setNSValue(projectSettings.projectDir, runtimePropertyName, { version: buildProps.properties.runtimeVersion });
+		}
+
 		const buildResult: IBuildResult = await this.getObjectFromS3File<IBuildResult>(buildResponse.resultUrl);
+
 		this.$logger.trace("Build result:");
 		this.$logger.trace(buildResult);
 
@@ -471,7 +478,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		if (!runtimeVersion && coreModulesVersion) {
 			// no runtime added. Let's find out which one we need based on the tns-core-modules.
 			if (semver.valid(coreModulesVersion)) {
-				runtimeVersion = `${semver.major(coreModulesVersion)}.${semver.minor(coreModulesVersion)}.*`;
+				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, this.getVersionRangeWithTilde(coreModulesVersion));
 			} else if (semver.validRange(coreModulesVersion)) {
 				// In case tns-core-modules in package.json are referred as `~x.x.x` - this is not a valid version, but is valid range.
 				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, coreModulesVersion);
@@ -483,7 +490,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 	private async getCliVersion(runtimeVersion: string): Promise<string> {
 		try {
-			const latestMatchingVersion = await this.getLatestMatchingVersion("nativescript", `~${runtimeVersion}`);
+			const latestMatchingVersion = await this.getLatestMatchingVersion("nativescript", this.getVersionRangeWithTilde(runtimeVersion));
 			return latestMatchingVersion || CloudBuildService.DEFAULT_VERSION;
 		} catch (err) {
 			this.$logger.trace(`Unable to get information about CLI versions. Error is: ${err.message}`);
@@ -509,6 +516,10 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			this.$logger.trace(`Unable to get versions of ${packageName} from npm. Error is: ${err.message}.`);
 			return [];
 		}
+	}
+
+	private getVersionRangeWithTilde(versionString: string): string {
+		return `~${semver.major(versionString)}.${semver.minor(versionString)}.0`;
 	}
 
 	private getCertificateInfo(certificatePath: string, certificatePassword: string): ICertificateInfo {
