@@ -1,6 +1,5 @@
 import { ServerRequest, ServerResponse, Server } from "http";
 import { parse } from "url";
-import { join } from "path";
 import { isInteractive } from "../helpers";
 
 export class AuthenticationService implements IAuthenticationService {
@@ -32,12 +31,13 @@ export class AuthenticationService implements IAuthenticationService {
 		let loginUrl: string;
 		this.localhostServer = this.$httpServer.createServer({
 			routes: {
-				"/": async (request: ServerRequest, response: ServerResponse) => {
+				"/": (request: ServerRequest, response: ServerResponse) => {
 					this.$logger.debug("Login complete: " + request.url);
 					const parsedUrl = parse(request.url, true);
 					const loginResponse = parsedUrl.query.response;
 					if (loginResponse) {
-						await this.serveLoginFile("end.html")(request, response);
+						response.statusCode = 302;
+						response.setHeader("Location", parsedUrl.query.loginCompleteUrl);
 						this.killLocalhostServer();
 
 						isResolved = true;
@@ -45,6 +45,7 @@ export class AuthenticationService implements IAuthenticationService {
 						const decodedResponse = new Buffer(loginResponse, "base64").toString();
 						this.rejectLoginPromiseAction = null;
 						authCompleteResolveAction(decodedResponse);
+						response.end();
 					} else {
 						this.$httpServer.redirect(response, loginUrl);
 					}
@@ -170,10 +171,6 @@ export class AuthenticationService implements IAuthenticationService {
 		const userData = this.$userService.getUserData();
 		const tokenState = await this.$authCloudService.getTokenState(userData.accessToken);
 		return tokenState;
-	}
-
-	private serveLoginFile(relPath: string): (request: ServerRequest, response: ServerResponse) => Promise<void> {
-		return this.$httpServer.serveFile(join(__dirname, "..", "..", "resources", "login", relPath));
 	}
 
 	private killLocalhostServer(): void {
