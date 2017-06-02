@@ -74,10 +74,12 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			url: buildResultUrl
 		};
 
+		const fullOutput = await this.getContentOfS3File(buildResponse.outputUrl);
+
 		const result = {
 			stderr: buildResult.stderr,
 			stdout: buildResult.stdout,
-			fullOutput: buildResult.stdout,
+			fullOutput: fullOutput,
 			outputFilePath: localBuildResult,
 			qrData: {
 				originalUrl: buildResultUrl,
@@ -221,7 +223,8 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 						// The logs variable will contain the full build log and we need to log only the logs that we don't have.
 						const contentToLog = this.$cloudBuildOutputFilter.filter(logs.substr(outputCursorPosition));
 						if (contentToLog) {
-							this.emit(constants.CLOUD_BUILD_EVENT_NAMES.OUTPUT, contentToLog);
+							const data = { data: contentToLog, pipe: "stdout" };
+							this.emit(constants.CLOUD_BUILD_EVENT_NAMES.BUILD_OUTPUT, data);
 							this.$logger.info(contentToLog);
 						}
 

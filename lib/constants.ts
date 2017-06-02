@@ -24,7 +24,7 @@ export const BUILD_SERVICE_NAME = "build";
 export const EMULATORS_SERVICE_NAME = "emulators";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
-	OUTPUT: "output"
+	BUILD_OUTPUT: "buildOutput"
 };
 
 export const DEVICE_DISCOVERY_EVENTS = {
