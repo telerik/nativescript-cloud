@@ -1,6 +1,7 @@
 import { ServerRequest, ServerResponse, Server } from "http";
 import { parse } from "url";
 import { isInteractive } from "../helpers";
+import { HTTP_HEADERS, HTTP_STATUS_CODES } from "../constants";
 
 export class AuthenticationService implements IAuthenticationService {
 	private static DEFAULT_NONINTERACTIVE_LOGIN_TIMEOUT_MS: number = 15 * 60 * 1000;
@@ -36,8 +37,8 @@ export class AuthenticationService implements IAuthenticationService {
 					const parsedUrl = parse(request.url, true);
 					const loginResponse = parsedUrl.query.response;
 					if (loginResponse) {
-						response.statusCode = 302;
-						response.setHeader("Location", parsedUrl.query.loginCompleteUrl);
+						response.statusCode = HTTP_STATUS_CODES.FOUND;
+						response.setHeader(HTTP_HEADERS.LOCATION, parsedUrl.query.loginCompleteUrl);
 						this.killLocalhostServer();
 
 						isResolved = true;
