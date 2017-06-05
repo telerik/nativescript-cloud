@@ -1,7 +1,7 @@
 import { ServerRequest, ServerResponse, Server } from "http";
 import { parse } from "url";
-import { join } from "path";
 import { isInteractive } from "../helpers";
+import { HTTP_HEADERS, HTTP_STATUS_CODES } from "../constants";
 
 export class AuthenticationService implements IAuthenticationService {
 	private static DEFAULT_NONINTERACTIVE_LOGIN_TIMEOUT_MS: number = 15 * 60 * 1000;
@@ -32,12 +32,13 @@ export class AuthenticationService implements IAuthenticationService {
 		let loginUrl: string;
 		this.localhostServer = this.$httpServer.createServer({
 			routes: {
-				"/": async (request: ServerRequest, response: ServerResponse) => {
+				"/": (request: ServerRequest, response: ServerResponse) => {
 					this.$logger.debug("Login complete: " + request.url);
 					const parsedUrl = parse(request.url, true);
 					const loginResponse = parsedUrl.query.response;
 					if (loginResponse) {
-						await this.serveLoginFile("end.html")(request, response);
+						response.statusCode = HTTP_STATUS_CODES.FOUND;
+						response.setHeader(HTTP_HEADERS.LOCATION, parsedUrl.query.loginCompleteUrl);
 						this.killLocalhostServer();
 
 						isResolved = true;
@@ -45,6 +46,7 @@ export class AuthenticationService implements IAuthenticationService {
 						const decodedResponse = new Buffer(loginResponse, "base64").toString();
 						this.rejectLoginPromiseAction = null;
 						authCompleteResolveAction(decodedResponse);
+						response.end();
 					} else {
 						this.$httpServer.redirect(response, loginUrl);
 					}
@@ -170,10 +172,6 @@ export class AuthenticationService implements IAuthenticationService {
 		const userData = this.$userService.getUserData();
 		const tokenState = await this.$authCloudService.getTokenState(userData.accessToken);
 		return tokenState;
-	}
-
-	private serveLoginFile(relPath: string): (request: ServerRequest, response: ServerResponse) => Promise<void> {
-		return this.$httpServer.serveFile(join(__dirname, "..", "..", "resources", "login", relPath));
 	}
 
 	private killLocalhostServer(): void {

@@ -9,7 +9,7 @@ const tns = require("nativescript");
 
 ### Module cloudBuildService
 The `cloudBuildService` allows build of applications in the cloud. You can call the following methods:
-* `build` method - it validates passed arguments and tries to build the application in the cloud. In case of successful build, the build result (.apk, .ipa or .zip) is downloaded. The result contains information about the whole build process, path to the downloaded build result and information used to generate a QR code, pointing to the latest build result (in S3). </br>
+* `build` method - it validates passed arguments and tries to build the application in the cloud. In case of successful build, the build result (.apk, .ipa or .zip) is downloaded. The result contains information about the whole build process, path to the downloaded build result and information used to generate a QR code, pointing to the latest build result (in S3). During the build the cloudBuildService will emit buildOutput event which will contain parts of the current build output.</br>
 Definition:
 
 ```TypeScript
@@ -50,6 +50,17 @@ const androidReleaseConfigurationData = {
 
 const platform = "android";
 const buildConfiguration = "release";
+
+tns.cloudBuildService.on("buildOutput", (data) => {
+	console.log(data);
+	/*
+		Sample data object:
+		{
+			"pipe": "stdout",
+			"data": "Add platform ios with runtime version 2.5.*"
+		}
+	*/
+});
 
 tns.cloudBuildService
 	.build(projectSettings, platform, buildConfiguration, androidReleaseConfigurationData)

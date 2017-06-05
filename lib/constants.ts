@@ -24,7 +24,7 @@ export const BUILD_SERVICE_NAME = "build";
 export const EMULATORS_SERVICE_NAME = "emulators";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
-	OUTPUT: "output"
+	BUILD_OUTPUT: "buildOutput"
 };
 
 export const DEVICE_DISCOVERY_EVENTS = {
@@ -58,11 +58,13 @@ export const HTTP_HEADERS = {
 	ACCEPT: "Accept",
 	AUTHORIZATION: "Authorization",
 	CONNECTION: "Connection",
-	CONTENT_TYPE: "Content-Type"
+	CONTENT_TYPE: "Content-Type",
+	LOCATION: "Location"
 };
 
 export const HTTP_STATUS_CODES = {
 	SUCCESS: 200,
+	FOUND: 302,
 	UNAUTHORIZED: 401,
 	PAYMENT_REQUIRED: 402
 };
