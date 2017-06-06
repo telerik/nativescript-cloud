@@ -14,6 +14,7 @@ class CustomDeviceEmitter extends EventEmitter implements CloudDeviceEmitter {
 	public getCurrentlyAttachedDevices(): IAttachedDevices {
 		return this._initialDevices;
 	}
+	public dispose(): void { /* empty */ }
 }
 
 describe("appetize device discovery", () => {
