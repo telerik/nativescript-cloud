@@ -10,6 +10,9 @@
 		},
 		"emulators-service": {
 			"fullHostName": "localhost:8002"
+		},
+		"code-commit": {
+			"fullHostName": "localhost:8003"
 		}
 	}
 }
