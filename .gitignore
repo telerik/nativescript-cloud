@@ -46,8 +46,12 @@ references.d.ts
 test-reports.xml
 tscommand-*.tmp.txt
 nativescript-cloud-*.tgz
+!resources/git/aws-credential-helper/code-commit-credential-helper.js
 
 # Custom
 **/.vs
 **/.vscode
 .DS_Store
+
+
+
