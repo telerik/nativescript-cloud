@@ -1,13 +1,13 @@
 {
 	"stage": "test",
 	"cloudServices": {
-		"auth": {
+		"auth-service": {
 			"subdomain": "test-authentication"
 		},
-		"build": {
+		"build-service": {
 			"subdomain": "test-build"
 		},
-		"emulators": {
+		"emulators-service": {
 			"subdomain": "test-emulators"
 		}
 	}

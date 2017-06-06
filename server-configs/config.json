@@ -4,13 +4,13 @@
 	"serverProto": "https",
 	"stage": "production",
 	"cloudServices": {
-		"auth": {
+		"auth-service": {
 			"subdomain": "authentication"
 		},
-		"build": {
+		"build-service": {
 			"subdomain": "build"
 		},
-		"emulators": {
+		"emulators-service": {
 			"subdomain": "emulators"
 		}
 	}

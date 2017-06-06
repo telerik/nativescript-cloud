@@ -2,13 +2,13 @@
 	"apiVersion": null,
 	"serverProto": "http",
 	"cloudServices": {
-		"auth": {
+		"auth-service": {
 			"fullHostName": "localhost:8000"
 		},
-		"build": {
+		"build-service": {
 			"fullHostName": "localhost:8001"
 		},
-		"emulators": {
+		"emulators-service": {
 			"fullHostName": "localhost:8002"
 		}
 	}
