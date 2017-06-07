@@ -1,13 +1,13 @@
 {
 	"stage": "dev",
 	"cloudServices": {
-		"auth": {
+		"auth-service": {
 			"subdomain": "dev-authentication"
 		},
-		"build": {
+		"build-service": {
 			"subdomain": "dev-build"
 		},
-		"emulators": {
+		"emulators-service": {
 			"subdomain": "dev-emulators"
 		}
 	}

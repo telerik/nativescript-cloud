@@ -19,9 +19,9 @@ export const PROVISION_TYPES = {
 	DEVELOPMENT: "Development",
 };
 
-export const AUTH_SERVICE_NAME = "auth";
-export const BUILD_SERVICE_NAME = "build";
-export const EMULATORS_SERVICE_NAME = "emulators";
+export const AUTH_SERVICE_NAME = "auth-service";
+export const BUILD_SERVICE_NAME = "build-service";
+export const EMULATORS_SERVICE_NAME = "emulators-service";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
 	BUILD_OUTPUT: "buildOutput"
