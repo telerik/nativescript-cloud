@@ -30,6 +30,15 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		super();
 	}
 
+	public getBuildOutputDirectory(options: ICloudBuildOutputDirectoryOptions): string {
+		let result = path.join(options.projectDir, constants.CLOUD_TEMP_DIR_NAME, options.platform.toLowerCase());
+		if (this.$mobileHelper.isiOSPlatform(options.platform)) {
+			result = path.join(result, options.emulator ? constants.CLOUD_BUILD_DIRECTORY_NAMES.EMULATOR : constants.CLOUD_BUILD_DIRECTORY_NAMES.DEVICE);
+		}
+
+		return result;
+	}
+
 	public async build(projectSettings: IProjectSettings,
 		platform: string, buildConfiguration: string,
 		androidBuildData?: IAndroidBuildData,
@@ -69,7 +78,11 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 		this.$logger.info(`Finished ${buildInformationString} successfully. Downloading result...`);
 
-		const localBuildResult = await this.downloadBuildResult(buildResult, projectSettings.projectDir);
+		const localBuildResult = await this.downloadBuildResult(buildResult, {
+			projectDir: projectSettings.projectDir,
+			platform,
+			emulator: iOSBuildData && !iOSBuildData.buildForDevice
+		});
 
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. OutputFilePath: ${localBuildResult}`);
 
@@ -419,8 +432,8 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		return result;
 	}
 
-	private async downloadBuildResult(buildResult: IBuildResult, projectDir: string): Promise<string> {
-		const destinationDir = path.join(projectDir, constants.CLOUD_TEMP_DIR_NAME);
+	private async downloadBuildResult(buildResult: IBuildResult, buildOutputOptions: ICloudBuildOutputDirectoryOptions): Promise<string> {
+		const destinationDir = this.getBuildOutputDirectory(buildOutputOptions);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
 		const buildResultObj = this.getBuildResult(buildResult);

@@ -114,6 +114,31 @@ tns.cloudBuildService
 	.catch(err => console.error("Data is invalid:", err));
 ```
 
+* `getBuildOutputDirectory` - Returns the path to the directory where the build output may be found.
+</br>
+Definition:
+
+```TypeScript
+/**
+ * Returns the path to the directory where the build output may be found.
+ * @param {ICloudBuildOutputDirectoryOptions} options Options that are used to determine the build output directory.
+ * @returns {string} The build output directory.
+ */
+getBuildOutputDirectory(options: ICloudBuildOutputDirectoryOptions): string;
+```
+Detailed description of the parameter can be found [here](./lib/definitions/cloud-build-service.d.ts).
+</br>
+Usage:
+```JavaScript
+const tns = require("nativescript");
+const cloudBuildOutputDirectory = tns.cloudBuildService
+									.getBuildOutputDirectory({
+										platform: "ios",
+										projectDir: "/tmp/myProject"
+										emulator: false
+									});
+```
+
 ### Module appetizeEmulatorLauncher
 The `appetizeEmulatorLauncher` provides a way for initial interaction with appetize emulators. You can call the following methods:
 * `startEmulator` method - starts an appetize emulator and returns a url where an html page is located, containing an iframe with the actual emulator. </br>
