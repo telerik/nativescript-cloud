@@ -32,7 +32,7 @@ interface IAppetizeEmulatorLauncher {
 /**
  * Describes service for interaction with server which communicates with cloud emulators.
  */
-interface ICloudDeviceEmulator {
+interface ICloudDeviceEmulator extends IDisposable {
 	/**
 	 * Event emitter instance that raises events upon finding/losing a device.
 	 */

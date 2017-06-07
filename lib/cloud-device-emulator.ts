@@ -5,8 +5,10 @@ export class CloudDeviceEmulatorWrapper implements ICloudDeviceEmulator {
 		return this.cloudDeviceEmulatorInstance.deviceEmitter;
 	}
 
-	constructor() {
+	constructor(private $options: IOptions,
+		private $processService: IProcessService) {
 		this.cloudDeviceEmulatorInstance = require("cloud-device-emulator");
+		this.$processService.attachToProcessExitSignals(this, this._dispose);
 	}
 
 	public getSeverAddress(): Promise<ICloudDeviceServerInfo> {
@@ -19,6 +21,16 @@ export class CloudDeviceEmulatorWrapper implements ICloudDeviceEmulator {
 
 	public killServer(): Promise<any> {
 		return this.cloudDeviceEmulatorInstance.killServer();
+	}
+
+	public dispose() {
+		if (!this.$options.watch) {
+			this._dispose();
+		}
+	}
+
+	private _dispose() {
+		this.cloudDeviceEmulatorInstance.deviceEmitter.dispose();
 	}
 }
 
