@@ -1,13 +1,17 @@
 export class CloudDeviceEmulatorWrapper implements ICloudDeviceEmulator {
-	private cloudDeviceEmulatorInstance: ICloudDeviceEmulator;
+	private _isCloudDeviceEmulatorInstanceInitialized = false;
+	private get cloudDeviceEmulatorInstance(): ICloudDeviceEmulator {
+		return require("cloud-device-emulator");
+	}
 
 	public get deviceEmitter(): CloudDeviceEmitter {
+		this._isCloudDeviceEmulatorInstanceInitialized = true;
 		return this.cloudDeviceEmulatorInstance.deviceEmitter;
 	}
 
 	constructor(private $options: IOptions,
+		private $usbLiveSyncService: any,
 		private $processService: IProcessService) {
-		this.cloudDeviceEmulatorInstance = require("cloud-device-emulator");
 		this.$processService.attachToProcessExitSignals(this, this._dispose);
 	}
 
@@ -24,13 +28,15 @@ export class CloudDeviceEmulatorWrapper implements ICloudDeviceEmulator {
 	}
 
 	public dispose() {
-		if (!this.$options.watch) {
+		if (!this.$options.watch || !this.$usbLiveSyncService.isInitialized) {
 			this._dispose();
 		}
 	}
 
 	private _dispose() {
-		this.cloudDeviceEmulatorInstance.deviceEmitter.dispose();
+		if (this._isCloudDeviceEmulatorInstanceInitialized) {
+			this.cloudDeviceEmulatorInstance.deviceEmitter.dispose();
+		}
 	}
 }
 
