@@ -142,7 +142,7 @@ export class AuthenticationService implements IAuthenticationService {
 
 	public async refreshCurrentUserToken(): Promise<void> {
 		const userData = this.$userService.getUserData();
-		const token = await this.$authCloudService.refreshToken(userData.refresnToken);
+		const token = await this.$authCloudService.refreshToken(userData.refreshToken);
 		this.$userService.setToken(token);
 	}
 

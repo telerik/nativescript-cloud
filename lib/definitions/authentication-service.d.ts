@@ -56,7 +56,7 @@ interface ILoginOptions extends IOpenActionOptions {
 }
 
 interface IUserData extends ITokenData {
-	refresnToken: string;
+	refreshToken: string;
 	userInfo: IUser;
 }
 

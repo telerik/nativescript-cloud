@@ -45,10 +45,9 @@ export class UserService implements IUserService {
 	}
 
 	public setToken(token: ITokenData): void {
-		if (!token) {
-			const newUserData = _.extend(token, this.getUserData());
+		if (token) {
+			const newUserData = _.extend(this.getUserData(), token);
 			this.setUserData(newUserData);
-			this.$fs.writeJson(this.getUserFilePath(), newUserData);
 		} else {
 			this.clearUserData();
 		}
