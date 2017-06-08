@@ -223,10 +223,13 @@ interface IBuildResult {
 	buildItems: IBuildItem[];
 }
 
-interface IBuildItem {
+interface IBuildItemBase {
 	disposition: string;
 	filename: string;
+	fullPath: string;
+}
+
+interface IBuildItem extends IBuildItemBase {
 	platform: string;
 	extension: string;
-	fullPath: string;
 }

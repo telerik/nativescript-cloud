@@ -25,7 +25,8 @@ interface ICloudEmulatorService {
 }
 
 interface IAmazonStorageEntryData extends IAmazonStorageEntry {
-	fileNameInS3: string;
+	filePath: string;
+	disposition: string;
 }
 
 interface ICloudEmulatorResponse {

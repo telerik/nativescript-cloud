@@ -14,7 +14,11 @@ export class BuildCloudService extends CloudServiceBase implements IBuildCloudSe
 	}
 
 	public getPresignedUploadUrlObject(appId: string, fileName: string): Promise<IAmazonStorageEntry> {
-		return this.sendRequest<IAmazonStorageEntry>(HTTP_METHODS.GET, `api/get-upload-url?${querystring.stringify({ fileName })}`, null);
+		return this.sendRequest<IAmazonStorageEntry>(HTTP_METHODS.GET, `api/upload-url?${querystring.stringify({ fileName })}`, null);
+	}
+
+	public getBuildCredential(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse> {
+		return this.sendRequest<IBuildCredentialResponse>(HTTP_METHODS.POST, "api/build-credentials", buildCredentialRequest);
 	}
 }
 

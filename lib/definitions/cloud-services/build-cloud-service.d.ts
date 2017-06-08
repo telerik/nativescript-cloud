@@ -1,6 +1,7 @@
 interface IBuildCloudService {
 	startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IBuildResponse>;
 	getPresignedUploadUrlObject(appId: string, fileName: string): Promise<IAmazonStorageEntry>;
+	getBuildCredential(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse>;
 }
 
 interface IBuildResponse {
@@ -20,9 +21,21 @@ interface IBuildRequestData {
 	BuildFiles: IBuildFile[];
 }
 
+interface IBuildCredentialRequest {
+	appId: string;
+	fileNames: string[];
+}
+
+interface IBuildCredentialResponse {
+	codeCommit: IGetRepositoryResponse;
+	urls: IAmazonStorageEntry[];
+	sessionKey: string;
+	codeCommitUrl: string;
+}
+
 interface IAmazonStorageEntry {
 	uploadPreSignedUrl: string;
 	publicDownloadUrl: string;
 	s3Url: string;
-	sessionKey: string;
+	fileName: string;
 }

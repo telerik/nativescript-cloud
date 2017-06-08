@@ -22,7 +22,9 @@ $injector.require("buildCloudService", path.join(__dirname, "services", "cloud-s
 $injector.require("cloudServicesProxy", path.join(__dirname, "services", "cloud-services", "cloud-services-proxy"));
 $injector.require("cloudRequestService", path.join(__dirname, "services", "cloud-services", "cloud-request-service"));
 $injector.require("cloudEmulatorService", path.join(__dirname, "services", "cloud-services", "cloud-emulator-service"));
+$injector.require("codeCommitService", path.join(__dirname, "services", "cloud-services", "code-commit-service"));
 $injector.require("packageInfoService", path.join(__dirname, "services", "package-info-service"));
+$injector.require("gitService", path.join(__dirname, "services", "git-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
