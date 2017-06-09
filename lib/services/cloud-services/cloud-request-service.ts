@@ -8,7 +8,7 @@ export class CloudRequestService implements ICloudRequestService {
 	public async call<T>(options: ICloudRequestOptions): Promise<T> {
 		try {
 			// Try to send the request.
-			return this.$cloudServicesProxy.call<T>(options);
+			return await this.$cloudServicesProxy.call<T>(options);
 		} catch (requestError) {
 			// If the server returns 401 we must try to get new access token using the refresh token and retry the request.
 			if (requestError.response.statusCode === HTTP_STATUS_CODES.UNAUTHORIZED) {
@@ -19,11 +19,9 @@ export class CloudRequestService implements ICloudRequestService {
 				} catch (refreshTokenError) {
 					this.$logger.trace("Cannot issue new access token. Reason is:");
 					this.$logger.trace(refreshTokenError);
-
-					throw {
-						message: "User is not logged in or the access token and the refresh tokens are expired.",
-						code: HTTP_STATUS_CODES.UNAUTHORIZED
-					};
+					const error = new Error("User is not logged in or the access token and the refresh tokens are expired.");
+					error.code = HTTP_STATUS_CODES.UNAUTHORIZED;
+					throw error;
 				}
 			} else {
 				throw requestError;
