@@ -1,11 +1,11 @@
 export class CloudDeviceEmulatorWrapper implements ICloudDeviceEmulator {
 	private _isCloudDeviceEmulatorInstanceInitialized = false;
 	private get cloudDeviceEmulatorInstance(): ICloudDeviceEmulator {
+		this._isCloudDeviceEmulatorInstanceInitialized = true;
 		return require("cloud-device-emulator");
 	}
 
 	public get deviceEmitter(): CloudDeviceEmitter {
-		this._isCloudDeviceEmulatorInstanceInitialized = true;
 		return this.cloudDeviceEmulatorInstance.deviceEmitter;
 	}
 
@@ -23,8 +23,10 @@ export class CloudDeviceEmulatorWrapper implements ICloudDeviceEmulator {
 		return this.cloudDeviceEmulatorInstance.refresh(deviceIdentifier);
 	}
 
-	public killServer(): Promise<any> {
-		return this.cloudDeviceEmulatorInstance.killServer();
+	public async killServer(): Promise<any> {
+		if (this._isCloudDeviceEmulatorInstanceInitialized) {
+			return this.cloudDeviceEmulatorInstance.killServer();
+		}
 	}
 
 	public dispose() {
