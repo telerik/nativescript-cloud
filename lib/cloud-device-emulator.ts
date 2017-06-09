@@ -23,10 +23,8 @@ export class CloudDeviceEmulatorWrapper implements ICloudDeviceEmulator {
 		return this.cloudDeviceEmulatorInstance.refresh(deviceIdentifier);
 	}
 
-	public async killServer(): Promise<any> {
-		if (this._isCloudDeviceEmulatorInstanceInitialized) {
-			return this.cloudDeviceEmulatorInstance.killServer();
-		}
+	public killServer(): Promise<any> {
+		return this.cloudDeviceEmulatorInstance.killServer();
 	}
 
 	public dispose() {
