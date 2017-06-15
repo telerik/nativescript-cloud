@@ -56,14 +56,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			buildProps = await this.getiOSBuildProperties(projectSettings, buildProps, iOSBuildData);
 		}
 
-		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
-		const platformAlreadyInstalled = _(this.$platformService.getInstalledPlatforms(projectData))
-			.map(p => p.toLowerCase())
-			.includes(platform.toLowerCase());
-		if (!platformAlreadyInstalled) {
-			await this.$platformService.addPlatforms([platform], null, projectData, <any>{}, null);
-		}
-
+		await this.prepareProject(projectSettings, platform, buildConfiguration, iOSBuildData);
 		const buildResponse: IBuildResponse = await this.$buildCloudService.startBuild(projectSettings.projectId, buildProps);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
@@ -194,6 +187,32 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				this.$errors.failWithoutHelp(errors.join(EOL));
 			}
 		}
+	}
+
+	private async prepareProject(projectSettings: IProjectSettings,
+		platform: string,
+		buildConfiguration: string,
+		iOSBuildData: IIOSBuildData): Promise<void> {
+
+		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
+		const appFilesUpdaterOptions: IAppFilesUpdaterOptions = {
+			// This option is used for webpack. As currently we do not support webpack, set it to false.
+			// TODO: Once we have a way to use webpack in cloud builds, we should pass correct value here.
+			bundle: false,
+			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.RELEASE_CONFIGURATION_NAME.toLowerCase()
+		};
+
+		const provisionData = iOSBuildData && iOSBuildData.pathToProvision && this.getMobileProvisionData(iOSBuildData.pathToProvision);
+		const provision = provisionData && provisionData.UUID;
+
+		const config: IAddPlatformCoreOptions = {
+			provision,
+			sdk: null,
+			frameworkPath: null,
+			ignoreScripts: false
+		};
+
+		await this.$platformService.preparePlatform(platform, appFilesUpdaterOptions, null, projectData, config);
 	}
 
 	private async getObjectFromS3File<T>(pathToFile: string): Promise<T> {
