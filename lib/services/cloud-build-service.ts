@@ -22,6 +22,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		private $itmsServicesPlistHelper: IItmsServicesPlistHelper,
 		private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
+		private $platformService: IPlatformService,
 		private $cloudBuildOutputFilter: ICloudBuildOutputFilter,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $projectHelper: IProjectHelper,
@@ -107,6 +108,8 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			}
 		};
 
+		const buildInfoFileDirname = path.dirname(result.outputFilePath);
+		this.$platformService.saveBuildInfoFile(platform, projectSettings.projectDir, buildInfoFileDirname);
 		return result;
 	}
 
