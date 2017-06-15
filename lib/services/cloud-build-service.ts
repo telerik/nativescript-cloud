@@ -56,16 +56,19 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			buildProps = await this.getiOSBuildProperties(projectSettings, buildProps, iOSBuildData);
 		}
 
+		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
+		const platformAlreadyInstalled = _(this.$platformService.getInstalledPlatforms(projectData))
+			.map(p => p.toLowerCase())
+			.includes(platform.toLowerCase());
+		if (!platformAlreadyInstalled) {
+			await this.$platformService.addPlatforms([platform], null, projectData, <any>{}, null);
+		}
+
 		const buildResponse: IBuildResponse = await this.$buildCloudService.startBuild(projectSettings.projectId, buildProps);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
 
 		await this.waitForBuildToFinish(buildResponse);
-
-		const runtimePropertyName = `tns-${platform.toLowerCase()}`;
-		if (!this.$projectDataService.getNSValue(projectSettings.projectDir, runtimePropertyName)) {
-			this.$projectDataService.setNSValue(projectSettings.projectDir, runtimePropertyName, { version: buildProps.properties.runtimeVersion });
-		}
 
 		const buildResult: IBuildResult = await this.getObjectFromS3File<IBuildResult>(buildResponse.resultUrl);
 
