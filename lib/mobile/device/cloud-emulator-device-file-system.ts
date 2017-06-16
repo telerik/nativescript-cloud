@@ -1,4 +1,4 @@
-export class AppetizeDeviceFileSystem implements Mobile.IDeviceFileSystem {
+export class CloudEmulatorDeviceFileSystem implements Mobile.IDeviceFileSystem {
 	public async listFiles(devicePath: string, appIdentifier?: string): Promise<any> { /* currently empty */ }
 
 	public async getFile(deviceFilePath: string, appIdentifier: string, outputPath?: string): Promise<void> { /* currently empty */ }

@@ -1,8 +1,8 @@
 import { EventEmitter } from "events";
 
-export class AppetizeApplicationManager extends EventEmitter implements Mobile.IDeviceApplicationManager {
+export class CloudEmulatorApplicationManager extends EventEmitter implements Mobile.IDeviceApplicationManager {
 
-	constructor(private basicInfo: IAppetizeDeviceBasicInfo,
+	constructor(private basicInfo: ICloudEmulatorDeviceBasicInfo,
 		private $cloudEmulatorService: ICloudEmulatorService) {
 		super();
 	}

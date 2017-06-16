@@ -1,11 +1,11 @@
-export class AppetizeEmulatorLauncher implements IAppetizeEmulatorLauncher {
+export class CloudEmulatorLauncher implements ICloudEmulatorLauncher {
 
 	constructor(private $cloudEmulatorService: ICloudEmulatorService) { }
 
-	public async startEmulator(data: IAppetizeEmulatorStartData): Promise<string> {
+	public async startEmulator(data: ICloudEmulatorStartData): Promise<string> {
 		const response: ICloudEmulatorResponse = await this.$cloudEmulatorService.deployApp(data.packageFile, data.platform);
 		return this.$cloudEmulatorService.startEmulator(response.publicKey, data.platform, data.model);
 	}
 }
 
-$injector.register("appetizeEmulatorLauncher", AppetizeEmulatorLauncher);
+$injector.register("cloudEmulatorLauncher", CloudEmulatorLauncher);

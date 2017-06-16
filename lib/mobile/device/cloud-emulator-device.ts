@@ -1,13 +1,13 @@
-import { AppetizeApplicationManager } from "./appetize-application-manager";
-import { AppetizeDeviceFileSystem } from "./appetize-device-file-system";
+import { CloudEmulatorApplicationManager } from "./cloud-emulator-application-manager";
+import { CloudEmulatorDeviceFileSystem } from "./cloud-emulator-device-file-system";
 import { DEVICE_INFO } from "../../constants";
 
-export class AppetizeDevice implements Mobile.IDevice {
+export class CloudEmulatorDevice implements Mobile.IDevice {
 	public applicationManager: Mobile.IDeviceApplicationManager;
 	public fileSystem: Mobile.IDeviceFileSystem;
 	public deviceInfo: Mobile.IDeviceInfo;
 
-	constructor(private basicInfo: IAppetizeDeviceBasicInfo,
+	constructor(private basicInfo: ICloudEmulatorDeviceBasicInfo,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $injector: IInjector) {
 		this.init();
@@ -30,8 +30,8 @@ export class AppetizeDevice implements Mobile.IDevice {
 	}
 
 	private init(): void {
-		this.applicationManager = this.$injector.resolve(AppetizeApplicationManager, { basicInfo: this.basicInfo });
-		this.fileSystem = this.$injector.resolve(AppetizeDeviceFileSystem);
+		this.applicationManager = this.$injector.resolve(CloudEmulatorApplicationManager, { basicInfo: this.basicInfo });
+		this.fileSystem = this.$injector.resolve(CloudEmulatorDeviceFileSystem);
 		this.deviceInfo = {
 			identifier: this.basicInfo.identifier,
 			model: this.basicInfo.model,

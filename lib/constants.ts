@@ -40,7 +40,7 @@ export const CLOUD_BUILD_DIRECTORY_NAMES = {
 export const DEVICE_INFO = {
 	TYPE: "Emulator",
 	STATUS: "Connected",
-	VENDOR: "Appetize"
+	VENDOR: "Cloud Emulator"
 };
 
 export const CONTENT_TYPES = {

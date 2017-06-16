@@ -1,4 +1,4 @@
-import { AppetizeDeviceDiscovery } from "../../../lib/mobile/mobile-core/appetize-device-discovery";
+import { CloudEmulatorDeviceDiscovery } from "../../../lib/mobile/mobile-core/cloud-emulator-device-discovery";
 import { DEVICE_DISCOVERY_EVENTS } from "../../../lib/constants";
 import { EventEmitter } from "events";
 import { Yok } from "mobile-cli-lib/yok";
@@ -17,7 +17,7 @@ class CustomDeviceEmitter extends EventEmitter implements CloudDeviceEmitter {
 	public dispose(): void { /* empty */ }
 }
 
-describe("appetize device discovery", () => {
+describe("cloud emulator device discovery", () => {
 	describe("startLookingForDevices", async () => {
 		const customDevice = {
 			identifier: "id",
@@ -50,8 +50,8 @@ describe("appetize device discovery", () => {
 		it(`should attach ${DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND}/${DEVICE_DISCOVERY_EVENTS.DEVICE_LOST}`, async () => {
 			const injector = createTestInjector();
 
-			const appetizeDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(AppetizeDeviceDiscovery);
-			await appetizeDeviceDiscovery.startLookingForDevices();
+			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
 
 			const deviceEmitter = injector.resolve("cloudDeviceEmulator").deviceEmitter;
 
@@ -62,9 +62,9 @@ describe("appetize device discovery", () => {
 		it(`should not attach ${DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND}/${DEVICE_DISCOVERY_EVENTS.DEVICE_LOST} multiple times upon multiple calls`, async () => {
 			const injector = createTestInjector();
 
-			const appetizeDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(AppetizeDeviceDiscovery);
-			await appetizeDeviceDiscovery.startLookingForDevices();
-			await appetizeDeviceDiscovery.startLookingForDevices();
+			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
+			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
 
 			const deviceEmitter = injector.resolve("cloudDeviceEmulator").deviceEmitter;
 
@@ -76,14 +76,14 @@ describe("appetize device discovery", () => {
 			const injector = createTestInjector(initialDevices);
 			let hasDetectedDevice = false;
 
-			const appetizeDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(AppetizeDeviceDiscovery);
-			appetizeDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (device: Mobile.IDevice) => {
+			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			cloudEmulatorDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (device: Mobile.IDevice) => {
 				hasDetectedDevice = true;
 				assert.deepEqual(device.deviceInfo.identifier, customDevice.identifier);
 				assert.deepEqual(device.deviceInfo.model, customDevice.model);
 			});
 
-			await appetizeDeviceDiscovery.startLookingForDevices();
+			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
 			assert.isTrue(hasDetectedDevice);
 		});
 
@@ -93,14 +93,14 @@ describe("appetize device discovery", () => {
 
 			const deviceEmitter: EventEmitter = injector.resolve("cloudDeviceEmulator").deviceEmitter;
 
-			const appetizeDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(AppetizeDeviceDiscovery);
-			appetizeDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (device: Mobile.IDevice) => {
+			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			cloudEmulatorDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (device: Mobile.IDevice) => {
 				hasDetectedDevice = true;
 				assert.deepEqual(device.deviceInfo.identifier, customDevice.identifier);
 				assert.deepEqual(device.deviceInfo.model, customDevice.model);
 			});
 
-			await appetizeDeviceDiscovery.startLookingForDevices();
+			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
 			deviceEmitter.emit(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, customDevice);
 			assert.isTrue(hasDetectedDevice);
 		});
@@ -111,14 +111,14 @@ describe("appetize device discovery", () => {
 
 			const deviceEmitter: EventEmitter = injector.resolve("cloudDeviceEmulator").deviceEmitter;
 
-			const appetizeDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(AppetizeDeviceDiscovery);
-			appetizeDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (device: Mobile.IDevice) => {
+			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			cloudEmulatorDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (device: Mobile.IDevice) => {
 				hasLostDevice = true;
 				assert.deepEqual(device.deviceInfo.identifier, customDevice.identifier);
 				assert.deepEqual(device.deviceInfo.model, customDevice.model);
 			});
 
-			await appetizeDeviceDiscovery.startLookingForDevices();
+			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
 			deviceEmitter.emit(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, customDevice);
 
 			assert.isTrue(hasLostDevice);

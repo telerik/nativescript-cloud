@@ -1,7 +1,7 @@
 /**
- * Describes options that can be passed when starting an appetize emulator.
+ * Describes options that can be passed when starting a cloud emulator.
  */
-interface IAppetizeEmulatorStartData {
+interface ICloudEmulatorStartData {
 	/**
 	 * Path to the package file (.apk or .zip) to load - can either be a local path or a url.
 	 */
@@ -17,16 +17,16 @@ interface IAppetizeEmulatorStartData {
 }
 
 /**
- * Describes service for initial interaction with appetize emulators.
+ * Describes service for initial interaction with cloud emulators.
  */
-interface IAppetizeEmulatorLauncher {
+interface ICloudEmulatorLauncher {
 	/**
-	 * Starts an appetize emulator.
-	 * @param {IAppetizeEmulatorStartData} data Options for starting emulator.
+	 * Starts a cloud emulator.
+	 * @param {ICloudEmulatorStartData} data Options for starting emulator.
 	 * @param optional {IConfigOptions} options The config options.
 	 * @returns {string} A url containing an html page with the emulator inside an iframe. The url's host is localhost.
 	 */
-	startEmulator(data: IAppetizeEmulatorStartData): Promise<string>;
+	startEmulator(data: ICloudEmulatorStartData): Promise<string>;
 }
 
 /**
