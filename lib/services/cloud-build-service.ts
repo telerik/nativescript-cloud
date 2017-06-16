@@ -202,11 +202,18 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.RELEASE_CONFIGURATION_NAME.toLowerCase()
 		};
 
-		const provisionData = iOSBuildData && iOSBuildData.pathToProvision && this.getMobileProvisionData(iOSBuildData.pathToProvision);
-		const provision = provisionData && provisionData.UUID;
+		let mobileProvisionData: IMobileProvisionData;
+		let provision: string;
+
+		if (iOSBuildData && iOSBuildData.pathToProvision) {
+			mobileProvisionData = this.getMobileProvisionData(iOSBuildData.pathToProvision);
+			mobileProvisionData.Type = this.getProvisionType(mobileProvisionData);
+			provision = mobileProvisionData.UUID;
+		}
 
 		const config: IAddPlatformCoreOptions = {
 			provision,
+			mobileProvisionData,
 			sdk: null,
 			frameworkPath: null,
 			ignoreScripts: false

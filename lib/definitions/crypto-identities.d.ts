@@ -21,6 +21,7 @@ interface IMobileProvisionData {
 	TimeToLive: 365;
 	UUID: string;
 	Version: number;
+	Type?: string;
 }
 
 interface ICloudProvisionData {
