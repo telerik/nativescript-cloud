@@ -26,12 +26,12 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 			fileLocation = await this.$uploadService.updloadToS3(fileLocation);
 		}
 
-		const appetizeKeys = this.getEmulatorCredentials(platform);
-		if (!appetizeKeys) {
+		const cloudEmulatorKeys = this.getEmulatorCredentials(platform);
+		if (!cloudEmulatorKeys) {
 			return this.createApp(fileLocation, platform);
 		}
 
-		return this.updateApp(fileLocation, platform, appetizeKeys.publicKey, appetizeKeys.privateKey);
+		return this.updateApp(fileLocation, platform, cloudEmulatorKeys.publicKey, cloudEmulatorKeys.privateKey);
 	}
 
 	public refereshEmulator(deviceIdentifier: string): Promise<void> {

@@ -1,8 +1,8 @@
 import { EventEmitter } from "events";
 import { DEVICE_DISCOVERY_EVENTS } from "../../constants";
-import { AppetizeDevice } from "../device/appetize-device";
+import { CloudEmulatorDevice } from "../device/cloud-emulator-device";
 
-export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDeviceDiscovery {
+export class CloudEmulatorDeviceDiscovery extends EventEmitter implements Mobile.IDeviceDiscovery {
 	private devices: IDictionary<Mobile.IDevice> = {};
 	private _hasStartedLookingForDevices = false;
 
@@ -30,14 +30,14 @@ export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDev
 		if (!this._hasStartedLookingForDevices) {
 			this._hasStartedLookingForDevices = true;
 			_.values(this.$cloudDeviceEmulator.deviceEmitter.getCurrentlyAttachedDevices()).forEach(basicInfo => {
-				this.addAppetizeDevice(basicInfo);
+				this.addCloudDevice(basicInfo);
 			});
 
-			this.$cloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (basicInfo: IAppetizeDeviceBasicInfo) => {
-				this.addAppetizeDevice(basicInfo);
+			this.$cloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (basicInfo: ICloudEmulatorDeviceBasicInfo) => {
+				this.addCloudDevice(basicInfo);
 			});
 
-			this.$cloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (basicInfo: IAppetizeDeviceBasicInfo) => {
+			this.$cloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (basicInfo: ICloudEmulatorDeviceBasicInfo) => {
 				this.removeDevice(basicInfo.identifier);
 			});
 		}
@@ -53,10 +53,10 @@ export class AppetizeDeviceDiscovery extends EventEmitter implements Mobile.IDev
 		this.emit(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, device);
 	}
 
-	private addAppetizeDevice(basicInfo: IAppetizeDeviceBasicInfo) {
-		const device: Mobile.IDevice = this.$injector.resolve(AppetizeDevice, { basicInfo: basicInfo });
+	private addCloudDevice(basicInfo: ICloudEmulatorDeviceBasicInfo) {
+		const device: Mobile.IDevice = this.$injector.resolve(CloudEmulatorDevice, { basicInfo: basicInfo });
 		this.addDevice(device);
 	}
 }
 
-$injector.register("appetizeDeviceDiscovery", AppetizeDeviceDiscovery);
+$injector.register("cloudEmulatorDeviceDiscovery", CloudEmulatorDeviceDiscovery);

@@ -7,12 +7,12 @@ $injector.require("cloudBuildOutputFilter", path.join(__dirname, "cloud-build-ou
 $injector.require("cloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
 
 // Mobile.
-$injector.require("appetizeDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "appetize-device-discovery"));
+$injector.require("cloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
 
 // Public API.
 $injector.requirePublicClass("authenticationService", path.join(__dirname, "services", "authentication-service"));
 $injector.requirePublicClass("cloudBuildService", path.join(__dirname, "services", "cloud-build-service"));
-$injector.requirePublicClass("appetizeEmulatorLauncher", path.join(__dirname, "services", "appetize-emulator-launcher"));
+$injector.requirePublicClass("cloudEmulatorLauncher", path.join(__dirname, "services", "cloud-emulator-emulator-launcher"));
 $injector.requirePublicClass("userService", path.join(__dirname, "services", "user-service"));
 
 // Services.
@@ -41,4 +41,4 @@ $injector.requireCommand("build|cloud", path.join(__dirname, "commands", "cloud-
 $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "cloud-lib-version"));
 
 const $devicesService: Mobile.IDevicesService = $injector.resolve("devicesService");
-$devicesService.addDeviceDiscovery($injector.resolve("appetizeDeviceDiscovery"));
+$devicesService.addDeviceDiscovery($injector.resolve("cloudEmulatorDeviceDiscovery"));
