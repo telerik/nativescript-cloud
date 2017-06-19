@@ -10,7 +10,7 @@
 		"emulators-service": {
 			"subdomain": "emulators"
 		},
-		"code-commit": {
+		"code-commit-service": {
 			"subdomain": "code-commit"
 		}
 	}

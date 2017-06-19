@@ -1,7 +1,7 @@
 interface IBuildCloudService {
 	startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IBuildResponse>;
 	getPresignedUploadUrlObject(appId: string, fileName: string): Promise<IAmazonStorageEntry>;
-	getBuildCredential(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse>;
+	getBuildCredentials(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse>;
 }
 
 interface IBuildResponse {

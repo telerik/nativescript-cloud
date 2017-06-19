@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as crypto from "crypto";
+import { sysInfo } from "nativescript-doctor";
 import { fromWindowsRelativePathToUnix } from "../helpers";
 
 export class GitService implements IGitService {
@@ -18,9 +19,9 @@ export class GitService implements IGitService {
 		private $fs: IFileSystem,
 		private $options: IProfileDir) { }
 
-	public async gitPushChanges(projectDir: string, remoteUrl: IRemoteUrl, codeCommitCredential: ICodeCommitCredentials, isNewRepository?: boolean): Promise<void> {
+	public async gitPushChanges(projectDir: string, remoteUrl: IRemoteUrl, codeCommitCredential: ICodeCommitCredentials, repositoryState?: IRepositoryState): Promise<void> {
 		this.cleanLocalRepositories();
-		if (isNewRepository) {
+		if (repositoryState && repositoryState.isNewRepository) {
 			this.deleteLocalRepository(projectDir);
 		}
 
@@ -46,6 +47,10 @@ export class GitService implements IGitService {
 	}
 
 	private cleanLocalRepositories(): void {
+		if (!this.$fs.exists(this.getGitDirBasePath())) {
+			return;
+		}
+
 		const entries = this.$fs.readDirectory(this.getGitDirBasePath())
 			.map(entry => path.join(this.getGitDirBasePath(), entry));
 		_.each(entries, entry => {
@@ -62,7 +67,7 @@ export class GitService implements IGitService {
 	}
 
 	private async configureEnvironment(projectDir: string): Promise<void> {
-		await this.executeCommand(projectDir, ["config", "--local", "credential.helper", this.getCredentialHelparPath()]);
+		await this.executeCommand(projectDir, ["config", "--local", "credential.helper", this.getCredentialHelperPath()]);
 		await this.executeCommand(projectDir, ["config", "--local", "credential.UseHttpPath", "true"]);
 	}
 
@@ -97,13 +102,13 @@ export class GitService implements IGitService {
 		return this.executeCommand(projectDir, ["remote", "add", GitService.REMOTE_NAME, remoteUrl.httpRemoteUrl]);
 	}
 
-	private async executeCommand(projectDir: string, args: string[], options?: any, spawnFromEventOptins?: ISpawnFromEventOptions): Promise<ISpawnResult> {
+	private async executeCommand(projectDir: string, args: string[], options?: any, spawnFromEventOptions?: ISpawnFromEventOptions): Promise<ISpawnResult> {
 		options = options || { cwd: projectDir };
 		const gitDir = this.getGitDirPath(projectDir);
 		this.$fs.ensureDirectoryExists(gitDir);
 		const command = await this.getGitFilePath();
 		args = [`--git-dir=${gitDir}`, `--work-tree=${projectDir}`].concat(args);
-		return this.$childProcess.spawnFromEvent(command, args, "close", options, spawnFromEventOptins);
+		return this.$childProcess.spawnFromEvent(command, args, "close", options, spawnFromEventOptions);
 	}
 
 	private deleteLocalRepository(projectDir: string) {
@@ -135,7 +140,11 @@ export class GitService implements IGitService {
 
 	private async getGitFilePath(): Promise<string> {
 		if (!this.gitFilePath) {
-			this.gitFilePath = await this.findGit();
+			this.gitFilePath = await sysInfo.getGitPath();
+
+			if (!this.gitFilePath) {
+				throw new Error("Git Installation Not Found. Install Git to improve the speed of cloud builds.");
+			}
 		}
 
 		return this.gitFilePath;
@@ -149,66 +158,13 @@ export class GitService implements IGitService {
 		}
 	}
 
-	private getCredentialHelparPath(): string {
+	private getCredentialHelperPath(): string {
 		const credentialHelperPath = path.join(this.getGitResourceFolder(), "aws-credential-helper", "credential-helper");
 		return fromWindowsRelativePathToUnix(credentialHelperPath);
 	}
 
 	private getGitResourceFolder(): string {
 		return path.join(__dirname, "..", "..", "resources", "git");
-	}
-
-	private findGit(): Promise<string> {
-		return process.platform === 'win32' ? this.findGitWin32() : this.findGitUnix();
-	}
-
-	private async findGitWin32(): Promise<string> {
-		const win32Paths = [process.env['ProgramFiles(x86)'], process.env['ProgramFiles']];
-		let result;
-		_.each(win32Paths, win32Path => {
-			result = this.findSystemGitWin32(win32Path);
-
-			if (result) {
-				return false;
-			}
-		});
-
-		result = this.findGitHubGitWin32();
-
-		return result ? result : this.findGitCore("where");
-	}
-
-	private findSystemGitWin32(base: string): string {
-		return this.findSpecificGit(path.join(base, 'Git', 'cmd', 'git.exe'));
-	}
-
-	private findGitHubGitWin32(): string {
-		const github = path.join(process.env['LOCALAPPDATA'], 'GitHub');
-
-		const children = this.$fs.readDirectory(github);
-		const git = children.filter(child => /^PortableGit/.test(child))[0];
-
-		return this.findSpecificGit(path.join(github, git, 'cmd', 'git.exe'));
-	}
-
-	private findSpecificGit(gitPath: string): string {
-		if (this.$fs.exists(gitPath)) {
-			return gitPath;
-		}
-	}
-
-	private async findGitUnix(): Promise<string> {
-		return await this.findGitCore("which");
-	}
-
-	private async findGitCore(command: string, options?: any): Promise<string> {
-		const result = await this.$childProcess.spawnFromEvent(command, ["git"], "close", options, { throwError: false });
-
-		if (result.exitCode !== 0) {
-			throw new Error("It looks like Git is not installed on your system.");
-		}
-
-		return result.stdout.split("\n")[0].trim();
 	}
 
 	private nothingToCommit(stdout: string): boolean {

@@ -1,9 +1,10 @@
+'use strict';
 const aws4 = require('aws4');
 
 const SERVICE = 'codecommit'
 const METHOD = 'GIT'
 
-const credential = {
+const credentials = {
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY,
 	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_KEY,
 	sessionToken: process.env.AWS_SESSION_TOKEN,
@@ -20,14 +21,14 @@ process.stdin.on('end', () => {
 });
 
 function writeGitParameters(options) {
-	let username = credential.accessKeyId;
-	if (credential.sessionToken) {
-		username += `%${credential.sessionToken}`;
+	let username = credentials.accessKeyId;
+	if (credentials.sessionToken) {
+		username += `%${credentials.sessionToken}`;
 	}
 
 	options.service = SERVICE;
 	options.method = METHOD;
-	const signer = new aws4.RequestSigner(options, credential);
+	const signer = new aws4.RequestSigner(options, credentials);
 	const password = `${signer.getDateTime()}Z${signer.signature()}`
 
 	console.log(`username=${username}`);

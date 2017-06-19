@@ -49,32 +49,33 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		this.$logger.info(`Starting ${buildInformationString}.`);
 
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
+		await this.prepareProject(projectSettings, platform, buildConfiguration, iOSBuildData);
 		let buildFiles: IBuildItemBase[] = [];
 		if (this.$mobileHelper.isAndroidPlatform(platform) && this.isReleaseConfiguration(buildConfiguration)) {
 			buildFiles.push({
 				filename: uuid.v4(),
 				fullPath: androidBuildData.pathToCertificate,
-				disposition: "CryptoStore"
+				disposition: constants.DISPOSITIONS.CRYPTO_STORE
 			});
 		} else if (this.$mobileHelper.isiOSPlatform(platform) && iOSBuildData.buildForDevice) {
 			buildFiles.push({
 				filename: uuid.v4(),
 				fullPath: iOSBuildData.pathToCertificate,
-				disposition: "Keychain"
+				disposition: constants.DISPOSITIONS.KEYCHAIN
 			});
 			const provisionData = this.getMobileProvisionData(iOSBuildData.pathToProvision);
 			buildFiles.push({
 				filename: `${provisionData.UUID}.mobileprovision`,
 				fullPath: iOSBuildData.pathToProvision,
-				disposition: "Provision"
+				disposition: constants.DISPOSITIONS.PROVISION
 			});
 		}
 
 		const fileNames = buildFiles.map(buildFile => buildFile.filename);
-		const buildCredenrial = await this.$buildCloudService.getBuildCredential({ appId: projectSettings.projectId, fileNames: fileNames });
+		const buildCredentials = await this.$buildCloudService.getBuildCredentials({ appId: projectSettings.projectId, fileNames: fileNames });
 
-		let filesToUpload = this.prepareFileToUpload(buildCredenrial.urls, buildFiles);
-		let buildProps = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration, buildCredenrial, filesToUpload);
+		const filesToUpload = this.prepareFilesToUpload(buildCredentials.urls, buildFiles);
+		let buildProps = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration, buildCredentials, filesToUpload);
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {
 			buildProps = await this.getAndroidBuildProperties(projectSettings, buildProps, filesToUpload, androidBuildData);
 		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
@@ -133,7 +134,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		return result;
 	}
 
-	private prepareFileToUpload(amazonStorageEntries: IAmazonStorageEntry[], buildFiles: IBuildItemBase[]): IAmazonStorageEntryData[] {
+	private prepareFilesToUpload(amazonStorageEntries: IAmazonStorageEntry[], buildFiles: IBuildItemBase[]): IAmazonStorageEntryData[] {
 		let result: IAmazonStorageEntryData[] = [];
 		_.each(amazonStorageEntries, amazonStorageEntry => {
 			_.each(buildFiles, buildFile => {
@@ -329,20 +330,25 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 	}
 
 	private async prepareBuildRequest(projectSettings: IProjectSettings,
-		platform: string, buildConfiguration: string, buildCredenrials: IBuildCredentialResponse, filesToUpload: IAmazonStorageEntryData[]): Promise<any> {
+		platform: string, buildConfiguration: string, buildCredentials: IBuildCredentialResponse, filesToUpload: IAmazonStorageEntryData[]): Promise<any> {
 		let buildFiles;
 		try {
-			await this.$gitService.gitPushChanges(projectSettings.projectDir, { httpRemoteUrl: buildCredenrials.codeCommit.cloneUrlHttp }, buildCredenrials.codeCommit.credentials);
+			await this.$gitService.gitPushChanges(projectSettings.projectDir,
+				{ httpRemoteUrl: buildCredentials.codeCommit.cloneUrlHttp },
+				buildCredentials.codeCommit.credentials,
+				{ isNewRepository: buildCredentials.codeCommit.isNewRepository });
+
 			buildFiles = [
 				{
-					disposition: "PackageGit",
-					sourceUri: buildCredenrials.codeCommitUrl
+					disposition: constants.DISPOSITIONS.PACKAGE_GIT,
+					sourceUri: buildCredentials.codeCommitUrl
 				}
 			];
 		} catch (err) {
+			this.$logger.warn(err.message);
 			const filePath = await this.zipProject(projectSettings.projectDir);
 			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(projectSettings.projectId, uuid.v4());
-			const disposition = "PackageZip";
+			const disposition = constants.DISPOSITIONS.PACKAGE_ZIP;
 			filesToUpload.push(_.merge({ filePath, disposition }, preSignedUrlData));
 			buildFiles = [
 				{
@@ -375,7 +381,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				appIdentifier: projectSettings.projectId,
 				frameworkVersion: cliVersion,
 				runtimeVersion: runtimeVersion,
-				sessionKey: buildCredenrials.sessionKey,
+				sessionKey: buildCredentials.sessionKey,
 				templateAppName: sanitizedProjectName,
 				projectName: sanitizedProjectName,
 				framework: "tns",
@@ -464,7 +470,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				templateName: "PROVISION_",
 				identifier: provisionData.UUID,
 				isDefault: true,
-				fileName: `${provisonData.fileName}`,
+				fileName: provisonData.fileName,
 				appGroups: [],
 				provisionType: this.getProvisionType(provisionData),
 				name: provisionData.Name
@@ -502,7 +508,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 	}
 
 	private getBuildResult(buildResult: IBuildResult): IBuildItem {
-		const result = _.find(buildResult.buildItems, b => b.disposition === "BuildResult");
+		const result = _.find(buildResult.buildItems, b => b.disposition === constants.DISPOSITIONS.BUILD_RESULT);
 
 		if (!result) {
 			this.$errors.failWithoutHelp("No item with disposition BuildResult found in the build result items.");
