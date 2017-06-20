@@ -48,6 +48,8 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		this.$logger.info(`Starting ${buildInformationString}.`);
 
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
+		await this.prepareProject(projectSettings, platform, buildConfiguration, iOSBuildData);
+
 		let buildProps = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration);
 
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {
@@ -56,7 +58,6 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			buildProps = await this.getiOSBuildProperties(projectSettings, buildProps, iOSBuildData);
 		}
 
-		await this.prepareProject(projectSettings, platform, buildConfiguration, iOSBuildData);
 		const buildResponse: IBuildResponse = await this.$buildCloudService.startBuild(projectSettings.projectId, buildProps);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
