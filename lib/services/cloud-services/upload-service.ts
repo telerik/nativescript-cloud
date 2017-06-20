@@ -14,7 +14,7 @@ export class UploadService extends CloudServiceBase implements IUploadService {
 		super($cloudRequestService);
 	}
 
-	public async updloadToS3(localFilePath: string): Promise<string> {
+	public async uploadToS3(localFilePath: string): Promise<string> {
 		const fileNameInS3 = uuid.v4();
 		const preSignedUrlData = await this.sendRequest<IPresignURLResponse>("GET", `api/get-upload-url?filename=${fileNameInS3}`, {});
 		const requestOpts: any = {

@@ -69,3 +69,17 @@ interface IUser {
 	firstName: string;
 	lastName: string;
 }
+
+interface IUserInfo {
+	avatar_type: number;
+	blogWebPageUrl: string;
+	companySize: number;
+	country: number;
+	developers: number;
+	externalAvatarUrl: string;
+	gravatar: string;
+	industry: number;
+	interests: string;
+	isProfilePublic: boolean;
+	twitterName: String;
+}

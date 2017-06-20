@@ -5,7 +5,12 @@ export class UserService implements IUserService {
 	private userData: IUserData;
 	private userInfoDirectory: string;
 
-	constructor(private $errors: IErrors,
+	private get $authCloudService(): IAuthCloudService {
+		return this.$injector.resolve("authCloudService");
+	}
+
+	constructor(private $injector: IInjector,
+		private $errors: IErrors,
 		private $fs: IFileSystem,
 		private $hostInfo: IHostInfo,
 		private $logger: ILogger) {
@@ -66,6 +71,15 @@ export class UserService implements IUserService {
 	public clearUserData(): void {
 		this.userData = null;
 		this.$fs.deleteFile(this.getUserFilePath());
+	}
+
+	public async getUserAvatar(): Promise<string> {
+		if (!this.hasUser()) {
+			return null;
+		}
+
+		const userInfo = await this.$authCloudService.getUserInfo();
+		return userInfo.externalAvatarUrl;
 	}
 
 	private getUserFilePath(): string {
