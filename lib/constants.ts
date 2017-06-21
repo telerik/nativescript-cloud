@@ -22,6 +22,7 @@ export const PROVISION_TYPES = {
 export const AUTH_SERVICE_NAME = "auth-service";
 export const BUILD_SERVICE_NAME = "build-service";
 export const EMULATORS_SERVICE_NAME = "emulators-service";
+export const CODE_COMMIT_SERVICE_NAME = "code-commit-service";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
 	BUILD_OUTPUT: "buildOutput"
@@ -72,4 +73,13 @@ export const HTTP_STATUS_CODES = {
 	FOUND: 302,
 	UNAUTHORIZED: 401,
 	PAYMENT_REQUIRED: 402
+};
+
+export const DISPOSITIONS = {
+	PACKAGE_ZIP: "PackageZip",
+	PACKAGE_GIT: "PackageGit",
+	BUILD_RESULT: "BuildResult",
+	PROVISION: "Provision",
+	KEYCHAIN: "Keychain",
+	CRYPTO_STORE: "CryptoStore"
 };

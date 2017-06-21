@@ -9,6 +9,9 @@
 		},
 		"emulators-service": {
 			"subdomain": "emulators"
+		},
+		"code-commit-service": {
+			"subdomain": "code-commit"
 		}
 	}
 }

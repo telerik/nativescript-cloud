@@ -17,6 +17,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 	private static DEFAULT_VERSION = "3.0.0";
 
 	constructor(private $buildCloudService: IBuildCloudService,
+		private $gitService: IGitService,
 		private $errors: IErrors,
 		private $fs: IFileSystem,
 		private $itmsServicesPlistHelper: IItmsServicesPlistHelper,
@@ -49,13 +50,36 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
 		await this.prepareProject(projectSettings, platform, buildConfiguration, iOSBuildData);
+		let buildFiles: IBuildItemBase[] = [];
+		if (this.$mobileHelper.isAndroidPlatform(platform) && this.isReleaseConfiguration(buildConfiguration)) {
+			buildFiles.push({
+				filename: uuid.v4(),
+				fullPath: androidBuildData.pathToCertificate,
+				disposition: constants.DISPOSITIONS.CRYPTO_STORE
+			});
+		} else if (this.$mobileHelper.isiOSPlatform(platform) && iOSBuildData.buildForDevice) {
+			buildFiles.push({
+				filename: uuid.v4(),
+				fullPath: iOSBuildData.pathToCertificate,
+				disposition: constants.DISPOSITIONS.KEYCHAIN
+			});
+			const provisionData = this.getMobileProvisionData(iOSBuildData.pathToProvision);
+			buildFiles.push({
+				filename: `${provisionData.UUID}.mobileprovision`,
+				fullPath: iOSBuildData.pathToProvision,
+				disposition: constants.DISPOSITIONS.PROVISION
+			});
+		}
 
-		let buildProps = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration);
+		const fileNames = buildFiles.map(buildFile => buildFile.filename);
+		const buildCredentials = await this.$buildCloudService.getBuildCredentials({ appId: projectSettings.projectId, fileNames: fileNames });
 
+		const filesToUpload = this.prepareFilesToUpload(buildCredentials.urls, buildFiles);
+		let buildProps = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration, buildCredentials, filesToUpload);
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {
-			buildProps = await this.getAndroidBuildProperties(projectSettings, buildProps, androidBuildData);
+			buildProps = await this.getAndroidBuildProperties(projectSettings, buildProps, filesToUpload, androidBuildData);
 		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
-			buildProps = await this.getiOSBuildProperties(projectSettings, buildProps, iOSBuildData);
+			buildProps = await this.getiOSBuildProperties(projectSettings, buildProps, filesToUpload, iOSBuildData);
 		}
 
 		const buildResponse: IBuildResponse = await this.$buildCloudService.startBuild(projectSettings.projectId, buildProps);
@@ -107,6 +131,19 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 		const buildInfoFileDirname = path.dirname(result.outputFilePath);
 		this.$platformService.saveBuildInfoFile(platform, projectSettings.projectDir, buildInfoFileDirname);
+		return result;
+	}
+
+	private prepareFilesToUpload(amazonStorageEntries: IAmazonStorageEntry[], buildFiles: IBuildItemBase[]): IAmazonStorageEntryData[] {
+		let result: IAmazonStorageEntryData[] = [];
+		_.each(amazonStorageEntries, amazonStorageEntry => {
+			_.each(buildFiles, buildFile => {
+				if (amazonStorageEntry.fileName === buildFile.filename) {
+					result.push(_.merge({ filePath: buildFile.fullPath, disposition: buildFile.disposition }, amazonStorageEntry));
+				}
+			});
+		});
+
 		return result;
 	}
 
@@ -293,10 +330,37 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 	}
 
 	private async prepareBuildRequest(projectSettings: IProjectSettings,
-		platform: string, buildConfiguration: string): Promise<any> {
+		platform: string, buildConfiguration: string, buildCredentials: IBuildCredentialResponse, filesToUpload: IAmazonStorageEntryData[]): Promise<any> {
+		let buildFiles;
+		try {
+			await this.$gitService.gitPushChanges(projectSettings.projectDir,
+				{ httpRemoteUrl: buildCredentials.codeCommit.cloneUrlHttp },
+				buildCredentials.codeCommit.credentials,
+				{ isNewRepository: buildCredentials.codeCommit.isNewRepository });
 
-		const projectZipFile = await this.zipProject(projectSettings.projectDir);
-		const buildPreSignedUrlData = await this.uploadFileToS3(projectSettings.projectId, projectZipFile);
+			buildFiles = [
+				{
+					disposition: constants.DISPOSITIONS.PACKAGE_GIT,
+					sourceUri: buildCredentials.codeCommitUrl
+				}
+			];
+		} catch (err) {
+			this.$logger.warn(err.message);
+			const filePath = await this.zipProject(projectSettings.projectDir);
+			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(projectSettings.projectId, uuid.v4());
+			const disposition = constants.DISPOSITIONS.PACKAGE_ZIP;
+			filesToUpload.push(_.merge({ filePath, disposition }, preSignedUrlData));
+			buildFiles = [
+				{
+					disposition,
+					sourceUri: preSignedUrlData.s3Url
+				}
+			];
+		}
+
+		for (const fileToUpload of filesToUpload) {
+			await this.uploadFileToS3(fileToUpload.filePath, fileToUpload.fileName, fileToUpload.uploadPreSignedUrl);
+		}
 
 		// HACK just for this version. After that we'll have UI for getting runtime version.
 		// Until then, use the coreModulesVersion.
@@ -317,28 +381,19 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				appIdentifier: projectSettings.projectId,
 				frameworkVersion: cliVersion,
 				runtimeVersion: runtimeVersion,
-				sessionKey: buildPreSignedUrlData.sessionKey,
+				sessionKey: buildCredentials.sessionKey,
 				templateAppName: sanitizedProjectName,
 				projectName: sanitizedProjectName,
 				framework: "tns",
 				useIncrementalBuild: !projectSettings.clean
 			},
-			buildFiles: [
-				{
-					disposition: "PackageZip",
-					sourceUri: buildPreSignedUrlData.s3Url
-				}
-			]
+			buildFiles
 		};
-
 	}
 
-	private async uploadFileToS3(projectId: string, filePathOrContent: string, fileNameInS3?: string): Promise<IAmazonStorageEntryData> {
-		fileNameInS3 = fileNameInS3 || uuid.v4();
-		const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(projectId, fileNameInS3);
-
+	private async uploadFileToS3(filePathOrContent: string, fileNameInS3: string, uploadPreSignedUrl: string): Promise<void> {
 		const requestOpts: any = {
-			url: preSignedUrlData.uploadPreSignedUrl,
+			url: uploadPreSignedUrl,
 			method: constants.HTTP_METHODS.PUT
 		};
 
@@ -357,10 +412,6 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		} catch (err) {
 			this.$errors.failWithoutHelp(`Error while uploading ${filePathOrContent} to S3. Errors is:`, err.message);
 		}
-
-		const amazonStorageEntryData: IAmazonStorageEntryData = _.merge({ fileNameInS3 }, preSignedUrlData, );
-
-		return amazonStorageEntryData;
 	}
 
 	private getCertificateBase64(cert: string) {
@@ -369,21 +420,21 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 	private async getAndroidBuildProperties(projectSettings: IProjectSettings,
 		buildProps: any,
+		amazonStorageEntriesData: IAmazonStorageEntryData[],
 		androidBuildData?: IAndroidBuildData): Promise<any> {
 
 		const buildConfiguration = buildProps.properties.buildConfiguration;
 
 		if (this.isReleaseConfiguration(buildConfiguration)) {
-			const certificateS3Data = await this.uploadFileToS3(projectSettings.projectId, androidBuildData.pathToCertificate);
-
-			buildProps.properties.keyStoreName = certificateS3Data.fileNameInS3;
+			const certificateData = _.find(amazonStorageEntriesData, amazonStorageEntryData => amazonStorageEntryData.filePath === androidBuildData.pathToCertificate);
+			buildProps.properties.keyStoreName = certificateData.fileName;
 			buildProps.properties.keyStoreAlias = this.getCertificateInfo(androidBuildData.pathToCertificate, androidBuildData.certificatePassword).friendlyName;
 			buildProps.properties.keyStorePassword = androidBuildData.certificatePassword;
 			buildProps.properties.keyStoreAliasPassword = androidBuildData.certificatePassword;
 
 			buildProps.buildFiles.push({
-				disposition: "CryptoStore",
-				sourceUri: certificateS3Data.s3Url
+				disposition: certificateData.disposition,
+				sourceUri: certificateData.s3Url
 			});
 		}
 
@@ -392,21 +443,22 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 	private async getiOSBuildProperties(projectSettings: IProjectSettings,
 		buildProps: any,
+		amazonStorageEntriesData: IAmazonStorageEntryData[],
 		iOSBuildData: IIOSBuildData): Promise<any> {
 
 		if (iOSBuildData.buildForDevice) {
 			const provisionData = this.getMobileProvisionData(iOSBuildData.pathToProvision);
-			const certificateS3Data = await this.uploadFileToS3(projectSettings.projectId, iOSBuildData.pathToCertificate);
-			const provisonS3Data = await this.uploadFileToS3(projectSettings.projectId, iOSBuildData.pathToProvision, `${provisionData.UUID}.mobileprovision`);
+			const certificateData = _.find(amazonStorageEntriesData, amazonStorageEntryData => amazonStorageEntryData.filePath === iOSBuildData.pathToCertificate);
+			const provisonData = _.find(amazonStorageEntriesData, amazonStorageEntryData => amazonStorageEntryData.filePath === iOSBuildData.pathToProvision);
 
 			buildProps.buildFiles.push(
 				{
-					sourceUri: certificateS3Data.s3Url,
-					disposition: "Keychain"
+					sourceUri: certificateData.s3Url,
+					disposition: certificateData.disposition
 				},
 				{
-					sourceUri: provisonS3Data.s3Url,
-					disposition: "Provision"
+					sourceUri: provisonData.s3Url,
+					disposition: provisonData.disposition
 				}
 			);
 
@@ -418,7 +470,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				templateName: "PROVISION_",
 				identifier: provisionData.UUID,
 				isDefault: true,
-				fileName: `${provisonS3Data.fileNameInS3}`,
+				fileName: provisonData.fileName,
 				appGroups: [],
 				provisionType: this.getProvisionType(provisionData),
 				name: provisionData.Name
@@ -456,7 +508,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 	}
 
 	private getBuildResult(buildResult: IBuildResult): IBuildItem {
-		const result = _.find(buildResult.buildItems, b => b.disposition === "BuildResult");
+		const result = _.find(buildResult.buildItems, b => b.disposition === constants.DISPOSITIONS.BUILD_RESULT);
 
 		if (!result) {
 			this.$errors.failWithoutHelp("No item with disposition BuildResult found in the build result items.");
@@ -603,8 +655,9 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				return null;
 			}
 
-			const amazonPlistEntry = await this.uploadFileToS3(options.projectId, this.$itmsServicesPlistHelper.createPlistContent(options));
-			return this.$qr.generateDataUri(`itms-services://?action=download-manifest&amp;url=${escape(amazonPlistEntry.publicDownloadUrl)}`);
+			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(options.projectId, uuid.v4());
+			await this.uploadFileToS3(this.$itmsServicesPlistHelper.createPlistContent(options), preSignedUrlData.fileName, preSignedUrlData.uploadPreSignedUrl);
+			return this.$qr.generateDataUri(`itms-services://?action=download-manifest&amp;url=${escape(preSignedUrlData.publicDownloadUrl)}`);
 		}
 
 		return this.$qr.generateDataUri(buildResultUrl);
