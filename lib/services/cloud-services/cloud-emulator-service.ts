@@ -23,7 +23,7 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 
 	public async deployApp(fileLocation: string, platform: string): Promise<ICloudEmulatorResponse> {
 		if (this.$fs.exists(path.resolve(fileLocation))) {
-			fileLocation = await this.$uploadService.updloadToS3(fileLocation);
+			fileLocation = await this.$uploadService.uploadToS3(fileLocation);
 		}
 
 		const cloudEmulatorKeys = this.getEmulatorCredentials(platform);

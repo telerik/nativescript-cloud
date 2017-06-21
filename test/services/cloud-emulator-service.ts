@@ -20,7 +20,7 @@ describe("cloud emulator service", () => {
 				writeJson: () => { /* empty */ }
 			});
 			testInjector.register("uploadService", {
-				updloadToS3: async (url: string) => url
+				uploadToS3: async (url: string) => url
 			});
 			testInjector.register("cloudDeviceEmulator", { /* empty */ });
 			testInjector.register("options", {
@@ -33,7 +33,7 @@ describe("cloud emulator service", () => {
 		it("should upload to S3 in case a local file is passed", async () => {
 			const injector = createTestInjector();
 			let hasUploadedToS3 = false;
-			injector.resolve("uploadService").updloadToS3 = (url: string) => {
+			injector.resolve("uploadService").uploadToS3 = (url: string) => {
 				if (url === filePath) {
 					hasUploadedToS3 = true;
 				}

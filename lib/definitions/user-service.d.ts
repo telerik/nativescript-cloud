@@ -35,4 +35,10 @@ interface IUserService {
 	 * Removes the current user data.
 	 */
 	clearUserData(): void;
+
+	/**
+	 * Return the URL where the avatar picture can be downloaded from.
+	 * @returns {Promise<string>} Return the URL where the avatar picture can be downloaded from. It will return null if the user does not have avatar or it is not logged in.
+	 */
+	getUserAvatar(): Promise<string>;
 }

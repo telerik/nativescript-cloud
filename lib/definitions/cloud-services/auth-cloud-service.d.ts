@@ -4,6 +4,7 @@ interface IAuthCloudService {
 	refreshToken(refreshToken: string): Promise<ITokenData>;
 	getTokenState(token: string): Promise<ITokenState>;
 	getLogoutUrl(): string;
+	getUserInfo(): Promise<IUserInfo>;
 }
 
 interface ITokenState {
