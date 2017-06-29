@@ -14,7 +14,6 @@ export class GitService implements IGitService {
 	private static MINIMAL_GIT_MINOR_VERSION = 9;
 
 	private gitFilePath: string;
-	private gitDirName: string;
 
 	constructor(
 		private $childProcess: IChildProcess,
@@ -150,12 +149,11 @@ export class GitService implements IGitService {
 	}
 
 	private getGitDirName(projectDir: string): string {
-		if (!this.gitDirName) {
-			const shasumData = crypto.createHash("sha1");
-			this.gitDirName = shasumData.digest("hex");
-		}
+		const shasumData = crypto.createHash("sha1");
+		shasumData.update(projectDir);
+		const gitDirName = shasumData.digest("hex");
 
-		return this.gitDirName;
+		return gitDirName;
 	}
 
 	private async getGitFilePath(): Promise<string> {
