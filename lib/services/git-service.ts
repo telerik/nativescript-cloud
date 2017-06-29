@@ -10,6 +10,8 @@ export class GitService implements IGitService {
 	private static GIT_IGNORE_FILE_NAME = ".gitignore";
 	private static TEMPLATE_GIT_IGNORE_FILE_NAME = "template-.gitignore";
 	private static MAX_TIME_FOR_UNUSED_REPOSITORY = 1000 * 3600 * 24 * 30;
+	private static MINIMAL_GIT_MAJOR_VERSION = 2;
+	private static MINIMAL_GIT_MINOR_VERSION = 9;
 
 	private gitFilePath: string;
 	private gitDirName: string;
@@ -17,6 +19,7 @@ export class GitService implements IGitService {
 	constructor(
 		private $childProcess: IChildProcess,
 		private $fs: IFileSystem,
+		private $hostInfo: IHostInfo,
 		private $options: IProfileDir) { }
 
 	public async gitPushChanges(projectDir: string, remoteUrl: IRemoteUrl, codeCommitCredential: ICodeCommitCredentials, repositoryState?: IRepositoryState): Promise<void> {
@@ -29,7 +32,7 @@ export class GitService implements IGitService {
 			await this.gitInit(projectDir);
 		}
 
-		await this.configureEnvironment(projectDir);
+		await this.configureEnvironment(projectDir, remoteUrl);
 		const statusResult = await this.gitStatus(projectDir);
 		if (this.nothingToCommit(statusResult.stdout)) {
 			await this.gitPush(projectDir, codeCommitCredential);
@@ -66,7 +69,24 @@ export class GitService implements IGitService {
 		return result.stdout.indexOf(remoteUrl.httpRemoteUrl) !== -1;
 	}
 
-	private async configureEnvironment(projectDir: string): Promise<void> {
+	private async configureEnvironment(projectDir: string, remoteUrl: IRemoteUrl): Promise<void> {
+		const gitVersion = await sysInfo.getGitVersion();
+		if (gitVersion) {
+			const match = gitVersion.match(/^(\d+?)\.(\d+?)\.\d+.*$/);
+			const gitMajorVersion = ~~match[1];
+			const gitMinorVersion = ~~match[2];
+			// After version 2.9.x git prompt for credential with Windows Credential Manager first then query over the rest of the credential managers.
+			// If credential.helper is configured to the empty string,
+			// this resets the helper list to empty (so you may override a helper set by a lower-priority config file by configuring the empty-string helper,
+			// followed by whatever set of helpers you would like).
+			// https://git-scm.com/docs/gitcredentials
+			if (this.$hostInfo.isWindows &&
+				gitMajorVersion === GitService.MINIMAL_GIT_MAJOR_VERSION &&
+				gitMinorVersion >= GitService.MINIMAL_GIT_MINOR_VERSION) {
+				await this.executeCommand(projectDir, ["config", "--local", `credential.${remoteUrl.httpRemoteUrl}.helper`, ""]);
+			}
+		}
+
 		await this.executeCommand(projectDir, ["config", "--local", "credential.helper", this.getCredentialHelperPath()]);
 		await this.executeCommand(projectDir, ["config", "--local", "credential.UseHttpPath", "true"]);
 	}
@@ -168,7 +188,7 @@ export class GitService implements IGitService {
 	}
 
 	private nothingToCommit(stdout: string): boolean {
-		return /nothing to commit, working directory clean/.test(stdout);
+		return /nothing to commit/.test(stdout);
 	}
 }
 
