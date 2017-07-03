@@ -19,6 +19,7 @@ export class GitService implements IGitService {
 		private $childProcess: IChildProcess,
 		private $fs: IFileSystem,
 		private $hostInfo: IHostInfo,
+		private $logger: ILogger,
 		private $options: IProfileDir) { }
 
 	public async gitPushChanges(projectDir: string, remoteUrl: IRemoteUrl, codeCommitCredential: ICodeCommitCredentials, repositoryState?: IRepositoryState): Promise<void> {
@@ -31,9 +32,14 @@ export class GitService implements IGitService {
 			await this.gitInit(projectDir);
 		}
 
+		await this.ensureGitIgnoreExists(projectDir);
+
 		await this.configureEnvironment(projectDir, remoteUrl);
 		const statusResult = await this.gitStatus(projectDir);
-		if (this.nothingToCommit(statusResult.stdout)) {
+		this.$logger.trace(`Result of git status: ${statusResult}.`);
+
+		if (this.hasNothingToCommit(statusResult.stdout)) {
+			this.$logger.trace("Nothing to commit. Just push force the branch.");
 			await this.gitPush(projectDir, codeCommitCredential);
 			return;
 		}
@@ -107,7 +113,6 @@ export class GitService implements IGitService {
 	}
 
 	private async gitPush(projectDir: string, codeCommitCredential: ICodeCommitCredentials): Promise<ISpawnResult> {
-		this.ensureGitIgnoreExists(projectDir);
 		const env = _.assign({}, process.env, {
 			AWS_ACCESS_KEY_ID: codeCommitCredential.accessKeyId,
 			AWS_SECRET_ACCESS_KEY: codeCommitCredential.secretAccessKey,
@@ -160,6 +165,8 @@ export class GitService implements IGitService {
 		if (!this.gitFilePath) {
 			this.gitFilePath = await sysInfo.getGitPath();
 
+			this.$logger.trace(`Path to git is: ${this.gitFilePath}.`);
+
 			if (!this.gitFilePath) {
 				throw new Error("Git Installation Not Found. Install Git to improve the speed of cloud builds.");
 			}
@@ -170,7 +177,9 @@ export class GitService implements IGitService {
 
 	private ensureGitIgnoreExists(projectDir: string): void {
 		const gitIgnorePath = path.join(projectDir, GitService.GIT_IGNORE_FILE_NAME);
+		this.$logger.trace(`Ensure ${gitIgnorePath} exists.`);
 		if (!this.$fs.exists(gitIgnorePath)) {
+			this.$logger.trace(`${gitIgnorePath} does not exist. Creating a default one.`);
 			const gitIgnoreResourceFile = path.join(this.getGitResourceFolder(), GitService.TEMPLATE_GIT_IGNORE_FILE_NAME);
 			this.$fs.copyFile(gitIgnoreResourceFile, gitIgnorePath);
 		}
@@ -185,7 +194,7 @@ export class GitService implements IGitService {
 		return path.join(__dirname, "..", "..", "resources", "git");
 	}
 
-	private nothingToCommit(stdout: string): boolean {
+	private hasNothingToCommit(stdout: string): boolean {
 		return /nothing to commit/.test(stdout);
 	}
 }
