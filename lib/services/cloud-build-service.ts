@@ -292,22 +292,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 					return;
 				}
 
-				if (buildStatus.status === CloudBuildService.BUILD_COMPLETE_STATUS) {
-					try {
-						clearInterval(buildIntervalId);
-						return resolve();
-					} catch (err) {
-						clearInterval(buildIntervalId);
-						return reject(err);
-					}
-				}
-
-				if (buildStatus.status === CloudBuildService.BUILD_FAILED_STATUS) {
-					clearInterval(buildIntervalId);
-					return reject(new Error("Build failed."));
-				}
-
-				if (buildStatus.status === CloudBuildService.BUILD_IN_PROGRESS_STATUS) {
+				const getBuildLogs = async () => {
 					try {
 						const logs: string = await this.getContentOfS3File(buildInformation.outputUrl);
 						// The logs variable will contain the full build log and we need to log only the logs that we don't have.
@@ -324,6 +309,24 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 						this.$logger.trace("Error while getting build logs:");
 						this.$logger.trace(err);
 					}
+				};
+
+				if (buildStatus.status === CloudBuildService.BUILD_COMPLETE_STATUS) {
+					clearInterval(buildIntervalId);
+					await getBuildLogs();
+
+					return resolve();
+				}
+
+				if (buildStatus.status === CloudBuildService.BUILD_FAILED_STATUS) {
+					clearInterval(buildIntervalId);
+					await getBuildLogs();
+
+					return reject(new Error("Build failed."));
+				}
+
+				if (buildStatus.status === CloudBuildService.BUILD_IN_PROGRESS_STATUS) {
+					await getBuildLogs();
 				}
 			}, CloudBuildService.BUILD_STATUS_CHECK_INTERVAL);
 		});
