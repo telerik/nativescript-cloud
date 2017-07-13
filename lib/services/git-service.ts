@@ -85,10 +85,13 @@ export class GitService implements IGitService {
 			// this resets the helper list to empty (so you may override a helper set by a lower-priority config file by configuring the empty-string helper,
 			// followed by whatever set of helpers you would like).
 			// https://git-scm.com/docs/gitcredentials
-			if (this.$hostInfo.isWindows &&
-				gitMajorVersion === GitService.MINIMAL_GIT_MAJOR_VERSION &&
-				gitMinorVersion >= GitService.MINIMAL_GIT_MINOR_VERSION) {
-				await this.executeCommand(projectDir, ["config", "--local", `credential.${remoteUrl.httpRemoteUrl}.helper`, ""]);
+			if (this.$hostInfo.isWindows) {
+				if (gitMajorVersion === GitService.MINIMAL_GIT_MAJOR_VERSION &&
+					gitMinorVersion >= GitService.MINIMAL_GIT_MINOR_VERSION) {
+					await this.executeCommand(projectDir, ["config", "--local", `credential.${remoteUrl.httpRemoteUrl}.helper`, ""]);
+				} else {
+					throw new Error(`Unsupported Git version: ${gitVersion}. The minimal supported version is 2.9.0. Please update.`);
+				}
 			}
 		}
 
