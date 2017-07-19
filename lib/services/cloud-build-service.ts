@@ -257,7 +257,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			ignoreScripts: false
 		};
 
-		await this.$platformService.preparePlatform(platform, appFilesUpdaterOptions, null, projectData, config);
+		await this.$platformService.preparePlatform(platform, appFilesUpdaterOptions, null, projectData, config, [], { skipNativePrepare: true });
 	}
 
 	private async getObjectFromS3File<T>(pathToFile: string): Promise<T> {
