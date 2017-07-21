@@ -32,7 +32,7 @@ export class ServerConfigManager implements IServerConfigManager {
 
 	public printConfigData(): void {
 		const config = this.getCurrentConfigData();
-		console.log(config);
+		console.log(JSON.stringify(config, null, "  "));
 	}
 
 	public getCurrentConfigData(): IServerConfig {

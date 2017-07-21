@@ -68,6 +68,8 @@ export const HTTP_HEADERS = {
 	LOCATION: "Location"
 };
 
+export const CUSTOM_ENV_HEADER_PREFIX = "X-Fusion-Env-Var-";
+
 export const HTTP_STATUS_CODES = {
 	SUCCESS: 200,
 	FOUND: 302,
