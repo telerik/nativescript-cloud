@@ -28,7 +28,8 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
-		private $qr: IQrCodeGenerator) {
+		private $qr: IQrCodeGenerator,
+		private $userService: IUserService) {
 		super();
 	}
 
@@ -388,7 +389,8 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				templateAppName: sanitizedProjectName,
 				projectName: sanitizedProjectName,
 				framework: "tns",
-				useIncrementalBuild: !projectSettings.clean
+				useIncrementalBuild: !projectSettings.clean,
+				userEmail: this.$userService.getUser().email
 			},
 			buildFiles
 		};
