@@ -25,7 +25,8 @@ export const EMULATORS_SERVICE_NAME = "emulators-service";
 export const CODE_COMMIT_SERVICE_NAME = "code-commit-service";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
-	BUILD_OUTPUT: "buildOutput"
+	BUILD_OUTPUT: "buildOutput",
+	STEP_CHANGED: "stepChanged"
 };
 
 export const DEVICE_DISCOVERY_EVENTS = {
@@ -82,4 +83,16 @@ export const DISPOSITIONS = {
 	PROVISION: "Provision",
 	KEYCHAIN: "Keychain",
 	CRYPTO_STORE: "CryptoStore"
+};
+
+export const BUILD_STEP_NAME = {
+	PREPARE: "prepare",
+	UPLOAD: "upload",
+	BUILD: "build",
+	DOWNLOAD: "download"
+};
+
+export const BUILD_STEP_PROGRESS = {
+	START: 0,
+	END: 100
 };
