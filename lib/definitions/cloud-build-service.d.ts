@@ -3,6 +3,11 @@
  */
 interface IBuildResultData {
 	/**
+	 * The ID of the build.
+	 */
+	buildId: string;
+
+	/**
 	 * All data printed to the stderr during cloud build operation.
 	 */
 	stderr: string;
@@ -26,6 +31,36 @@ interface IBuildResultData {
 	 * Data required for generation of a QR code from the build result.
 	 */
 	qrData: IQrData;
+}
+
+/**
+ * Describes build step.
+ */
+interface IBuildStep {
+	/**
+	 * The ID of the build.
+	 */
+	buildId: string;
+
+	/**
+	 * The name of the step.
+	 */
+	step: string;
+
+	/**
+	 * The progress of the step in percents. The value will be between 0 and 100.
+	 */
+	progress: number;
+}
+
+interface IBuildError extends Error {
+	buildId: string;
+}
+
+interface IBuildLog {
+	buildId: string;
+	data: string;
+	pipe: string;
 }
 
 /**
