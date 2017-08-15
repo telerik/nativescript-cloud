@@ -9,7 +9,7 @@ const tns = require("nativescript");
 
 ### Module cloudBuildService
 The `cloudBuildService` allows build of applications in the cloud. You can call the following methods:
-* `build` method - it validates passed arguments and tries to build the application in the cloud. In case of successful build, the build result (.apk, .ipa or .zip) is downloaded. The result contains information about the whole build process, path to the downloaded build result and information used to generate a QR code, pointing to the latest build result (in S3). During the build the cloudBuildService will emit buildOutput event which will contain parts of the current build output.</br>
+* `build` method - it validates passed arguments and tries to build the application in the cloud. In case of successful build, the build result (.apk, .ipa or .zip) is downloaded. The result contains information about the whole build process, path to the downloaded build result and information used to generate a QR code, pointing to the latest build result (in S3). </br>
 Definition:
 
 ```TypeScript
@@ -29,6 +29,39 @@ build(projectSettings: IProjectSettings,
 ```
 Detailed description of each parameter can be found [here](./lib/definitions/cloud-build-service.d.ts).
 </br>
+
+Events:
+1. buildOutput - contains parts of the current build output:
+	```TypeScript
+	interface IBuildLog {
+		buildId: string;
+		data: string;
+		pipe: string;
+	}
+	```
+2. stepChanged - contains the name of the changed build step and its progress:
+	```TypeScript
+	/**
+	* Describes build step.
+	*/
+	interface IBuildStep {
+		/**
+		* The ID of the build.
+		*/
+		buildId: string;
+
+		/**
+		* The name of the step - prepare, upload, build or download.
+		*/
+		step: string;
+
+		/**
+		* The progress of the step in percents. The value will be between 0 and 100.
+		*/
+		progress: number;
+	}
+	```
+
 Usage:
 ```JavaScript
 const tns = require("nativescript");
@@ -56,8 +89,21 @@ tns.cloudBuildService.on("buildOutput", (data) => {
 	/*
 		Sample data object:
 		{
+			"buildId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
 			"pipe": "stdout",
 			"data": "Add platform ios with runtime version 2.5.*"
+		}
+	*/
+});
+
+tns.cloudBuildService.on("stepChanged", (data) => {
+	console.log(data);
+	/*
+		Sample data object:
+		{
+			"buildId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
+			"step": "build";
+			"progress": 100;
 		}
 	*/
 });
