@@ -43,7 +43,7 @@ interface IBuildStep {
 	buildId: string;
 
 	/**
-	 * The name of the step.
+	 * The name of the step - prepare, upload, build or download.
 	 */
 	step: string;
 
