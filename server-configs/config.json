@@ -15,6 +15,9 @@
 		},
 		"code-commit-service": {
 			"subdomain": "code-commit"
+		},
+		"misc-service": {
+			"subdomain": "misc"
 		}
 	}
 }

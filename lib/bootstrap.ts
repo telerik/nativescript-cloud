@@ -14,6 +14,7 @@ $injector.requirePublicClass("authenticationService", path.join(__dirname, "serv
 $injector.requirePublicClass("cloudBuildService", path.join(__dirname, "services", "cloud-build-service"));
 $injector.requirePublicClass("cloudEmulatorLauncher", path.join(__dirname, "services", "cloud-emulator-emulator-launcher"));
 $injector.requirePublicClass("userService", path.join(__dirname, "services", "user-service"));
+$injector.requirePublicClass("assetGenerationService", path.join(__dirname, "services", "asset-generation-service"));
 
 // Services.
 $injector.require("uploadService", path.join(__dirname, "services", "cloud-services", "upload-service"));

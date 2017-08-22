@@ -13,6 +13,9 @@
 		},
 		"code-commit-service": {
 			"fullHostName": "localhost:8003"
+		},
+		"misc-service": {
+			"subdomain": "localhost:8004"
 		}
 	}
 }

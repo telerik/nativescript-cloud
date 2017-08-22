@@ -12,6 +12,9 @@
 		},
 		"code-commit-service": {
 			"subdomain": "test-code-commit"
+		},
+		"misc-service": {
+			"subdomain": "misc"
 		}
 	}
 }

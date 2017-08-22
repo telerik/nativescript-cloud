@@ -11,7 +11,7 @@ interface ICloudServicesProxy extends ICloudRequestService {
 }
 
 interface IUploadService {
-	uploadToS3(localFilePath: string): Promise<string>;
+	uploadToS3(localFilePath: string, requestHeaders?: any): Promise<string>;
 }
 
 interface IEmulatorCredentials {
