@@ -14,7 +14,7 @@ export class CloudBuild implements ICommand {
 
 	public async execute(args: string[]): Promise<void> {
 		const platform = this.$mobileHelper.validatePlatformName(args[0]);
-		this.$logger.warn(`Executing cloud build with platform: ${platform}.`);
+		this.$logger.info(`Executing cloud build with platform: ${platform}.`);
 		const nativescriptData = this.$fs.readJson(path.join(this.$projectData.projectDir, "package.json")).nativescript;
 		let pathToCertificate = "";
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {

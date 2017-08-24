@@ -12,6 +12,7 @@ $injector.require("cloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile",
 // Public API.
 $injector.requirePublicClass("authenticationService", path.join(__dirname, "services", "authentication-service"));
 $injector.requirePublicClass("cloudBuildService", path.join(__dirname, "services", "cloud-build-service"));
+$injector.requirePublicClass("cloudCodesignService", path.join(__dirname, "services", "cloud-codesign-service"));
 $injector.requirePublicClass("cloudEmulatorLauncher", path.join(__dirname, "services", "cloud-emulator-emulator-launcher"));
 $injector.requirePublicClass("userService", path.join(__dirname, "services", "user-service"));
 
@@ -40,6 +41,7 @@ $injector.requireCommand("user", path.join(__dirname, "commands", "user"));
 $injector.requireCommand("kill-server", path.join(__dirname, "commands", "kill-server"));
 
 $injector.requireCommand("build|cloud", path.join(__dirname, "commands", "cloud-build"));
+$injector.requireCommand("codesign|cloud", path.join(__dirname, "commands", "cloud-codesign"));
 $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "cloud-lib-version"));
 
 const $devicesService: Mobile.IDevicesService = $injector.resolve("devicesService");

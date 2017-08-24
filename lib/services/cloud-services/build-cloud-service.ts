@@ -9,8 +9,8 @@ export class BuildCloudService extends CloudServiceBase implements IBuildCloudSe
 		super($cloudRequestService);
 	}
 
-	public startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IBuildResponse> {
-		return this.sendRequest<IBuildResponse>(HTTP_METHODS.POST, "api/build", buildRequest);
+	public startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IServerResponse> {
+		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/build", buildRequest);
 	}
 
 	public getPresignedUploadUrlObject(appId: string, fileName: string): Promise<IAmazonStorageEntry> {
@@ -19,6 +19,10 @@ export class BuildCloudService extends CloudServiceBase implements IBuildCloudSe
 
 	public getBuildCredentials(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse> {
 		return this.sendRequest<IBuildCredentialResponse>(HTTP_METHODS.POST, "api/build-credentials", buildCredentialRequest);
+	}
+
+	public generateCodesignFiles(codesignRequestData: IServerRequestData): Promise<IServerResponse> {
+		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/codesign", codesignRequestData);
 	}
 }
 

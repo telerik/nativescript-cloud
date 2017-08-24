@@ -5,24 +5,24 @@ import * as forge from "node-forge";
 import * as minimatch from "minimatch";
 import { escape } from "querystring";
 import { EOL } from "os";
-import { EventEmitter } from "events";
 import * as constants from "../constants";
+import { CloudService } from "./cloud-service";
 const plist = require("simple-plist");
 
-export class CloudBuildService extends EventEmitter implements ICloudBuildService {
-	private static BUILD_STATUS_CHECK_INTERVAL = 1500;
-	private static BUILD_COMPLETE_STATUS = "Success";
-	private static BUILD_IN_PROGRESS_STATUS = "Building";
-	private static BUILD_FAILED_STATUS = "Failed";
+export class CloudBuildService extends CloudService implements ICloudBuildService {
 	private static DEFAULT_VERSION = "3.0.0";
 
-	constructor(private $buildCloudService: IBuildCloudService,
+	protected failedError: string;
+	protected failedToStartError: string;
+	protected operationInProgressStatus: string;
+
+	constructor($fs: IFileSystem,
+		$httpClient: Server.IHttpClient,
+		$logger: ILogger,
+		private $buildCloudService: IBuildCloudService,
 		private $gitService: IGitService,
 		private $errors: IErrors,
-		private $fs: IFileSystem,
 		private $itmsServicesPlistHelper: IItmsServicesPlistHelper,
-		private $httpClient: Server.IHttpClient,
-		private $logger: ILogger,
 		private $platformService: IPlatformService,
 		private $cloudBuildOutputFilter: ICloudBuildOutputFilter,
 		private $mobileHelper: Mobile.IMobileHelper,
@@ -30,10 +30,13 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		private $projectDataService: IProjectDataService,
 		private $qr: IQrCodeGenerator,
 		private $userService: IUserService) {
-		super();
+		super($fs, $httpClient, $logger);
+		this.failedToStartError = "Failed to start cloud build.";
+		this.failedError = "Build failed.";
+		this.operationInProgressStatus = "Building";
 	}
 
-	public getBuildOutputDirectory(options: ICloudBuildOutputDirectoryOptions): string {
+	public getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string {
 		let result = path.join(options.projectDir, constants.CLOUD_TEMP_DIR_NAME, options.platform.toLowerCase());
 		if (this.$mobileHelper.isiOSPlatform(options.platform)) {
 			result = path.join(result, options.emulator ? constants.CLOUD_BUILD_DIRECTORY_NAMES.EMULATOR : constants.CLOUD_BUILD_DIRECTORY_NAMES.DEVICE);
@@ -70,7 +73,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
 		await this.prepareProject(buildId, projectSettings, platform, buildConfiguration, iOSBuildData);
-		let buildFiles: IBuildItemBase[] = [];
+		let buildFiles: IServerItemBase[] = [];
 		if (this.$mobileHelper.isAndroidPlatform(platform) && this.isReleaseConfiguration(buildConfiguration)) {
 			buildFiles.push({
 				filename: uuid.v4(),
@@ -103,11 +106,11 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		}
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.START);
-		const buildResponse: IBuildResponse = await this.$buildCloudService.startBuild(projectSettings.projectId, buildProps);
+		const buildResponse: IServerResponse = await this.$buildCloudService.startBuild(projectSettings.projectId, buildProps);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
-		await this.waitForBuildToFinish(buildId, buildResponse);
-		const buildResult: IBuildResult = await this.getObjectFromS3File<IBuildResult>(buildResponse.resultUrl);
+		await this.waitForServerOperationToFinish(buildId, buildResponse);
+		const buildResult: IServerResult = await this.getObjectFromS3File<IServerResult>(buildResponse.resultUrl);
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.END);
 
 		this.$logger.trace("Build result:");
@@ -120,7 +123,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 
 		this.$logger.info(`Finished ${buildInformationString} successfully. Downloading result...`);
 
-		const localBuildResult = await this.downloadBuildResult(buildId, buildResult, {
+		const localBuildResult = await this.downloadServerResult(buildId, buildResult, {
 			projectDir: projectSettings.projectDir,
 			platform,
 			emulator: iOSBuildData && !iOSBuildData.buildForDevice
@@ -155,7 +158,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		return result;
 	}
 
-	private prepareFilesToUpload(amazonStorageEntries: IAmazonStorageEntry[], buildFiles: IBuildItemBase[]): IAmazonStorageEntryData[] {
+	private prepareFilesToUpload(amazonStorageEntries: IAmazonStorageEntry[], buildFiles: IServerItemBase[]): IAmazonStorageEntryData[] {
 		let result: IAmazonStorageEntryData[] = [];
 		_.each(amazonStorageEntries, amazonStorageEntry => {
 			_.each(buildFiles, buildFile => {
@@ -271,12 +274,13 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 			provision = mobileProvisionData.UUID;
 		}
 
-		const config: IAddPlatformCoreOptions = {
+		const config: IPlatformOptions = {
 			provision,
 			mobileProvisionData,
 			sdk: null,
 			frameworkPath: null,
-			ignoreScripts: false
+			ignoreScripts: false,
+			teamId: ""
 		};
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
@@ -284,84 +288,12 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.END);
 	}
 
-	private async getObjectFromS3File<T>(pathToFile: string): Promise<T> {
-		return JSON.parse(await this.getContentOfS3File(pathToFile));
-	}
-
-	private async getContentOfS3File(pathToFile: string): Promise<string> {
-		return (await this.$httpClient.httpRequest(pathToFile)).body;
-	}
-
-	private waitForBuildToFinish(buildId: string, buildInformation: IBuildResponse): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			let outputCursorPosition = 0;
-			let hasCheckedForBuildStatus = false;
-			const buildIntervalId = setInterval(async () => {
-				let buildStatus: IBuildStatus;
-				try {
-					buildStatus = await this.getObjectFromS3File<IBuildStatus>(buildInformation.statusUrl);
-				} catch (err) {
-					this.$logger.trace(err);
-				}
-
-				if (!hasCheckedForBuildStatus) {
-					hasCheckedForBuildStatus = true;
-				} else if (!buildStatus) {
-					// We will get here if there is no build status twice in a row.
-					clearInterval(buildIntervalId);
-					return reject(new Error("Failed to start cloud build."));
-				}
-
-				if (!buildStatus) {
-					return;
-				}
-
-				const getBuildLogs = async () => {
-					try {
-						const logs: string = await this.getContentOfS3File(buildInformation.outputUrl);
-						// The logs variable will contain the full build log and we need to log only the logs that we don't have.
-						const contentToLog = this.$cloudBuildOutputFilter.filter(logs.substr(outputCursorPosition));
-						if (contentToLog) {
-							const data: IBuildLog = { buildId, data: contentToLog, pipe: "stdout" };
-							this.emit(constants.CLOUD_BUILD_EVENT_NAMES.BUILD_OUTPUT, data);
-							this.$logger.info(contentToLog);
-						}
-
-						outputCursorPosition = logs.length <= 0 ? 0 : logs.length - 1;
-					} catch (err) {
-						// Ignore the error from getting the build output because the build can finish even if there is error.
-						this.$logger.trace("Error while getting build logs:");
-						this.$logger.trace(err);
-					}
-				};
-
-				if (buildStatus.status === CloudBuildService.BUILD_COMPLETE_STATUS) {
-					clearInterval(buildIntervalId);
-					await getBuildLogs();
-
-					return resolve();
-				}
-
-				if (buildStatus.status === CloudBuildService.BUILD_FAILED_STATUS) {
-					clearInterval(buildIntervalId);
-					await getBuildLogs();
-
-					return reject(new Error("Build failed."));
-				}
-
-				if (buildStatus.status === CloudBuildService.BUILD_IN_PROGRESS_STATUS) {
-					await getBuildLogs();
-				}
-			}, CloudBuildService.BUILD_STATUS_CHECK_INTERVAL);
-		});
-	}
-
 	private async prepareBuildRequest(buildId: string,
 		projectSettings: IProjectSettings,
 		platform: string,
 		buildConfiguration: string,
 		buildCredentials: IBuildCredentialResponse,
-		filesToUpload: IAmazonStorageEntryData[]): Promise<any> {
+		filesToUpload: IAmazonStorageEntryData[]): Promise<IBuildRequestData> {
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.START);
 		let buildFiles;
 		try {
@@ -422,6 +354,7 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 				useIncrementalBuild: !projectSettings.clean,
 				userEmail: this.$userService.getUser().email
 			},
+			targets: [],
 			buildFiles
 		};
 	}
@@ -538,37 +471,44 @@ export class CloudBuildService extends EventEmitter implements ICloudBuildServic
 		return result;
 	}
 
-	private getBuildResultUrl(buildResult: IBuildResult): string {
-		return this.getBuildResult(buildResult).fullPath;
+	private getBuildResultUrl(buildResult: IServerResult): string {
+		// We expect only one buildResult - .ipa, .apk ...
+		return this.getServerResults(buildResult)[0].fullPath;
 	}
 
-	private getBuildResult(buildResult: IBuildResult): IBuildItem {
+	protected getServerResults(buildResult: IServerResult): IServerItem[] {
 		const result = _.find(buildResult.buildItems, b => b.disposition === constants.DISPOSITIONS.BUILD_RESULT);
 
 		if (!result) {
 			this.$errors.failWithoutHelp("No item with disposition BuildResult found in the build result items.");
 		}
 
-		return result;
+		return [result];
 	}
 
-	private async downloadBuildResult(buildId: string, buildResult: IBuildResult, buildOutputOptions: ICloudBuildOutputDirectoryOptions): Promise<string> {
+	protected async getServerLogs(logsUrl: string, buildId: string): Promise<void> {
+		try {
+			const logs: string = await this.getContentOfS3File(logsUrl);
+			// The logs variable will contain the full server log and we need to log only the logs that we don't have.
+			const contentToLog = this.$cloudBuildOutputFilter.filter(logs.substr(this.outputCursorPosition));
+			if (contentToLog) {
+				const data: IBuildLog = { buildId, data: contentToLog, pipe: "stdout" };
+				this.emit(constants.CLOUD_BUILD_EVENT_NAMES.BUILD_OUTPUT, data);
+				this.$logger.info(contentToLog);
+			}
+
+			this.outputCursorPosition = logs.length <= 0 ? 0 : logs.length - 1;
+		} catch (err) {
+			// Ignore the error from getting the server output because the task can finish even if there is error.
+			this.$logger.trace(`Error while getting server logs: ${err}`);
+		}
+	};
+
+	private async downloadServerResult(buildId: string, buildResult: IServerResult, buildOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string> {
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.START);
-		const destinationDir = this.getBuildOutputDirectory(buildOutputOptions);
-		this.$fs.ensureDirectoryExists(destinationDir);
-
-		const buildResultObj = this.getBuildResult(buildResult);
-		const targetFileName = path.join(destinationDir, buildResultObj.filename);
-		const targetFile = this.$fs.createWriteStream(targetFileName);
-
-		// Download the output file.
-		await this.$httpClient.httpRequest({
-			url: buildResultObj.fullPath,
-			pipeTo: targetFile
-		});
-
+		const targetFileNames = await super.downloadServerResults(buildResult, buildOutputOptions);
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.END);
-		return targetFileName;
+		return targetFileNames[0];
 	}
 
 	private async zipProject(projectDir: string): Promise<string> {
