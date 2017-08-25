@@ -1,5 +1,5 @@
 export const CLOUD_TEMP_DIR_NAME = ".cloud";
-export const CODESIGN_TEMP_DIR_NAME = ".codesign";
+export const CODESIGN_FILES_DIR_NAME = "codesign_files";
 export const RELEASE_CONFIGURATION_NAME = "release";
 
 export const CRYPTO = {

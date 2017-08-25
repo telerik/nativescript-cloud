@@ -189,3 +189,9 @@ interface IIOSBuildData extends IBuildForDevice {
 	 */
 	deviceIdentifier?: string;
 }
+
+/**
+ * Here only for backwards compatibility.
+ */
+interface ICloudBuildOutputDirectoryOptions extends ICloudServerOutputDirectoryOptions {
+}

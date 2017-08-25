@@ -28,7 +28,7 @@ interface IServerResultData {
  */
 interface IServerStatus {
 	/**
-	 * The build status.
+	 * The status of the server operation.
 	 */
 	status: string;
 }
@@ -61,7 +61,7 @@ interface IServerResult {
 	code: number;
 	stdout: string;
 	stderr: string;
-	buildItems: IServerItem[]; // naming is die to initial implementation that is related to other repos.
+	buildItems: IServerItem[]; // naming is due to initial implementation that is related to other repos.
 }
 
 interface IServerItemBase {

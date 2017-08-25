@@ -4,11 +4,19 @@ import * as constants from "../constants";
 import { CloudService } from "./cloud-service";
 
 export class CloudCodesignService extends CloudService implements ICloudCodesignService {
-	private platform = this.$devicePlatformsConstants.iOS;
+	private get platform() {
+		return this.$devicePlatformsConstants.iOS;
+	};
 
-	protected failedError: string;
-	protected failedToStartError: string;
-	protected operationInProgressStatus: string;
+	protected get failedError() {
+		return "Generation of codesign files failed.";
+	};
+	protected get failedToStartError() {
+		return "Failed to start generation of codesign files.";
+	};
+	protected get operationInProgressStatus() {
+		return "Working";
+	};
 
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
@@ -17,29 +25,24 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		private $errors: IErrors,
 		private $devicesService: Mobile.IDevicesService,
 		private $projectHelper: IProjectHelper,
+		private $projectDataService: IProjectDataService,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
 		super($fs, $httpClient, $logger);
-		this.failedToStartError = "Failed to start cloud codesign generation.";
-		this.failedError = "Codesign generation failed.";
-		this.operationInProgressStatus = "Working";
 	}
 
 	public async generateCodesignFiles(codesignData: ICodesignData,
-		projectData: IProjectData): Promise<ICodesignResultData> {
+		projectDir: string): Promise<ICodesignResultData> {
+		this.validateParameteres(codesignData, projectDir);
 		codesignData.clean = codesignData.clean === undefined ? true : codesignData.clean;
 		const buildId = uuid.v4();
 
 		try {
-			const serverResult = await this.executeGeneration(codesignData, projectData, buildId);
+			const serverResult = await this.executeGeneration(codesignData, projectDir, buildId);
 			return serverResult;
 		} catch (err) {
 			err.buildId = buildId;
 			throw err;
 		}
-	}
-
-	public getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string {
-		return path.join(options.projectDir, constants.CODESIGN_TEMP_DIR_NAME, options.platform.toLowerCase());
 	}
 
 	protected getServerResults(codesignResult: IServerResult): IServerItem[] {
@@ -54,35 +57,47 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		return result;
 	}
 
-	protected async getServerLogs(logsUrl: string, buildId: string): Promise<void> {
-		// no specific implementation needed.
+	public getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string {
+		return path.join(options.projectDir, constants.CODESIGN_FILES_DIR_NAME, options.platform.toLowerCase());
 	}
 
-	public async executeGeneration(codesignData: ICodesignData,
-		projectData: IProjectData,
+	private validateParameteres(codesignData: ICodesignData,
+		projectDir: string) {
+		if (!codesignData || !codesignData.username || !codesignData.password) {
+			this.$errors.failWithoutHelp(`Codesign failed. Reason is missing code sign data. Apple Id and Apple Id password are required..`);
+		}
+
+		if (!projectDir || projectDir === "") {
+			this.$errors.failWithoutHelp(`Codesign failed. Reason is invalid project path.`);
+		}
+	}
+
+	private async executeGeneration(codesignData: ICodesignData,
+		projectDir: string,
 		buildId: string): Promise<ICodesignResultData> {
-		const codesignInformationString = "Generation of iOS certificate and provision files";
+		const codesignInformationString = "generation of iOS certificate and provision files";
 		this.$logger.info(`Starting ${codesignInformationString}.`);
 
+		const projectData = this.$projectDataService.getProjectData(projectDir);
 		const codesignRequest = await this.prepareCodesignRequest(buildId, codesignData, projectData);
 		const codesignResponse: IServerResponse = await this.$buildCloudService.generateCodesignFiles(codesignRequest);
 		this.$logger.trace(`Codesign response: ${JSON.stringify(codesignResponse)}`);
 
-		let codesignResult: IServerResult;
 		try {
 			await this.waitForServerOperationToFinish(buildId, codesignResponse);
 		} catch (ex) {
 			this.$logger.trace("Codesign generation failed with err: ", ex);
-		} finally {
-			codesignResult = await this.getObjectFromS3File<IServerResult>(codesignResponse.resultUrl);
 		}
 
+		const codesignResult = await this.getObjectFromS3File<IServerResult>(codesignResponse.resultUrl);
 		this.$logger.trace("Codesign result:");
 		this.$logger.trace(codesignResult);
 
 		if (!codesignResult.buildItems || !codesignResult.buildItems.length) {
 			// Something failed.
-			this.$errors.failWithoutHelp(`Codesign failed. Reason is: ${codesignResult.errors}. Additional information: ${codesignResult.stderr}.`);
+			const err: any = new Error(`Codesign failed. Reason is: ${codesignResult.errors}.`);
+			err.stderr = codesignResult.stderr;
+			throw err;
 		}
 
 		this.$logger.info(`Finished ${codesignInformationString} successfully. Downloading result...`);
@@ -108,6 +123,10 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		return result;
 	}
 
+	protected async getServerLogs(logsUrl: string, buildId: string): Promise<void> {
+		// no specific implementation needed.
+	}
+
 	private async prepareCodesignRequest(buildId: string,
 		codesignData: ICodesignData,
 		projectData: IProjectData): Promise<any> {
@@ -115,7 +134,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectData.projectName);
 		await this.$devicesService.detectCurrentlyAttachedDevices({ shouldReturnImmediateResult: false, platform: this.platform });
 		let attachedDevices = this.$devicesService.getDeviceInstances();
-		attachedDevices = attachedDevices.filter(d => d.deviceInfo.platform.toLowerCase() === this.platform.toLowerCase());
+		attachedDevices = attachedDevices.filter(d => !d.isEmulator && d.deviceInfo.platform.toLowerCase() === this.platform.toLowerCase());
 		const devices = attachedDevices.map(d => ({ displayName: d.deviceInfo.displayName, identifier: d.deviceInfo.identifier }));
 
 		return {
@@ -125,7 +144,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 			clean: codesignData.clean,
 			username: codesignData.username,
 			password: codesignData.password,
-			devices: devices
+			devices
 		};
 	}
 }

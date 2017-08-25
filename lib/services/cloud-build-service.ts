@@ -12,9 +12,15 @@ const plist = require("simple-plist");
 export class CloudBuildService extends CloudService implements ICloudBuildService {
 	private static DEFAULT_VERSION = "3.0.0";
 
-	protected failedError: string;
-	protected failedToStartError: string;
-	protected operationInProgressStatus: string;
+	protected get failedError() {
+		return "Build failed.";
+	};
+	protected get failedToStartError() {
+		return "Failed to start cloud build.";
+	};
+	protected get operationInProgressStatus() {
+		return "Building";
+	};
 
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
@@ -31,9 +37,6 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $qr: IQrCodeGenerator,
 		private $userService: IUserService) {
 		super($fs, $httpClient, $logger);
-		this.failedToStartError = "Failed to start cloud build.";
-		this.failedError = "Build failed.";
-		this.operationInProgressStatus = "Building";
 	}
 
 	public getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string {
@@ -43,6 +46,13 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		return result;
+	}
+
+	/**
+	 * Here only for backwards compatibility.
+	 */
+	public getBuildOutputDirectory(options: ICloudBuildOutputDirectoryOptions): string {
+		return this.getServerOperationOutputDirectory(options);
 	}
 
 	public async build(projectSettings: IProjectSettings,
@@ -280,7 +290,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			sdk: null,
 			frameworkPath: null,
 			ignoreScripts: false,
-			teamId: ""
+			teamId: undefined
 		};
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
@@ -488,7 +498,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 	protected async getServerLogs(logsUrl: string, buildId: string): Promise<void> {
 		try {
-			const logs: string = await this.getContentOfS3File(logsUrl);
+			const logs = await this.getContentOfS3File(logsUrl);
 			// The logs variable will contain the full server log and we need to log only the logs that we don't have.
 			const contentToLog = this.$cloudBuildOutputFilter.filter(logs.substr(this.outputCursorPosition));
 			if (contentToLog) {
