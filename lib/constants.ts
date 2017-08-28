@@ -1,4 +1,5 @@
 export const CLOUD_TEMP_DIR_NAME = ".cloud";
+export const CODESIGN_FILES_DIR_NAME = "codesign_files";
 export const RELEASE_CONFIGURATION_NAME = "release";
 
 export const CRYPTO = {
@@ -81,6 +82,7 @@ export const DISPOSITIONS = {
 	PACKAGE_GIT: "PackageGit",
 	BUILD_RESULT: "BuildResult",
 	PROVISION: "Provision",
+	CERTIFICATE: "Certificate",
 	KEYCHAIN: "Keychain",
 	CRYPTO_STORE: "CryptoStore"
 };

@@ -1,24 +1,24 @@
 interface IBuildCloudService {
-	startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IBuildResponse>;
+	startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IServerResponse>;
 	getPresignedUploadUrlObject(appId: string, fileName: string): Promise<IAmazonStorageEntry>;
 	getBuildCredentials(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse>;
+	generateCodesignFiles(codesignRequestData: IServerRequestData): Promise<IServerResponse>;
 }
 
-interface IBuildResponse {
+interface IServerResponse {
 	statusUrl: string;
 	resultUrl: string;
 	outputUrl: string;
 }
 
 interface IBuildFile {
-	Disposition: string;
-	SourceUri: string;
+	disposition: string;
+	sourceUri: string;
 }
 
-interface IBuildRequestData {
-	Targets: string[];
-	Properties: IDictionary<string>;
-	BuildFiles: IBuildFile[];
+interface IBuildRequestData extends IServerRequestData {
+	targets: string[];
+	buildFiles: IBuildFile[];
 }
 
 interface IBuildCredentialRequest {
@@ -38,4 +38,8 @@ interface IAmazonStorageEntry {
 	publicDownloadUrl: string;
 	s3Url: string;
 	fileName: string;
+}
+
+interface IServerRequestData {
+	properties: IDictionary<any>;
 }

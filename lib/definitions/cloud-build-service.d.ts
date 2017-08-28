@@ -1,27 +1,7 @@
 /**
  * Describes the result of a cloud build operation.
  */
-interface IBuildResultData {
-	/**
-	 * The ID of the build.
-	 */
-	buildId: string;
-
-	/**
-	 * All data printed to the stderr during cloud build operation.
-	 */
-	stderr: string;
-
-	/**
-	 * All data printed to the stdout during cloud build operation.
-	 */
-	stdout: string;
-
-	/**
-	 * The full ordered output - combination for stderr and stdout, but ordered in correct timeline.
-	 */
-	fullOutput: string;
-
+interface IBuildResultData extends IServerResultData {
 	/**
 	 * Path to the downloaded result of the build operation - .apk, .ipa...
 	 */
@@ -81,7 +61,7 @@ interface IQrData {
 /**
  * Defines operations for building a project in the cloud.
  */
-interface ICloudBuildService {
+interface ICloudBuildService extends ICloudOperationService {
 	/**
 	 * Builds the specified application in the cloud and returns information about the whole build process.
 	 * @param {IProjectSettings} projectSettings Describes the current project - project dir, application identifier, name and nativescript data.
@@ -111,13 +91,6 @@ interface ICloudBuildService {
 		projectId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<void>;
-
-	/**
-	 * Returns the path to the directory where the build output may be found.
-	 * @param {ICloudBuildOutputDirectoryOptions} options Options that are used to determine the build output directory.
-	 * @returns {string} The build output directory.
-	 */
-	getBuildOutputDirectory(options: ICloudBuildOutputDirectoryOptions): string;
 }
 
 /**
@@ -218,53 +191,7 @@ interface IIOSBuildData extends IBuildForDevice {
 }
 
 /**
- * Describes the status of the build.
+ * Here only for backwards compatibility.
  */
-interface IBuildStatus {
-	/**
-	 * The build status.
-	 */
-	status: string;
-}
-
-/**
- * Describes options that can be passed in order to specify the exact location of the built package.
- */
-interface ICloudBuildOutputDirectoryOptions {
-	/**
-	 * Android or iOS
-	 */
-	platform: string;
-
-	/**
-	 * Directory where the project is located.
-	 */
-	projectDir: string;
-
-	/**
-	 * Whether the build is for emulator or not.
-	 */
-	emulator?: boolean;
-}
-
-/**
- * Describes the result from the build.
- */
-interface IBuildResult {
-	errors: string[];
-	code: number;
-	stdout: string;
-	stderr: string;
-	buildItems: IBuildItem[];
-}
-
-interface IBuildItemBase {
-	disposition: string;
-	filename: string;
-	fullPath: string;
-}
-
-interface IBuildItem extends IBuildItemBase {
-	platform: string;
-	extension: string;
+interface ICloudBuildOutputDirectoryOptions extends ICloudServerOutputDirectoryOptions {
 }
