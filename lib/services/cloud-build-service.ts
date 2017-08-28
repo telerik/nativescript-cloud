@@ -15,11 +15,9 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	protected get failedError() {
 		return "Build failed.";
 	};
+
 	protected get failedToStartError() {
 		return "Failed to start cloud build.";
-	};
-	protected get operationInProgressStatus() {
-		return "Building";
 	};
 
 	constructor($fs: IFileSystem,

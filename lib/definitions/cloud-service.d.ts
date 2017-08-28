@@ -61,7 +61,11 @@ interface IServerResult {
 	code: number;
 	stdout: string;
 	stderr: string;
-	buildItems: IServerItem[]; // naming is due to initial implementation that is related to other repos.
+	/**
+	 * Items produced after execution of server command. Could be empty.
+	 * Naming is due to initial implementation that is related to other repos.
+	 */
+	buildItems: IServerItem[];
 }
 
 interface IServerItemBase {

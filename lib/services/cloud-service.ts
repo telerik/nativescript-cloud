@@ -5,11 +5,11 @@ export abstract class CloudService extends EventEmitter {
 	private static OPERATION_STATUS_CHECK_INTERVAL = 1500;
 	private static OPERATION_COMPLETE_STATUS = "Success";
 	private static OPERATION_FAILED_STATUS = "Failed";
+	private static OPERATION_IN_PROGRESS_STATUS = "Building";
 
 	protected outputCursorPosition: number;
 	protected abstract failedToStartError: string;
 	protected abstract failedError: string;
-	protected abstract operationInProgressStatus: string;
 	protected abstract getServerResults(serverResult: IServerResult): IServerItem[];
 	protected abstract getServerLogs(logsUrl: string, buildId: string): Promise<void>;
 
@@ -67,7 +67,7 @@ export abstract class CloudService extends EventEmitter {
 					return reject(new Error(this.failedError));
 				}
 
-				if (serverStatus.status === this.operationInProgressStatus) {
+				if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
 					await this.getServerLogs(serverInformation.outputUrl, buildId);
 				}
 			}, CloudService.OPERATION_STATUS_CHECK_INTERVAL);
