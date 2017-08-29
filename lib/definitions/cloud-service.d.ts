@@ -83,7 +83,7 @@ interface IServerItem extends IServerItemBase {
  */
 interface ICloudOperationService {
 	/**
-	 * Returns the path to the directory where the build output may be found.
+	 * Returns the path to the directory where the server request output may be found.
 	 * @param {ICloudServerOutputDirectoryOptions} options Options that are used to determine the build output directory.
 	 * @returns {string} The build output directory.
 	 */

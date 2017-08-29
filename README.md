@@ -161,6 +161,8 @@ tns.cloudBuildService
 ```
 
 * `getBuildOutputDirectory` - Returns the path to the directory where the build output may be found.
+> This method is currently available only for backwards compatibility. The module now implements base module for server operations that exposes same functionality with more generic method:
+> `getServerOperationOutputDirectory`. Detailed description of the parameter can be found [here](./lib/definitions/cloud-service.d.ts).
 </br>
 Definition:
 
@@ -178,11 +180,67 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 const cloudBuildOutputDirectory = tns.cloudBuildService
-									.getBuildOutputDirectory({
-										platform: "ios",
-										projectDir: "/tmp/myProject"
-										emulator: false
-									});
+			.getBuildOutputDirectory({
+				platform: "ios",
+				projectDir: "/tmp/myProject"
+				emulator: false
+			});
+```
+
+### Module cloudCodesignService
+The `cloudCodesignService` allows generation of codesign files (currently only iOS .p12 and .mobileprovision) in the cloud. You can call the following methods:
+* `generateCodesignFiles` method - it validates passed arguments and tries to generate codesign files in the cloud. In case of success, the result files (.p12 and/or .mobileprovision) are downloaded. The result contains information about errors, if any, and path to the downloaded codesign files (in S3). </br>
+Definition:
+
+```TypeScript
+/**
+ * Generates codesign files in the cloud and returns s3 urls to certificate or/and provision.
+ * @param {ICodesignData} codesignData Apple speicific information.
+ * @param {string} projectDir The path of the project.
+ * @returns {Promise<ICodesignResultData>} Information about the generation process. It is returned only on successfull generation. In case there is some error, the Promise is rejected with the server information.
+ */
+generateCodesignFiles(codesignData: ICodesignData, projectDir: string): Promise<ICodesignResultData>;
+```
+Detailed description of the parameter can be found [here](./lib/definitions/cloud-codesign-service.d.ts).
+</br>
+Usage:
+```JavaScript
+const tns = require("nativescript");
+const codesignResultData = tns.cloudBuildService
+			.generateCodesignFiles({
+				username:'appleuser@mail.com',
+				password:'password',
+				platform: "ios",
+				clean: true,
+				attachedDevices: [{
+					displayName: 'iPhone',
+					identifier: 'cc3653b16f1beab6cf34a53af84c8a94cb2f0c9f'
+				}]
+			}, '/tmp/projects/myproj');
+```
+
+* `getServerOperationOutputDirectory` - Returns the path to the directory where the server request output files may be found, if any. In this implementation - the generated codesign files. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns the path to the directory where the server request output may be found.
+ * @param {ICloudServerOutputDirectoryOptions} options Options that are used to determine the build output directory.
+ * @returns {string} The build output directory.
+ */
+getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string;
+```
+Detailed description of the parameter can be found [here](./lib/definitions/cloud-service.d.ts).
+</br>
+Usage:
+```JavaScript
+const tns = require("nativescript");
+const generateCodesignFilesOutputDirectory = tns.cloudBuildService
+				.getServerOperationOutputDirectory({
+					platform: "ios",
+					projectDir: "/tmp/myProject"
+					emulator: false
+				});
 ```
 
 ### Module cloudEmulatorLauncher

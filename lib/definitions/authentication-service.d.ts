@@ -1,6 +1,6 @@
 interface IAuthenticationService {
 	/**
-	 * Uses username and password for login and after successfull login saves the user information.
+	 * Uses username and password for login and after successful login saves the user information.
 	 * @param {string} username The username of the user.
 	 * @param {string} password The password of the user.
 	 * @returns {Promise<IUser>} Returns the user information after successful login.
@@ -8,7 +8,7 @@ interface IAuthenticationService {
 	devLogin(username: string, password: string): Promise<IUser>;
 
 	/**
-	 * Opens login page and after successfull login saves the user information.
+	 * Opens login page and after successful login saves the user information.
 	 * If options.openAction is provided, it will be used to open the login url instead of the default opener.
 	 * @param {ILoginOptions} options Optional settings for the login method.
 	 * @returns {Promise<IUser>} Returns the user information after successful login.
