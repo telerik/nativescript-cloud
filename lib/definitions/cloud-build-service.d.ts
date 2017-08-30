@@ -67,9 +67,9 @@ interface ICloudBuildService extends ICloudOperationService {
 	 * @param {IProjectSettings} projectSettings Describes the current project - project dir, application identifier, name and nativescript data.
 	 * @param {string} platform The mobile platform for which the application should be built: Android or iOS.
 	 * @param {string} buildConfiguration The build configuration - Debug or Release.
-	 * @param {IAndroidBuildData} androidBuildData Android speicific information for the build.
-	 * @param {IIOSBuildData} iOSBuildData iOS speicific information for the build.
-	 * @returns {Promise<IBuildResultData>} Information about the build process. It is returned only on successfull build. In case the build fails, the Promise is rejected with the server information.
+	 * @param {IAndroidBuildData} androidBuildData Android specific information for the build.
+	 * @param {IIOSBuildData} iOSBuildData iOS specific information for the build.
+	 * @returns {Promise<IBuildResultData>} Information about the build process. It is returned only on successful build. In case the build fails, the Promise is rejected with the server information.
 	 */
 	build(projectSettings: IProjectSettings,
 		platform: string, buildConfiguration: string,
@@ -82,8 +82,8 @@ interface ICloudBuildService extends ICloudOperationService {
 	 * @param {string} platform The mobile platform for which the application should be built: Android or iOS.
 	 * @param {string} buildConfiguration The build configuration - Debug or Release.
 	 * @param {string} projectId Application identifier of the project.
-	 * @param {IAndroidBuildData} androidBuildData Android speicific information for the build.
-	 * @param {IIOSBuildData} iOSBuildData iOS speicific information for the build.
+	 * @param {IAndroidBuildData} androidBuildData Android specific information for the build.
+	 * @param {IIOSBuildData} iOSBuildData iOS specific information for the build.
 	 * @returns {Promise<void>}
 	 */
 	validateBuildProperties(platform: string,

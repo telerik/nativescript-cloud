@@ -30,9 +30,9 @@ interface ICodesignData extends ICredentials {
 interface ICloudCodesignService extends ICloudOperationService {
 	/**
 	 * Generates codesign files in the cloud and returns s3 urls to certificate or/and provision.
-	 * @param {ICodesignData} codesignData Apple speicific information.
+	 * @param {ICodesignData} codesignData Apple specific information.
 	 * @param {string} projectDir The path of the project.
-	 * @returns {Promise<ICodesignResultData>} Information about the generation process. It is returned only on successfull generation. In case there is some error, the Promise is rejected with the server information.
+	 * @returns {Promise<ICodesignResultData>} Information about the generation process. It is returned only on successful generation. In case there is some error, the Promise is rejected with the server information.
 	 */
 	generateCodesignFiles(codesignData: ICodesignData, projectDir: string): Promise<ICodesignResultData>;
 }

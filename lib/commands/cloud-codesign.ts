@@ -13,7 +13,6 @@ export class CloudCodesignCommand implements ICommand {
 		private $errors: IErrors,
 		private $projectData: IProjectData,
 		private $prompter: IPrompter,
-		private $options: IOptions,
 		private $cloudCodesignService: ICloudCodesignService) {
 		this.$projectData.initializeProjectData();
 	}
@@ -34,7 +33,7 @@ export class CloudCodesignCommand implements ICommand {
 
 		const codesignData = {
 			username, password,
-			clean: this.$options.clean,
+			clean: true,
 			platform: this.platform,
 			attachedDevices: this.devices
 		};
