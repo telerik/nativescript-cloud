@@ -4,7 +4,9 @@
   "description": "Used for cloud support in NativeScript CLI",
   "main": "lib/bootstrap.js",
   "scripts": {
-    "test": "node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha -- --recursive --reporter spec-xunit-file --require test/test-bootstrap.js --timeout 1000 test/"
+    "test": "node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha -- --recursive --reporter spec-xunit-file --require test/test-bootstrap.js --timeout 1000 test/",
+    "tslint": "tslint -p tsconfig.json --type-check",
+    "tslint-fix": "tslint -p tsconfig.json --type-check --fix"
   },
   "repository": {
     "type": "git",
@@ -19,7 +21,6 @@
   "devDependencies": {
     "@types/chai": "3.4.34",
     "@types/chai-as-promised": "0.0.29",
-    "@types/lodash": "4.14.50",
     "@types/node": "6.0.61",
     "@types/node-forge": "0.6.7",
     "@types/semver": "5.3.30",
@@ -32,17 +33,16 @@
     "grunt-contrib-copy": "1.0.0",
     "grunt-contrib-watch": "1.0.0",
     "grunt-shell": "1.3.0",
-    "grunt-ts": "6.0.0-beta.11",
-    "grunt-tslint": "4.0.1",
+    "grunt-ts": "6.0.0-beta.16",
     "istanbul": "0.4.5",
     "mobile-cli-lib": "https://github.com/telerik/mobile-cli-lib/tarball/master",
-    "mocha": "3.1.2",
-    "mocha-typescript": "^1.0.4",
+    "mocha": "3.5.3",
+    "mocha-typescript": "1.1.8",
     "nativescript": "https://github.com/NativeScript/nativescript-cli/tarball/master",
     "should": "7.0.2",
     "spec-xunit-file": "0.0.1-3",
-    "tslint": "4.3.1",
-    "typescript": "2.1.5"
+    "tslint": "5.7.0",
+    "typescript": "2.4.1"
   },
   "dependencies": {
     "aws4": "1.6.0",
