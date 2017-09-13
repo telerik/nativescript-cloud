@@ -35,15 +35,15 @@ export class AuthenticationService implements IAuthenticationService {
 				"/": (request: ServerRequest, response: ServerResponse) => {
 					this.$logger.debug("Login complete: " + request.url);
 					const parsedUrl = parse(request.url, true);
-					const loginResponse = parsedUrl.query.response;
-					if (loginResponse) {
+					const serverResponse = parsedUrl.query.response;
+					if (serverResponse) {
 						response.statusCode = HTTP_STATUS_CODES.FOUND;
 						response.setHeader(HTTP_HEADERS.LOCATION, parsedUrl.query.loginCompleteUrl);
 						this.killLocalhostServer();
 
 						isResolved = true;
 
-						const decodedResponse = new Buffer(loginResponse, "base64").toString();
+						const decodedResponse = new Buffer(serverResponse, "base64").toString();
 						this.rejectLoginPromiseAction = null;
 						authCompleteResolveAction(decodedResponse);
 						response.end();

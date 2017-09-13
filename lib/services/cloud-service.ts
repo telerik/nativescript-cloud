@@ -92,7 +92,7 @@ export abstract class CloudService extends EventEmitter {
 				url: serverResultObj.fullPath,
 				pipeTo: targetFile
 			});
-		};
+		}
 
 		return targetFileNames;
 	}
