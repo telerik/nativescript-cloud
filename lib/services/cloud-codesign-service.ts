@@ -7,11 +7,11 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 
 	protected get failedError() {
 		return "Generation of codesign files failed.";
-	};
+	}
 
 	protected get failedToStartError() {
 		return "Failed to start generation of codesign files.";
-	};
+	}
 
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,

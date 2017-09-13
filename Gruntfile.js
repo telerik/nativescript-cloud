@@ -46,17 +46,6 @@ module.exports = function (grunt) {
 			}
 		},
 
-		tslint: {
-			build: {
-				files: {
-					src: ["lib/**/*.ts", "test/**/*.ts", "definitions/**/*.ts"]
-				},
-				options: {
-					configuration: grunt.file.readJSON("./tslint.json")
-				}
-			}
-		},
-
 		watch: {
 			devall: {
 				files: ["lib/**/*.ts", "test/**/*.ts"],
@@ -117,7 +106,6 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks("grunt-contrib-watch");
 	grunt.loadNpmTasks("grunt-shell");
 	grunt.loadNpmTasks("grunt-ts");
-	grunt.loadNpmTasks("grunt-tslint");
 
 	grunt.registerTask("set_package_version", function (version) {
 		const buildVersion = getBuildVersion(version);
@@ -196,6 +184,10 @@ module.exports = function (grunt) {
 		});
 	});
 
+	grunt.registerTask("tslint:build", function (version) {
+		childProcess.execSync("npm run tslint", { stdio: "inherit" });
+	});
+
 	grunt.registerTask("test", ["transpile_additional_project", "generate_references", "ts:devlib", "shell:ci_unit_tests"]);
 
 	grunt.registerTask("generate_references", () => {
@@ -214,7 +206,15 @@ module.exports = function (grunt) {
 			.concat(getReferencesFromDir(pathToIosDeviceLib))
 			.concat(getReferencesFromDir(path.join(nodeModulesDirPath, "cloud-device-emulator")));
 
-		const lines = pathsOfDtsFiles.map(file => `/// <reference path="${fromWindowsRelativePathToUnix(path.relative(__dirname, file))}" />`);
+		// These files are const enums, which are included as .ts files, but in order to get transpilation work, we must have them in the references.d.ts
+		const specialFiles = [
+			path.join(nodeModulesDirPath, "mobile-cli-lib", "services", "analytics-type.ts"),
+			path.join(nodeModulesDirPath, "mobile-cli-lib", "services", "google-analytics-data-type.ts")
+		];
+
+		const pathToFilesToInclude = pathsOfDtsFiles.concat(...specialFiles);
+
+		const lines = pathToFilesToInclude.map(file => `/// <reference path="${fromWindowsRelativePathToUnix(path.relative(__dirname, file))}" />`);
 
 		fs.writeFileSync(referencesPath, lines.join(os.EOL));
 	});
@@ -254,7 +254,7 @@ module.exports = function (grunt) {
 		"setPackageName"
 	]);
 	grunt.registerTask("lint", ["tslint:build"]);
-	grunt.registerTask("all", ["clean", "test", "lint"]);
+	grunt.registerTask("all", ["clean", "test", "tslint:build"]);
 	grunt.registerTask("rebuild", ["clean", "ts:devlib"]);
 	grunt.registerTask("default", ["generate_references", "ts:devlib"]);
 };

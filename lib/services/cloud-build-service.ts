@@ -14,11 +14,11 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 	protected get failedError() {
 		return "Build failed.";
-	};
+	}
 
 	protected get failedToStartError() {
 		return "Failed to start cloud build.";
-	};
+	}
 
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
@@ -510,7 +510,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			// Ignore the error from getting the server output because the task can finish even if there is error.
 			this.$logger.trace(`Error while getting server logs: ${err}`);
 		}
-	};
+	}
 
 	private async downloadServerResult(buildId: string, buildResult: IServerResult, buildOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string> {
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.START);
