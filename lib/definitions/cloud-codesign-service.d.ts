@@ -11,17 +11,16 @@ interface ICodesignResultData extends IServerResultData {
 /**
  *  Describes specific data required for codesigning files to be generated.
  */
-interface ICodesignData extends ICredentials {
+interface ICodesignData extends ICredentials, IPlatform {
 	/**
 	 * Whether to revoke and reissue certificate even if it is not expired. This option is necessary as re-downloading the .p12 file is impossible.
 	 * It provides consumers with opportunity to deliberately reissue account's development certificate. It will default to true as it is the expected behaviour.
 	 */
 	clean?: boolean;
 	/**
-	 * To generate development codesign files Apple API requires devices as development provisions are only issued per them.
+	 * To generate development codesign files Apple API requires devices as development provisions are only issued for them.
 	 */
 	attachedDevices: Mobile.IDeviceInfo[];
-	platform: string;
 }
 
 /**

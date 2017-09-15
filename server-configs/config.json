@@ -1,20 +1,21 @@
 {
-	"apiVersion": "v1",
-	"domainName": "digitalfactory.rocks",
-	"serverProto": "https",
-	"stage": "production",
-	"cloudServices": {
-		"auth-service": {
-			"subdomain": "authentication"
-		},
-		"build-service": {
-			"subdomain": "build"
-		},
-		"emulators-service": {
-			"subdomain": "emulators"
-		},
-		"code-commit-service": {
-			"subdomain": "code-commit"
-		}
-	}
+    "apiVersion": null,
+    "serverProto": "https",
+    "cloudServices": {
+        "auth-service": {
+            "fullHostName": "zqzdiyctif.execute-api.us-west-2.amazonaws.com/pr80"
+        },
+        "build-service": {
+            "fullHostName": "ymvtafu5y2.execute-api.us-west-2.amazonaws.com/pr80"
+        },
+        "emulators-service": {
+            "fullHostName": "4984d2us5c.execute-api.us-west-2.amazonaws.com/pr80"
+        },
+        "misc-service": {
+            "fullHostName": "qbqo8ls8wb.execute-api.us-west-2.amazonaws.com/pr80"
+        },
+        "code-commit-service": {
+            "fullHostName": "n61d0wlz22.execute-api.us-west-2.amazonaws.com/pr80"
+        }
+    }
 }

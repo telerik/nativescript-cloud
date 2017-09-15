@@ -16,12 +16,7 @@ interface IBuildResultData extends IServerResultData {
 /**
  * Describes build step.
  */
-interface IBuildStep {
-	/**
-	 * The ID of the build.
-	 */
-	buildId: string;
-
+interface IBuildStep extends IBuildId {
 	/**
 	 * The name of the step - prepare, upload, build or download.
 	 */
@@ -33,12 +28,16 @@ interface IBuildStep {
 	progress: number;
 }
 
-interface IBuildError extends Error {
+interface IBuildError extends Error, IBuildId { }
+
+interface IBuildId {
+	/**
+	 * The ID of the build.
+	 */
 	buildId: string;
 }
 
-interface IBuildLog {
-	buildId: string;
+interface IBuildLog extends IBuildId {
 	data: string;
 	pipe: string;
 }
@@ -56,6 +55,32 @@ interface IQrData {
 	 * Base64 encoded data used for generating QR code image.
 	 */
 	imageData: string;
+}
+
+/**
+ * Describes arguments that may be passed to the build action.
+ */
+interface IBuildData {
+	/**
+	 * Describes the current project - project dir, application identifier, name and nativescript data.
+	 */
+	projectSettings: IProjectSettings;
+	/**
+	 * The mobile platform for which the application should be built: Android or iOS.
+	 */
+	platform: string;
+	/**
+	 * The build configuration - Debug or Release.
+	 */
+	buildConfiguration: string;
+	/**
+	 * Android specific information for the build.
+	 */
+	androidBuildData?: IAndroidBuildData;
+	/**
+	* iOSBuildData iOS specific information for the build.
+	 */
+	iOSBuildData?: IIOSBuildData;
 }
 
 /**

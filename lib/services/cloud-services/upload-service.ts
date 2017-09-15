@@ -1,6 +1,6 @@
 import * as uuid from "uuid";
 
-import { BUILD_SERVICE_NAME } from "../../constants";
+import { BUILD_SERVICE_NAME, HTTP_METHODS } from "../../constants";
 import { CloudServiceBase } from "./cloud-service-base";
 
 export class UploadService extends CloudServiceBase implements IUploadService {
@@ -14,15 +14,25 @@ export class UploadService extends CloudServiceBase implements IUploadService {
 		super($cloudRequestService);
 	}
 
-	public async uploadToS3(localFilePath: string): Promise<string> {
-		const fileNameInS3 = uuid.v4();
-		const preSignedUrlData = await this.sendRequest<IPresignURLResponse>("GET", `api/get-upload-url?filename=${fileNameInS3}`, {});
+	public async uploadToS3(filePathOrContent: string, fileNameInS3?: string, uploadPreSignedUrl?: string): Promise<string> {
+		fileNameInS3 = fileNameInS3 || uuid.v4();
+		let preSignedUrlData: IPresignURLResponse;
+		if (!uploadPreSignedUrl) {
+			preSignedUrlData = await this.sendRequest<IPresignURLResponse>(HTTP_METHODS.GET, `api/get-upload-url?fileName=${fileNameInS3}`, {});
+			uploadPreSignedUrl = preSignedUrlData.uploadPreSignedUrl;
+		}
+
 		const requestOpts: any = {
-			url: preSignedUrlData.uploadPreSignedUrl,
-			method: "PUT"
+			url: uploadPreSignedUrl,
+			method: HTTP_METHODS.PUT
 		};
 
-		requestOpts.body = this.$fs.readFile(localFilePath);
+		if (this.$fs.exists(filePathOrContent)) {
+			requestOpts.body = this.$fs.readFile(filePathOrContent);
+		} else {
+			requestOpts.body = filePathOrContent;
+		}
+
 		requestOpts.headers = requestOpts.headers || {};
 		// It is vital we set this, else the http request comes out as chunked and S3 doesn't support chunked requests
 		requestOpts.headers["Content-Length"] = requestOpts.body.length;
@@ -30,10 +40,10 @@ export class UploadService extends CloudServiceBase implements IUploadService {
 		try {
 			await this.$httpClient.httpRequest(requestOpts);
 		} catch (err) {
-			this.$errors.failWithoutHelp(`Error while uploading ${localFilePath} to S3. Errors is:`, err.message);
+			this.$errors.failWithoutHelp(`Error while uploading ${filePathOrContent} to S3. Errors is:`, err.message);
 		}
 
-		return preSignedUrlData.publicDownloadUrl;
+		return preSignedUrlData && preSignedUrlData.publicDownloadUrl;
 	}
 }
 

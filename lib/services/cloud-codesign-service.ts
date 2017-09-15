@@ -123,7 +123,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 
 	private async prepareCodesignRequest(buildId: string,
 		codesignData: ICodesignData,
-		projectData: IProjectData): Promise<any> {
+		projectData: IProjectData): Promise<ICodeSignRequestData> {
 
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectData.projectName);
 		return {

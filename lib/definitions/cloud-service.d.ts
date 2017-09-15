@@ -1,12 +1,7 @@
 /**
  * Describes the result of a server operation.
  */
-interface IServerResultData {
-	/**
-	 * The ID of the operation - usually named buildId due to initial implementation that is related to other repos.
-	 */
-	buildId: string;
-
+interface IServerResultData extends IBuildId {
 	/**
 	 * All data printed to the stderr during server operation.
 	 */
@@ -36,12 +31,7 @@ interface IServerStatus {
 /**
  * Describes options that can be passed in order to specify the exact location of the built package.
  */
-interface ICloudServerOutputDirectoryOptions {
-	/**
-	 * Android or iOS - currently only iOS implementation is available
-	 */
-	platform: string;
-
+interface ICloudServerOutputDirectoryOptions extends IPlatform {
 	/**
 	 * Directory where the project is located.
 	 */
@@ -57,7 +47,7 @@ interface ICloudServerOutputDirectoryOptions {
  * Describes the result from the server operation.
  */
 interface IServerResult {
-	errors: string[];
+	errors: string;
 	code: number;
 	stdout: string;
 	stderr: string;
@@ -74,8 +64,7 @@ interface IServerItemBase {
 	fullPath: string;
 }
 
-interface IServerItem extends IServerItemBase {
-	platform: string;
+interface IServerItem extends IServerItemBase, IPlatform {
 	extension: string;
 }
 /**

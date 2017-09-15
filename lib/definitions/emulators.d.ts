@@ -1,15 +1,11 @@
 /**
  * Describes options that can be passed when starting a cloud emulator.
  */
-interface ICloudEmulatorStartData {
+interface ICloudEmulatorStartData extends IPlatform {
 	/**
 	 * Path to the package file (.apk or .zip) to load - can either be a local path or a url.
 	 */
 	packageFile: string;
-	/**
-	 * Platform for the emulator - android or ios
-	 */
-	platform: string;
 	/**
 	 * Model of the emulator - for example nexus5, iphone5s, iphone6 - etc
 	 */

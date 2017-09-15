@@ -208,6 +208,7 @@ module.exports = function (grunt) {
 
 		// These files are const enums, which are included as .ts files, but in order to get transpilation work, we must have them in the references.d.ts
 		const specialFiles = [
+			path.join(nodeModulesDirPath, "mobile-cli-lib", "option-type.ts"),
 			path.join(nodeModulesDirPath, "mobile-cli-lib", "services", "analytics-type.ts"),
 			path.join(nodeModulesDirPath, "mobile-cli-lib", "services", "google-analytics-data-type.ts")
 		];

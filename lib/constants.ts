@@ -1,6 +1,5 @@
 export const CLOUD_TEMP_DIR_NAME = ".cloud";
 export const CODESIGN_FILES_DIR_NAME = "codesign_files";
-export const RELEASE_CONFIGURATION_NAME = "release";
 
 export const CRYPTO = {
 	CERTIFICATE_HEADER: "-----BEGINCERTIFICATE-----",
@@ -24,6 +23,7 @@ export const AUTH_SERVICE_NAME = "auth-service";
 export const BUILD_SERVICE_NAME = "build-service";
 export const EMULATORS_SERVICE_NAME = "emulators-service";
 export const CODE_COMMIT_SERVICE_NAME = "code-commit-service";
+export const DEFAULT_ANDROID_PUBLISH_TRACK = "beta";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
 	BUILD_OUTPUT: "buildOutput",
@@ -33,6 +33,11 @@ export const CLOUD_BUILD_EVENT_NAMES = {
 export const DEVICE_DISCOVERY_EVENTS = {
 	DEVICE_FOUND: "deviceFound",
 	DEVICE_LOST: "deviceLost"
+};
+
+export const CLOUD_BUILD_CONFIGURATIONS = {
+	DEBUG: "Debug",
+	RELEASE: "Release"
 };
 
 export const CLOUD_BUILD_DIRECTORY_NAMES = {
@@ -97,4 +102,8 @@ export const BUILD_STEP_NAME = {
 export const BUILD_STEP_PROGRESS = {
 	START: 0,
 	END: 100
+};
+
+export const ERROR_MESSAGES = {
+	COMMAND_REQUIRES_APPLE_USERNAME_PASS: "The command accepts only two parameters - Apple account id and Apple account password."
 };

@@ -21,8 +21,12 @@ export class BuildCloudService extends CloudServiceBase implements IBuildCloudSe
 		return this.sendRequest<IBuildCredentialResponse>(HTTP_METHODS.POST, "api/build-credentials", buildCredentialRequest);
 	}
 
-	public generateCodesignFiles(codesignRequestData: IServerRequestData): Promise<IServerResponse> {
+	public generateCodesignFiles(codesignRequestData: ICodeSignRequestData): Promise<IServerResponse> {
 		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/codesign", codesignRequestData);
+	}
+
+	public publish(publishRequestData: IPublishRequestData): Promise<IServerResponse> {
+		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/publish", publishRequestData);
 	}
 }
 

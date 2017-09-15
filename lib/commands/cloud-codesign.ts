@@ -1,7 +1,7 @@
 import { isInteractive } from "../helpers";
+import { ERROR_MESSAGES } from "../constants";
 
 export class CloudCodesignCommand implements ICommand {
-	private readonly parametersValidationText = "The command has only two valid parameters - Apple account id and Apple account password.";
 	// Currently only iOS codesign generation is supported.
 	private readonly platform = this.$devicePlatformsConstants.iOS;
 	private devices: Mobile.IDeviceInfo[];
@@ -43,7 +43,7 @@ export class CloudCodesignCommand implements ICommand {
 
 	public async canExecute(args: string[]): Promise<boolean> {
 		if (args.length > 2 || (!isInteractive() && args.length < 2)) {
-			this.$errors.fail(this.parametersValidationText);
+			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
 		}
 
 		await this.$devicesService.detectCurrentlyAttachedDevices({ shouldReturnImmediateResult: false, platform: this.platform });

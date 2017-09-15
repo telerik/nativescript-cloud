@@ -33,6 +33,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
 		private $qr: IQrCodeGenerator,
+		private $uploadService: IUploadService,
 		private $userService: IUserService) {
 		super($fs, $httpClient, $logger);
 	}
@@ -270,7 +271,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			// This option is used for webpack. As currently we do not support webpack, set it to false.
 			// TODO: Once we have a way to use webpack in cloud builds, we should pass correct value here.
 			bundle: false,
-			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.RELEASE_CONFIGURATION_NAME.toLowerCase()
+			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase()
 		};
 
 		let mobileProvisionData: IMobileProvisionData;
@@ -331,7 +332,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		for (const fileToUpload of filesToUpload) {
-			await this.uploadFileToS3(fileToUpload.filePath, fileToUpload.fileName, fileToUpload.uploadPreSignedUrl);
+			await this.$uploadService.uploadToS3(fileToUpload.filePath, fileToUpload.fileName, fileToUpload.uploadPreSignedUrl);
 		}
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.END);
@@ -365,29 +366,6 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			targets: [],
 			buildFiles
 		};
-	}
-
-	private async uploadFileToS3(filePathOrContent: string, fileNameInS3: string, uploadPreSignedUrl: string): Promise<void> {
-		const requestOpts: any = {
-			url: uploadPreSignedUrl,
-			method: constants.HTTP_METHODS.PUT
-		};
-
-		if (this.$fs.exists(filePathOrContent)) {
-			requestOpts.body = this.$fs.readFile(filePathOrContent);
-		} else {
-			requestOpts.body = filePathOrContent;
-		}
-
-		requestOpts.headers = requestOpts.headers || {};
-		// It is vital we set this, else the http request comes out as chunked and S3 doesn't support chunked requests
-		requestOpts.headers["Content-Length"] = requestOpts.body.length;
-
-		try {
-			await this.$httpClient.httpRequest(requestOpts);
-		} catch (err) {
-			this.$errors.failWithoutHelp(`Error while uploading ${filePathOrContent} to S3. Errors is:`, err.message);
-		}
 	}
 
 	private getCertificateBase64(cert: string) {
@@ -641,7 +619,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			}
 
 			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(options.projectId, uuid.v4());
-			await this.uploadFileToS3(this.$itmsServicesPlistHelper.createPlistContent(options), preSignedUrlData.fileName, preSignedUrlData.uploadPreSignedUrl);
+			await this.$uploadService.uploadToS3(this.$itmsServicesPlistHelper.createPlistContent(options), preSignedUrlData.fileName, preSignedUrlData.uploadPreSignedUrl);
 			return this.$qr.generateDataUri(`itms-services://?action=download-manifest&amp;url=${escape(preSignedUrlData.publicDownloadUrl)}`);
 		}
 
@@ -655,7 +633,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	}
 
 	private isReleaseConfiguration(buildConfiguration: string): boolean {
-		return buildConfiguration.toLowerCase() === constants.RELEASE_CONFIGURATION_NAME;
+		return buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase();
 	}
 
 	private getRegexPattern(appIdentifier: string): string {
