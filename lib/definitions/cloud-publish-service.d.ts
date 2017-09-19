@@ -36,7 +36,7 @@ interface IItunesConnectPublishData extends IPublishDataCore, IOptionalTeamIdent
 /**
  * Describes strings which can be passed when publishing to Google Play in order to manipulate the publish track.
  */
-interface IAndroidTrack {
+interface IOptionalAndroidTrack {
 	/**
 	 * Track for which to publish - "alpha" | "beta" | "production".
 	 */
@@ -46,7 +46,7 @@ interface IAndroidTrack {
 /**
  * Describes data needed to publish to Google Play.
  */
-interface IGooglePlayPublishData extends IPublishDataCore, IAndroidTrack {
+interface IGooglePlayPublishData extends IPublishDataCore, IOptionalAndroidTrack {
 	/**
 	 * Path to local json file generated through Google API Console.
 	 */

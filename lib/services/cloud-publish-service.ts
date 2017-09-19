@@ -51,55 +51,14 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 			teamId: publishData.teamId
 		};
 
-		const getError = (publishResult: IServerResult) => {
-			const itmsMessage = this.getFormattedError(publishResult.stdout, CloudPublishService.ITMS_ERROR_REGEX);
-			const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
-			const err: any = new Error(`${publishResult.errors}${EOL}${itmsMessage}${EOL}${generalMessage}`);
-			if (_.includes(publishResult.stderr, CloudPublishService.FASTLANE_MULTIPLE_TEAMS_FOUND_ERROR)) {
-				const teamNames = [];
-				// Fastlane can't decide a team for us and we can't either.
-				// Capture the teams and return them to the client.
-
-				// Fastlane's printing logic can be found here https://github.com/fastlane/fastlane/blob/master/spaceship/lib/spaceship/portal/ui/select_team.rb#L86
-				// Sample output:
-				/*
-				Multiple iTunes Connect teams found, please enter the number of the team you want to use:
-				Note: to automatically choose the team, provide either the iTunes Connect Team ID, or the Team Name in your fastlane/Appfile:
-				Alternatively you can pass the team name or team ID using the `FASTLANE_ITC_TEAM_ID` or `FASTLANE_ITC_TEAM_NAME` environment variable
-
-				itc_team_id "944446"
-
-				or
-
-				itc_team_name "Telerik A D"
-
-				1) "Telerik A D" (944446)
-				2) "Telerik AD" (115499815)
-				Multiple teams found on iTunes Connect, Your Terminal is running in non-interactive mode! Cannot continue from here.
-				Please check that you set FASTLANE_ITC_TEAM_ID or FASTLANE_ITC_TEAM_NAME to the right value.
-				*/
-				// We need the team names only
-
-				let matches;
-				while (matches = CloudPublishService.IOS_TEAMS_REGEX.exec(publishResult.stdout)) {
-					teamNames.push(matches[1]);
-				}
-
-				err.teamNames = teamNames;
-				err.packagePaths = publishRequestData.packagePaths;
-			}
-
-			return err;
-		};
-
-		return this.publishCore(publishRequestData, publishData, getError);
+		return this.publishCore(publishRequestData, publishData, this.getiOSError.bind(this));
 	}
 
 	public async publishToGooglePlay(publishData: IGooglePlayPublishData): Promise<void> {
 		this.validatePublishData(publishData);
 
 		if (!publishData.pathToAuthJson || !this.$fs.exists(publishData.pathToAuthJson)) {
-			this.$errors.failWithoutHelp("Cannot perform publish - auth json file is not supplied or missing.");
+			this.$errors.failWithoutHelp("Cannot perform publish - auth json file is not supplied or the provided path does not exist.");
 		}
 
 		let authJson: string;
@@ -110,11 +69,6 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		}
 
 		publishData.track = publishData.track || DEFAULT_ANDROID_PUBLISH_TRACK;
-		const getError = (publishResult: IServerResult) => {
-			const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
-			return new Error(`${publishResult.errors}${EOL}${generalMessage}`);
-		};
-
 		const appIdentifier = this.$projectDataService.getProjectData(publishData.projectDir).projectId;
 		return this.publishCore({
 			appIdentifier,
@@ -124,10 +78,56 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 			packagePaths: publishData.packagePaths,
 			platform: this.$devicePlatformsConstants.Android,
 			track: publishData.track
-		}, publishData, getError);
+		}, publishData, this.getAndroidError.bind(this));
 	}
 
-	private async publishCore(publishRequestData: IPublishRequestData, publishDataCore: IPublishDataCore, getError: (publishResult: IServerResult) => any): Promise<void> {
+	private getiOSError(publishResult: IServerResult, publishRequestData: IPublishRequestData) {
+		const itmsMessage = this.getFormattedError(publishResult.stdout, CloudPublishService.ITMS_ERROR_REGEX);
+		const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
+		const err: any = new Error(`${publishResult.errors}${EOL}${itmsMessage}${EOL}${generalMessage}`);
+		if (_.includes(publishResult.stderr, CloudPublishService.FASTLANE_MULTIPLE_TEAMS_FOUND_ERROR)) {
+			const teamNames = [];
+			// Fastlane can't decide a team for us and we can't either.
+			// Capture the teams and return them to the client.
+
+			// Fastlane's printing logic can be found here https://github.com/fastlane/fastlane/blob/master/spaceship/lib/spaceship/portal/ui/select_team.rb#L86
+			// Sample output:
+			/*
+			Multiple iTunes Connect teams found, please enter the number of the team you want to use:
+			Note: to automatically choose the team, provide either the iTunes Connect Team ID, or the Team Name in your fastlane/Appfile:
+			Alternatively you can pass the team name or team ID using the `FASTLANE_ITC_TEAM_ID` or `FASTLANE_ITC_TEAM_NAME` environment variable
+
+			itc_team_id "944446"
+
+			or
+
+			itc_team_name "Telerik A D"
+
+			1) "Telerik A D" (944446)
+			2) "Telerik AD" (115499815)
+			Multiple teams found on iTunes Connect, Your Terminal is running in non-interactive mode! Cannot continue from here.
+			Please check that you set FASTLANE_ITC_TEAM_ID or FASTLANE_ITC_TEAM_NAME to the right value.
+			*/
+			// We need the team names only
+
+			let matches;
+			while (matches = CloudPublishService.IOS_TEAMS_REGEX.exec(publishResult.stdout)) {
+				teamNames.push(matches[1]);
+			}
+
+			err.teamNames = teamNames;
+			err.packagePaths = publishRequestData.packagePaths;
+		}
+
+		return err;
+	}
+
+	private getAndroidError(publishResult: IServerResult, publishRequestData: IPublishRequestData) {
+		const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
+		return new Error(`${publishResult.errors}${EOL}${generalMessage}`);
+	}
+
+	private async publishCore(publishRequestData: IPublishRequestData, publishDataCore: IPublishDataCore, getError: (publishResult: IServerResult, publishRequestData: IPublishRequestData) => any): Promise<void> {
 		publishRequestData.packagePaths = await this.getPreparePackagePaths(publishDataCore);
 
 		this.$logger.info("Starting publishing.");
@@ -145,7 +145,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		this.$logger.trace("Publish result:", publishResult);
 
 		if (publishResult.code || publishResult.errors) {
-			const err = getError(publishResult);
+			const err = getError(publishResult, publishRequestData);
 			err.stderr = publishResult.stderr;
 			err.stdout = publishResult.stdout;
 			throw err;

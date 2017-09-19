@@ -1,6 +1,6 @@
 interface IBuildCloudService {
-	startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IServerResponse>;
-	getPresignedUploadUrlObject(appId: string, fileName: string): Promise<IAmazonStorageEntry>;
+	startBuild(buildRequest: IBuildRequestData): Promise<IServerResponse>;
+	getPresignedUploadUrlObject(fileName: string): Promise<IAmazonStorageEntry>;
 	getBuildCredentials(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse>;
 	generateCodesignFiles(codesignRequestData: ICodeSignRequestData): Promise<IServerResponse>;
 	publish(publishRequestData: IPublishRequestData): Promise<IServerResponse>;
@@ -55,7 +55,7 @@ interface IPublishCredentials {
 	authJson?: string;
 }
 
-interface IPublishRequestData extends IPlatform, IPackagePaths, IAndroidTrack, IOptionalTeamIdentifier {
+interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroidTrack, IOptionalTeamIdentifier {
 	credentials: IPublishCredentials;
 	appIdentifier?: string;
 }

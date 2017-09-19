@@ -9,11 +9,11 @@ export class BuildCloudService extends CloudServiceBase implements IBuildCloudSe
 		super($cloudRequestService);
 	}
 
-	public startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IServerResponse> {
+	public startBuild(buildRequest: IBuildRequestData): Promise<IServerResponse> {
 		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/build", buildRequest);
 	}
 
-	public getPresignedUploadUrlObject(appId: string, fileName: string): Promise<IAmazonStorageEntry> {
+	public getPresignedUploadUrlObject(fileName: string): Promise<IAmazonStorageEntry> {
 		return this.sendRequest<IAmazonStorageEntry>(HTTP_METHODS.GET, `api/upload-url?${querystring.stringify({ fileName })}`, null);
 	}
 

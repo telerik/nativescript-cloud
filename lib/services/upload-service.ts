@@ -1,24 +1,23 @@
 import * as uuid from "uuid";
 
-import { BUILD_SERVICE_NAME, HTTP_METHODS } from "../../constants";
-import { CloudServiceBase } from "./cloud-service-base";
+import { BUILD_SERVICE_NAME, HTTP_METHODS } from "../constants";
 
-export class UploadService extends CloudServiceBase implements IUploadService {
+export class UploadService implements IUploadService {
 
 	protected serviceName = BUILD_SERVICE_NAME;
 
-	constructor(protected $cloudRequestService: ICloudRequestService,
+	constructor(private $buildCloudService: IBuildCloudService,
+		protected $cloudRequestService: ICloudRequestService,
 		private $httpClient: Server.IHttpClient,
 		private $errors: IErrors,
 		private $fs: IFileSystem) {
-		super($cloudRequestService);
 	}
 
 	public async uploadToS3(filePathOrContent: string, fileNameInS3?: string, uploadPreSignedUrl?: string): Promise<string> {
 		fileNameInS3 = fileNameInS3 || uuid.v4();
-		let preSignedUrlData: IPresignURLResponse;
+		let preSignedUrlData: IAmazonStorageEntry;
 		if (!uploadPreSignedUrl) {
-			preSignedUrlData = await this.sendRequest<IPresignURLResponse>(HTTP_METHODS.GET, `api/get-upload-url?fileName=${fileNameInS3}`, {});
+			preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(fileNameInS3);
 			uploadPreSignedUrl = preSignedUrlData.uploadPreSignedUrl;
 		}
 

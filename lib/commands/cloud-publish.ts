@@ -78,23 +78,21 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 	public async execute(args: string[]): Promise<void> {
 		const credentials = await this.$buildCommandHelper.getAppleCredentials(args);
 		const packagePath = await this.$buildCommandHelper.buildForPublishingPlatform(this.$devicePlatformsConstants.iOS);
+		const itunesPublishdata: IItunesConnectPublishData = {
+			credentials,
+			packagePaths: [packagePath],
+			projectDir: this.$projectData.projectDir,
+			teamId: this.$options.teamId
+		};
 
 		try {
-			await this.$cloudPublishService.publishToItunesConnect({
-				credentials,
-				packagePaths: [packagePath],
-				projectDir: this.$projectData.projectDir,
-				teamId: this.$options.teamId
-			});
+			await this.$cloudPublishService.publishToItunesConnect(itunesPublishdata);
 		} catch (err) {
 			if (err.teamNames && isInteractive()) {
 				const teamId = await this.$prompter.promptForChoice("Multiple teams found on iTunes Connect, please choose one", err.teamNames);
-				return this.$cloudPublishService.publishToItunesConnect({
-					credentials,
-					packagePaths: err.packagePaths || [packagePath],
-					projectDir: this.$projectData.projectDir,
-					teamId
-				});
+				itunesPublishdata.teamId = teamId;
+				itunesPublishdata.packagePaths = err.packagePaths || itunesPublishdata.packagePaths;
+				return this.$cloudPublishService.publishToItunesConnect(itunesPublishdata);
 			}
 
 			throw err;

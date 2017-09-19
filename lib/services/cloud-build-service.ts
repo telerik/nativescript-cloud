@@ -115,7 +115,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.START);
-		const buildResponse: IServerResponse = await this.$buildCloudService.startBuild(projectSettings.projectId, buildProps);
+		const buildResponse: IServerResponse = await this.$buildCloudService.startBuild(buildProps);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
 		await this.waitForServerOperationToFinish(buildId, buildResponse);
@@ -320,7 +320,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		} catch (err) {
 			this.$logger.warn(err.message);
 			const filePath = await this.zipProject(projectSettings.projectDir);
-			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(projectSettings.projectId, uuid.v4());
+			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(uuid.v4());
 			const disposition = constants.DISPOSITIONS.PACKAGE_ZIP;
 			filesToUpload.push(_.merge({ filePath, disposition }, preSignedUrlData));
 			buildFiles = [
@@ -618,7 +618,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				return null;
 			}
 
-			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(options.projectId, uuid.v4());
+			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(uuid.v4());
 			await this.$uploadService.uploadToS3(this.$itmsServicesPlistHelper.createPlistContent(options), preSignedUrlData.fileName, preSignedUrlData.uploadPreSignedUrl);
 			return this.$qr.generateDataUri(`itms-services://?action=download-manifest&amp;url=${escape(preSignedUrlData.publicDownloadUrl)}`);
 		}

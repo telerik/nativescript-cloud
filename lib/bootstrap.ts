@@ -20,7 +20,6 @@ $injector.requirePublicClass("cloudPublishService", path.join(__dirname, "servic
 $injector.requirePublicClass("userService", path.join(__dirname, "services", "user-service"));
 
 // Services.
-$injector.require("uploadService", path.join(__dirname, "services", "cloud-services", "upload-service"));
 $injector.require("authCloudService", path.join(__dirname, "services", "cloud-services", "auth-cloud-service"));
 $injector.require("buildCloudService", path.join(__dirname, "services", "cloud-services", "build-cloud-service"));
 $injector.require("cloudServicesProxy", path.join(__dirname, "services", "cloud-services", "cloud-services-proxy"));
@@ -28,6 +27,7 @@ $injector.require("cloudRequestService", path.join(__dirname, "services", "cloud
 $injector.require("cloudEmulatorService", path.join(__dirname, "services", "cloud-services", "cloud-emulator-service"));
 $injector.require("codeCommitService", path.join(__dirname, "services", "cloud-services", "code-commit-service"));
 $injector.require("packageInfoService", path.join(__dirname, "services", "package-info-service"));
+$injector.require("uploadService", path.join(__dirname, "services", "upload-service"));
 $injector.require("gitService", path.join(__dirname, "services", "git-service"));
 
 // Commands.
