@@ -75,7 +75,6 @@ export abstract class CloudService extends EventEmitter {
 	}
 
 	protected async downloadServerResults(serverResult: IServerResult, serverOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string[]> {
-
 		const destinationDir = this.getServerOperationOutputDirectory(serverOutputOptions);
 		this.$fs.ensureDirectoryExists(destinationDir);
 

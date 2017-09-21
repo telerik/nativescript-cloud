@@ -1,8 +1,9 @@
 interface IBuildCloudService {
-	startBuild(appId: string, buildRequest: IBuildRequestData): Promise<IServerResponse>;
-	getPresignedUploadUrlObject(appId: string, fileName: string): Promise<IAmazonStorageEntry>;
+	startBuild(buildRequest: IBuildRequestData): Promise<IServerResponse>;
+	getPresignedUploadUrlObject(fileName: string): Promise<IAmazonStorageEntry>;
 	getBuildCredentials(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse>;
-	generateCodesignFiles(codesignRequestData: IServerRequestData): Promise<IServerResponse>;
+	generateCodesignFiles(codesignRequestData: ICodeSignRequestData): Promise<IServerResponse>;
+	publish(publishRequestData: IPublishRequestData): Promise<IServerResponse>;
 }
 
 interface IServerResponse {
@@ -16,13 +17,21 @@ interface IBuildFile {
 	sourceUri: string;
 }
 
+interface ICodeSignRequestData extends IBuildId, IAppId, IClean, ICredentials {
+	appName: string;
+	devices: Mobile.IDeviceInfo[];
+}
+
 interface IBuildRequestData extends IServerRequestData {
 	targets: string[];
 	buildFiles: IBuildFile[];
 }
 
-interface IBuildCredentialRequest {
+interface IAppId {
 	appId: string;
+}
+
+interface IBuildCredentialRequest extends IAppId {
 	fileNames: string[];
 }
 
@@ -38,6 +47,17 @@ interface IAmazonStorageEntry {
 	publicDownloadUrl: string;
 	s3Url: string;
 	fileName: string;
+}
+
+interface IPublishCredentials {
+	username?: string;
+	password?: string;
+	authJson?: string;
+}
+
+interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroidTrack, IOptionalTeamIdentifier {
+	credentials: IPublishCredentials;
+	appIdentifier?: string;
 }
 
 interface IServerRequestData {

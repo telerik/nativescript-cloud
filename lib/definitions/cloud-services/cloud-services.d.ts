@@ -11,7 +11,7 @@ interface ICloudServicesProxy extends ICloudRequestService {
 }
 
 interface IUploadService {
-	uploadToS3(localFilePath: string): Promise<string>;
+	uploadToS3(filePathOrContent: string, fileNameInS3?: string, uploadPreSignedUrl?: string): Promise<string>;
 }
 
 interface IEmulatorCredentials {
@@ -29,14 +29,13 @@ interface IAmazonStorageEntryData extends IAmazonStorageEntry {
 	disposition: string;
 }
 
-interface ICloudEmulatorResponse {
+interface ICloudEmulatorResponse extends IPlatform {
 	appPermissions: any;
 	appURL: string;
 	architectures: [string];
 	created: Date;
 	email: string;
 	manageURL: string;
-	platform: string;
 	privateKey: string;
 	publicKey: string;
 	publicURL: string;

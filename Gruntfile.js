@@ -206,15 +206,7 @@ module.exports = function (grunt) {
 			.concat(getReferencesFromDir(pathToIosDeviceLib))
 			.concat(getReferencesFromDir(path.join(nodeModulesDirPath, "cloud-device-emulator")));
 
-		// These files are const enums, which are included as .ts files, but in order to get transpilation work, we must have them in the references.d.ts
-		const specialFiles = [
-			path.join(nodeModulesDirPath, "mobile-cli-lib", "services", "analytics-type.ts"),
-			path.join(nodeModulesDirPath, "mobile-cli-lib", "services", "google-analytics-data-type.ts")
-		];
-
-		const pathToFilesToInclude = pathsOfDtsFiles.concat(...specialFiles);
-
-		const lines = pathToFilesToInclude.map(file => `/// <reference path="${fromWindowsRelativePathToUnix(path.relative(__dirname, file))}" />`);
+		const lines = pathsOfDtsFiles.map(file => `/// <reference path="${fromWindowsRelativePathToUnix(path.relative(__dirname, file))}" />`);
 
 		fs.writeFileSync(referencesPath, lines.join(os.EOL));
 	});

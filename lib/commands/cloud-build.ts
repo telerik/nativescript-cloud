@@ -1,37 +1,19 @@
-import * as path from "path";
 export class CloudBuild implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
 	constructor(private $errors: IErrors,
-		private $logger: ILogger,
-		private $mobileHelper: Mobile.IMobileHelper,
+		private $buildCommandHelper: IBuildCommandHelper,
 		private $projectData: IProjectData,
-		private $cloudBuildService: ICloudBuildService,
-		private $options: IOptions,
-		private $fs: IFileSystem) {
+		private $cloudBuildService: ICloudBuildService) {
 		this.$projectData.initializeProjectData();
 	}
 
 	public async execute(args: string[]): Promise<void> {
-		const platform = this.$mobileHelper.validatePlatformName(args[0]);
-		this.$logger.info(`Executing cloud build with platform: ${platform}.`);
-		const nativescriptData = this.$fs.readJson(path.join(this.$projectData.projectDir, "package.json")).nativescript;
-		let pathToCertificate = "";
-		if (this.$mobileHelper.isAndroidPlatform(platform)) {
-			pathToCertificate = this.$options.keyStorePath ? path.resolve(this.$options.keyStorePath) : "";
-		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
-			pathToCertificate = this.$options.certificate ? path.resolve(this.$options.certificate) : "";
-		} else {
-			this.$errors.failWithoutHelp(`Currently only ${this.$mobileHelper.platformNames.join(' ')} platforms are supported.`);
-		}
-
-		const pathToProvision = this.$options.provision ? path.resolve(this.$options.provision) : "";
-		const projectSettings = { projectDir: this.$projectData.projectDir, projectId: this.$projectData.projectId, projectName: this.$projectData.projectName, nativescriptData, clean: this.$options.clean };
-		const buildConfiguration = this.$options.release ? "Release" : "Debug";
-		await this.$cloudBuildService.build(projectSettings,
-			platform, buildConfiguration,
-			{ pathToCertificate, certificatePassword: this.$options.keyStorePassword },
-			{ pathToCertificate, certificatePassword: this.$options.certificatePassword, pathToProvision, buildForDevice: !this.$options.emulator });
+		const buildData = this.$buildCommandHelper.getCloudBuildData(args[0]);
+		await this.$cloudBuildService.build(buildData.projectSettings,
+			buildData.platform, buildData.buildConfiguration,
+			buildData.androidBuildData,
+			buildData.iOSBuildData);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -47,4 +29,4 @@ export class CloudBuild implements ICommand {
 	}
 }
 
-$injector.registerCommand("build|cloud", CloudBuild);
+$injector.registerCommand(["build|cloud", "cloud|build"], CloudBuild);

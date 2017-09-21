@@ -5,6 +5,8 @@ $injector.require("itmsServicesPlistHelper", path.join(__dirname, "itms-services
 $injector.require("serverConfigManager", path.join(__dirname, "server-config-manager"));
 $injector.require("cloudBuildOutputFilter", path.join(__dirname, "cloud-build-output-filter"));
 $injector.require("cloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
+$injector.require("cloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
+$injector.require("buildCommandHelper", path.join(__dirname, "commands", "build-command-helper"));
 
 // Mobile.
 $injector.require("cloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
@@ -14,10 +16,10 @@ $injector.requirePublicClass("authenticationService", path.join(__dirname, "serv
 $injector.requirePublicClass("cloudBuildService", path.join(__dirname, "services", "cloud-build-service"));
 $injector.requirePublicClass("cloudCodesignService", path.join(__dirname, "services", "cloud-codesign-service"));
 $injector.requirePublicClass("cloudEmulatorLauncher", path.join(__dirname, "services", "cloud-emulator-emulator-launcher"));
+$injector.requirePublicClass("cloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
 $injector.requirePublicClass("userService", path.join(__dirname, "services", "user-service"));
 
 // Services.
-$injector.require("uploadService", path.join(__dirname, "services", "cloud-services", "upload-service"));
 $injector.require("authCloudService", path.join(__dirname, "services", "cloud-services", "auth-cloud-service"));
 $injector.require("buildCloudService", path.join(__dirname, "services", "cloud-services", "build-cloud-service"));
 $injector.require("cloudServicesProxy", path.join(__dirname, "services", "cloud-services", "cloud-services-proxy"));
@@ -25,6 +27,7 @@ $injector.require("cloudRequestService", path.join(__dirname, "services", "cloud
 $injector.require("cloudEmulatorService", path.join(__dirname, "services", "cloud-services", "cloud-emulator-service"));
 $injector.require("codeCommitService", path.join(__dirname, "services", "cloud-services", "code-commit-service"));
 $injector.require("packageInfoService", path.join(__dirname, "services", "package-info-service"));
+$injector.require("uploadService", path.join(__dirname, "services", "upload-service"));
 $injector.require("gitService", path.join(__dirname, "services", "git-service"));
 
 // Commands.
@@ -40,8 +43,10 @@ $injector.requireCommand("logout", path.join(__dirname, "commands", "logout"));
 $injector.requireCommand("user", path.join(__dirname, "commands", "user"));
 $injector.requireCommand("kill-server", path.join(__dirname, "commands", "kill-server"));
 
-$injector.requireCommand("build|cloud", path.join(__dirname, "commands", "cloud-build"));
-$injector.requireCommand("codesign|cloud", path.join(__dirname, "commands", "cloud-codesign"));
+$injector.requireCommand(["cloud|build", "build|cloud"], path.join(__dirname, "commands", "cloud-build"));
+$injector.requireCommand(["cloud|codesign", "codesign|cloud"], path.join(__dirname, "commands", "cloud-codesign"));
+$injector.requireCommand("cloud|publish|android", path.join(__dirname, "commands", "cloud-publish"));
+$injector.requireCommand("cloud|publish|ios", path.join(__dirname, "commands", "cloud-publish"));
 $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "cloud-lib-version"));
 
 const $devicesService: Mobile.IDevicesService = $injector.resolve("devicesService");
