@@ -7,10 +7,7 @@ import { CloudService } from "./cloud-service";
 export class CloudPublishService extends CloudService implements ICloudPublishService {
 	// Taken from: https://github.com/fastlane/fastlane/blob/master/fastlane_core/lib/fastlane_core/itunes_transporter.rb#L100
 	private static ITMS_ERROR_REGEX = /\[Transporter Error Output\]:.*/g;
-	// Taken from: https://github.com/fastlane/fastlane/blob/master/spaceship/lib/spaceship/portal/ui/select_team.rb#L88
-	private static FASTLANE_MULTIPLE_TEAMS_FOUND_ERROR = "Multiple iTunes Connect Teams found";
 	private static GENERAL_ERROR_REGEX = /\[!\].*/g;
-	private static IOS_TEAMS_REGEX = /\d+\) "(.*)" \(.*\)/g;
 
 	protected get failedError() {
 		return "Publishing failed.";
@@ -47,8 +44,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 			appIdentifier,
 			credentials: publishData.credentials,
 			packagePaths: publishData.packagePaths,
-			platform: this.$devicePlatformsConstants.iOS,
-			teamId: publishData.teamId
+			platform: this.$devicePlatformsConstants.iOS
 		};
 
 		return this.publishCore(publishRequestData, publishData, this.getiOSError.bind(this));
@@ -85,40 +81,6 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		const itmsMessage = this.getFormattedError(publishResult.stdout, CloudPublishService.ITMS_ERROR_REGEX);
 		const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
 		const err: any = new Error(`${publishResult.errors}${EOL}${itmsMessage}${EOL}${generalMessage}`);
-		if (_.includes(publishResult.stderr, CloudPublishService.FASTLANE_MULTIPLE_TEAMS_FOUND_ERROR)) {
-			const teamNames = [];
-			// Fastlane can't decide a team for us and we can't either.
-			// Capture the teams and return them to the client.
-
-			// Fastlane's printing logic can be found here https://github.com/fastlane/fastlane/blob/master/spaceship/lib/spaceship/portal/ui/select_team.rb#L86
-			// Sample output:
-			/*
-			Multiple iTunes Connect teams found, please enter the number of the team you want to use:
-			Note: to automatically choose the team, provide either the iTunes Connect Team ID, or the Team Name in your fastlane/Appfile:
-			Alternatively you can pass the team name or team ID using the `FASTLANE_ITC_TEAM_ID` or `FASTLANE_ITC_TEAM_NAME` environment variable
-
-			itc_team_id "944446"
-
-			or
-
-			itc_team_name "Telerik A D"
-
-			1) "Telerik A D" (944446)
-			2) "Telerik AD" (115499815)
-			Multiple teams found on iTunes Connect, Your Terminal is running in non-interactive mode! Cannot continue from here.
-			Please check that you set FASTLANE_ITC_TEAM_ID or FASTLANE_ITC_TEAM_NAME to the right value.
-			*/
-			// We need the team names only
-
-			let matches;
-			while (matches = CloudPublishService.IOS_TEAMS_REGEX.exec(publishResult.stdout)) {
-				teamNames.push(matches[1]);
-			}
-
-			err.teamNames = teamNames;
-			err.packagePaths = publishRequestData.packagePaths;
-		}
-
 		return err;
 	}
 

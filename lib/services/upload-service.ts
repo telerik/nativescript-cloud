@@ -7,7 +7,6 @@ export class UploadService implements IUploadService {
 	protected serviceName = BUILD_SERVICE_NAME;
 
 	constructor(private $buildCloudService: IBuildCloudService,
-		protected $cloudRequestService: ICloudRequestService,
 		private $httpClient: Server.IHttpClient,
 		private $errors: IErrors,
 		private $fs: IFileSystem) {

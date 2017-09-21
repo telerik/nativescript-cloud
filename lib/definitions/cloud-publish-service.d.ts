@@ -26,7 +26,7 @@ interface IOptionalTeamIdentifier {
 /**
  * Describes data needed to publish to iTunes Connect.
  */
-interface IItunesConnectPublishData extends IPublishDataCore, IOptionalTeamIdentifier {
+interface IItunesConnectPublishData extends IPublishDataCore {
 	/**
 	 * Credentials for iTunes Connect.
 	 */
