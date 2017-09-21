@@ -243,6 +243,68 @@ const generateCodesignFilesOutputDirectory = tns.cloudBuildService
 				});
 ```
 
+### Module cloudPublishService
+The `cloudPublishService` allows publishing build packages to an application store (either GooglePlay or iTunesConnect). You can call the following methods:
+* `publishToItunesConnect` method - it will try to publish the provided package to iTunes Connect. </br>
+Definition:
+
+```TypeScript
+/**
+ * Publishes the given .ipa packages to iTunes Connect.
+ * @param {IItunesConnectPublishData} publishData Data needed to publish to iTunes Connect.
+ * @returns {Promise<void>}
+ */
+publishToItunesConnect(publishData: IItunesConnectPublishData): Promise<void>;
+```
+Detailed description of the parameter can be found [here](./lib/definitions/cloud-publish-service.d.ts).
+</br>
+Usage:
+```JavaScript
+const tns = require("nativescript");
+tns.cloudPublishService
+	.publishToItunesConnect({
+		credentials: {
+			username: "user",
+			password: "pass"
+		},
+		packagePaths: ["/tmp/myReleaseIpa.ipa"],
+		projectDir: "/tmp/myProject"
+	})
+	.then(() => {
+		console.log("Publishing succeeded");
+	})
+	.catch(err => console.error(err));
+```
+
+* `publishToGooglePlay` - method - it will try to publish the provided packages to Google Play. </br>
+Definition:
+
+```TypeScript
+/**
+ * Publishes the given .apk packages to Google Play.
+ * @param {IGooglePlayPublishData} publishData Data needed to publish to Google Play.
+ * @returns {Promise<void>}
+ */
+publishToGooglePlay(publishData: IGooglePlayPublishData): Promise<void>;
+```
+Detailed description of the parameter can be found [here](./lib/definitions/cloud-publish-service.d.ts).
+</br>
+Usage:
+```JavaScript
+const tns = require("nativescript");
+tns.cloudPublishService
+	.publishToGooglePlay({
+		track: "alpha",
+		pathToAuthJson: "/tmp/myAuthJson.json",
+		packagePaths: ["/tmp/myReleaseApk.apk"],
+		projectDir: "/tmp/myProject"
+	})
+	.then(() => {
+		console.log("Publishing succeeded");
+	})
+	.catch(err => console.error(err));
+```
+
 ### Module cloudEmulatorLauncher
 The `cloudEmulatorLauncher` provides a way for initial interaction with cloud emulators. You can call the following methods:
 * `startEmulator` method - starts an cloud emulator and returns a url where an html page is located, containing an iframe with the actual emulator. </br>
