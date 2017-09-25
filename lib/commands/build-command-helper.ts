@@ -2,13 +2,17 @@ import * as path from "path";
 import { CLOUD_BUILD_CONFIGURATIONS } from "../constants";
 
 export class BuildCommandHelper implements IBuildCommandHelper {
+	private get $localBuildService(): ILocalBuildService {
+		return this.$injector.resolve<ILocalBuildService>("localBuildService");
+	}
+
 	constructor(private $cloudBuildService: ICloudBuildService,
 		private $errors: IErrors,
 		private $logger: ILogger,
 		private $prompter: IPrompter,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $projectData: IProjectData,
-		private $localBuildService: ILocalBuildService,
+		private $injector: IInjector,
 		private $options: ICloudOptions,
 		private $fs: IFileSystem) {
 		this.$projectData.initializeProjectData();
