@@ -12,6 +12,7 @@ $injector.require("buildCommandHelper", path.join(__dirname, "commands", "build-
 $injector.require("cloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
 
 // Public API.
+$injector.requirePublicClass("applicationService", path.join(__dirname, "services", "application-service"));
 $injector.requirePublicClass("authenticationService", path.join(__dirname, "services", "authentication-service"));
 $injector.requirePublicClass("cloudBuildService", path.join(__dirname, "services", "cloud-build-service"));
 $injector.requirePublicClass("cloudCodesignService", path.join(__dirname, "services", "cloud-codesign-service"));
