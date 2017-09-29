@@ -305,6 +305,64 @@ tns.cloudPublishService
 	.catch(err => console.error(err));
 ```
 
+### Module applicationService
+The `applicationService` allows for application management and gathering more information about the app's current state. You can call the following methods:
+* `shouldBuild` method - it will determine whether the current application should be built or not. </br>
+Definition:
+
+```TypeScript
+/**
+* Determines whether the application should be built or not.
+* @param {IApplicationBuildConfig} config Settings used to help decide whether the project should be built or not.
+* @returns {Promise<boolean>}
+*/
+shouldBuild(config: IApplicationBuildConfig): Promise<boolean>;
+```
+Detailed description of the parameter can be found [here](./lib/definitions/application-service.d.ts).
+</br>
+Usage:
+```JavaScript
+const tns = require("nativescript");
+tns.cloudPublishService
+	.shouldBuild({
+		projectDir: "/tmp/myProject",
+		platform: "android",
+		outputPath: "/tmp/myProject/.cloud/android" // for cloud builds
+	})
+	.then((shouldBuild) => {
+		console.log("Should build? ", shouldBuild);
+	})
+	.catch(err => console.error(err));
+```
+
+* `shouldInstall` - method - it will determine whether the current application's package should be installed on the given device or not. </br>
+Definition:
+
+```TypeScript
+/**
+* Determines whether the application's output package should be installed on the given device or not.
+* @param {IApplicationInstallConfig} config Settings used to help decide whether the project's output should be installed or not.
+* @returns {Promise<boolean>}
+*/
+shouldInstall(config: IApplicationInstallConfig): Promise<boolean>;
+```
+Detailed description of the parameter can be found [here](./lib/definitions/application-service.d.ts).
+</br>
+Usage:
+```JavaScript
+const tns = require("nativescript");
+tns.cloudPublishService
+	.shouldInstall({
+		projectDir: "/tmp/myProject",
+		deviceIdentifier: "192.168.56.101:5555",
+		outputPath: "/tmp/myProject/.cloud/ios" // for cloud builds
+	})
+	.then((shouldInstall) => {
+		console.log("Should install?", shouldInstall);
+	})
+	.catch(err => console.error(err));
+```
+
 ### Module cloudEmulatorLauncher
 The `cloudEmulatorLauncher` provides a way for initial interaction with cloud emulators. You can call the following methods:
 * `startEmulator` method - starts an cloud emulator and returns a url where an html page is located, containing an iframe with the actual emulator. </br>
