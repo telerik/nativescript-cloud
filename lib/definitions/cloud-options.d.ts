@@ -2,6 +2,7 @@
  * Describes additional -- flags that can be passed to cloud commands.
  */
 interface ICloudOptions extends IOptions {
+	accountId: string;
 	local: boolean;
 	track: string;
 }

@@ -29,10 +29,6 @@ export class AuthCloudService extends CloudServiceBase implements IAuthCloudServ
 		return this.getAuthUrl("api/logout");
 	}
 
-	public getUserInfo(): Promise<IUserInfo> {
-		return this.sendRequest<IUserInfo>(HTTP_METHODS.GET, "api/user-info", null);
-	}
-
 	private getAuthUrl(urlPath: string): string {
 		const proto = this.$nsCloudServicesProxy.getServiceProto(AUTH_SERVICE_NAME);
 		const host = this.$nsCloudServicesProxy.getServiceAddress(AUTH_SERVICE_NAME);

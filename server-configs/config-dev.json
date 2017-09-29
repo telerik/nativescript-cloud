@@ -12,6 +12,12 @@
 		},
 		"code-commit-service": {
 			"subdomain": "code-commit"
+		},
+		"misc-service": {
+			"subdomain": "dev-misc"
+		},
+		"accounts-service": {
+			"subdomain": "dev-accounts"
 		}
 	}
 }
