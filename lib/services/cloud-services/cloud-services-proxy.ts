@@ -1,4 +1,4 @@
-import { CONTENT_TYPES, HTTP_HEADERS } from "../../constants";
+import { CONTENT_TYPES, HTTP_HEADERS, CUSTOM_ENV_HEADER_PREFIX } from "../../constants";
 
 export class CloudServicesProxy implements ICloudServicesProxy {
 	private serverConfig: IServerConfig;
@@ -15,7 +15,7 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 		const host = this.getServiceAddress(options.serviceName);
 		const finalUrlPath = this.getUrlPath(options.serviceName, options.urlPath);
 
-		const headers = options.headers || Object.create(null);
+		let headers = options.headers || Object.create(null);
 
 		if (!_.has(headers, HTTP_HEADERS.AUTHORIZATION) && this.$userService.hasUser()) {
 			headers[HTTP_HEADERS.AUTHORIZATION] = `Bearer ${this.$userService.getUserData().accessToken}`;
@@ -24,6 +24,9 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 		if (options.accept) {
 			headers[HTTP_HEADERS.ACCEPT] = options.accept;
 		}
+
+		const cloudEnvHeaders = this.getCloudConfigHeaders(options.serviceName);
+		headers = _.merge(headers, cloudEnvHeaders);
 
 		let requestOpts: any = {
 			proto: this.getServiceProto(options.serviceName),
@@ -99,6 +102,17 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 		}
 
 		return <string>this.serverConfig[valueName];
+	}
+
+	private getCloudConfigHeaders(serviceName: string): IStringDictionary {
+		const result: IStringDictionary = {};
+		const envVars = _.merge(this.serverConfig.cloudEnv, this.serverConfig.cloudServices[serviceName].cloudEnv);
+
+		_.each(envVars, (value, key) => {
+			result[`${CUSTOM_ENV_HEADER_PREFIX}${key}`] = value;
+		});
+
+		return result;
 	}
 }
 

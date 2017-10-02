@@ -18,21 +18,21 @@ interface IServerConfigManager {
 	printConfigData(): void;
 }
 
-interface IServerConfig {
+interface IServerConfig extends IDynamicIndex {
 	apiVersion?: string;
 	domainName: string;
 	serverProto?: string;
 	stage?: string;
+	cloudEnv?: IStringDictionary;
 	cloudServices: IDictionary<ICloudServiceConfig>;
-	[index: string]: string | IDictionary<ICloudServiceConfig>;
 }
 
-interface ICloudServiceConfig {
+interface ICloudServiceConfig extends IDynamicIndex {
 	apiVersion?: string;
 	fullHostName?: string;
 	serverProto?: string;
 	subdomain?: string;
-	[index: string]: string;
+	cloudEnv?: IStringDictionary;
 }
 
 /**
