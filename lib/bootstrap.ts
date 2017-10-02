@@ -49,6 +49,3 @@ $injector.requireCommand(["cloud|codesign", "codesign|cloud"], path.join(__dirna
 $injector.requireCommand("cloud|publish|android", path.join(__dirname, "commands", "cloud-publish"));
 $injector.requireCommand("cloud|publish|ios", path.join(__dirname, "commands", "cloud-publish"));
 $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "cloud-lib-version"));
-
-const $devicesService: Mobile.IDevicesService = $injector.resolve("devicesService");
-$devicesService.addDeviceDiscovery($injector.resolve("cloudEmulatorDeviceDiscovery"));
