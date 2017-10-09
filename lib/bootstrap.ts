@@ -1,35 +1,35 @@
 import * as path from "path";
 
-$injector.require("httpServer", path.join(__dirname, "http-server"));
-$injector.require("itmsServicesPlistHelper", path.join(__dirname, "itms-services-plist-helper"));
-$injector.require("serverConfigManager", path.join(__dirname, "server-config-manager"));
-$injector.require("cloudBuildOutputFilter", path.join(__dirname, "cloud-build-output-filter"));
-$injector.require("cloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
-$injector.require("cloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
-$injector.require("buildCommandHelper", path.join(__dirname, "commands", "build-command-helper"));
+$injector.require("nsCloudHttpServer", path.join(__dirname, "http-server"));
+$injector.require("nsCloudItmsServicesPlistHelper", path.join(__dirname, "itms-services-plist-helper"));
+$injector.require("nsCloudServerConfigManager", path.join(__dirname, "server-config-manager"));
+$injector.require("nsCloudBuildOutputFilter", path.join(__dirname, "cloud-build-output-filter"));
+$injector.require("nsCloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
+$injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
+$injector.require("nsCloudBuildCommandHelper", path.join(__dirname, "commands", "build-command-helper"));
 
 // Mobile.
-$injector.require("cloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
+$injector.require("nsCloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
 
 // Public API.
-$injector.requirePublicClass("applicationService", path.join(__dirname, "services", "application-service"));
-$injector.requirePublicClass("authenticationService", path.join(__dirname, "services", "authentication-service"));
-$injector.requirePublicClass("cloudBuildService", path.join(__dirname, "services", "cloud-build-service"));
-$injector.requirePublicClass("cloudCodesignService", path.join(__dirname, "services", "cloud-codesign-service"));
-$injector.requirePublicClass("cloudEmulatorLauncher", path.join(__dirname, "services", "cloud-emulator-emulator-launcher"));
-$injector.requirePublicClass("cloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
-$injector.requirePublicClass("userService", path.join(__dirname, "services", "user-service"));
+$injector.requirePublicClass("nsCloudApplicationService", path.join(__dirname, "services", "application-service"));
+$injector.requirePublicClass("nsCloudAuthenticationService", path.join(__dirname, "services", "authentication-service"));
+$injector.requirePublicClass("nsCloudBuildService", path.join(__dirname, "services", "cloud-build-service"));
+$injector.requirePublicClass("nsCloudCodesignService", path.join(__dirname, "services", "cloud-codesign-service"));
+$injector.requirePublicClass("nsCloudEmulatorLauncher", path.join(__dirname, "services", "cloud-emulator-emulator-launcher"));
+$injector.requirePublicClass("nsCloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
+$injector.requirePublicClass("nsCloudUserService", path.join(__dirname, "services", "user-service"));
 
 // Services.
-$injector.require("authCloudService", path.join(__dirname, "services", "cloud-services", "auth-cloud-service"));
-$injector.require("buildCloudService", path.join(__dirname, "services", "cloud-services", "build-cloud-service"));
-$injector.require("cloudServicesProxy", path.join(__dirname, "services", "cloud-services", "cloud-services-proxy"));
-$injector.require("cloudRequestService", path.join(__dirname, "services", "cloud-services", "cloud-request-service"));
-$injector.require("cloudEmulatorService", path.join(__dirname, "services", "cloud-services", "cloud-emulator-service"));
-$injector.require("codeCommitService", path.join(__dirname, "services", "cloud-services", "code-commit-service"));
-$injector.require("packageInfoService", path.join(__dirname, "services", "package-info-service"));
-$injector.require("uploadService", path.join(__dirname, "services", "upload-service"));
-$injector.require("gitService", path.join(__dirname, "services", "git-service"));
+$injector.require("nsCloudAuthCloudService", path.join(__dirname, "services", "cloud-services", "auth-cloud-service"));
+$injector.require("nsCloudBuildCloudService", path.join(__dirname, "services", "cloud-services", "build-cloud-service"));
+$injector.require("nsCloudServicesProxy", path.join(__dirname, "services", "cloud-services", "cloud-services-proxy"));
+$injector.require("nsCloudRequestService", path.join(__dirname, "services", "cloud-services", "cloud-request-service"));
+$injector.require("nsCloudEmulatorService", path.join(__dirname, "services", "cloud-services", "cloud-emulator-service"));
+$injector.require("nsCloudCodeCommitService", path.join(__dirname, "services", "cloud-services", "code-commit-service"));
+$injector.require("nsCloudPackageInfoService", path.join(__dirname, "services", "package-info-service"));
+$injector.require("nsCloudUploadService", path.join(__dirname, "services", "upload-service"));
+$injector.require("nsCloudGitService", path.join(__dirname, "services", "git-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));

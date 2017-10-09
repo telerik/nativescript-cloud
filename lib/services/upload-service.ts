@@ -6,7 +6,7 @@ export class UploadService implements IUploadService {
 
 	protected serviceName = BUILD_SERVICE_NAME;
 
-	constructor(private $buildCloudService: IBuildCloudService,
+	constructor(private $nsCloudBuildCloudService: IBuildCloudService,
 		private $httpClient: Server.IHttpClient,
 		private $errors: IErrors,
 		private $fs: IFileSystem) {
@@ -16,7 +16,7 @@ export class UploadService implements IUploadService {
 		fileNameInS3 = fileNameInS3 || uuid.v4();
 		let preSignedUrlData: IAmazonStorageEntry;
 		if (!uploadPreSignedUrl) {
-			preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(fileNameInS3);
+			preSignedUrlData = await this.$nsCloudBuildCloudService.getPresignedUploadUrlObject(fileNameInS3);
 			uploadPreSignedUrl = preSignedUrlData.uploadPreSignedUrl;
 		}
 
@@ -45,4 +45,4 @@ export class UploadService implements IUploadService {
 	}
 }
 
-$injector.register("uploadService", UploadService);
+$injector.register("nsCloudUploadService", UploadService);

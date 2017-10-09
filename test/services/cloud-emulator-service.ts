@@ -11,7 +11,7 @@ describe("cloud emulator service", () => {
 
 		function createTestInjector(): IInjector {
 			const testInjector = new Yok();
-			testInjector.register("cloudRequestService", {
+			testInjector.register("nsCloudRequestService", {
 				call: async () => emulatorCredentials
 			});
 			testInjector.register("fs", {
@@ -19,10 +19,10 @@ describe("cloud emulator service", () => {
 				readJson: () => ({}),
 				writeJson: () => { /* empty */ }
 			});
-			testInjector.register("uploadService", {
+			testInjector.register("nsCloudUploadService", {
 				uploadToS3: async (url: string) => url
 			});
-			testInjector.register("cloudDeviceEmulator", { /* empty */ });
+			testInjector.register("nsCloudDeviceEmulator", { /* empty */ });
 			testInjector.register("options", {
 				profileDir: "test"
 			});
@@ -33,14 +33,14 @@ describe("cloud emulator service", () => {
 		it("should upload to S3 in case a local file is passed", async () => {
 			const injector = createTestInjector();
 			let hasUploadedToS3 = false;
-			injector.resolve("uploadService").uploadToS3 = (url: string) => {
+			injector.resolve("nsCloudUploadService").uploadToS3 = (url: string) => {
 				if (url === filePath) {
 					hasUploadedToS3 = true;
 				}
 			};
 
-			const cloudEmulatorService: ICloudEmulatorService = injector.resolve(CloudEmulatorService);
-			await cloudEmulatorService.deployApp(filePath, platform);
+			const nsCloudEmulatorService: ICloudEmulatorService = injector.resolve(CloudEmulatorService);
+			await nsCloudEmulatorService.deployApp(filePath, platform);
 
 			assert.isTrue(hasUploadedToS3);
 		});
@@ -48,15 +48,15 @@ describe("cloud emulator service", () => {
 		it("should call create if emulator credentials not present", async () => {
 			const injector = createTestInjector();
 			let hasCalledCloudRequestService = false;
-			injector.resolve("cloudRequestService").call = (options: ICloudRequestOptions) => {
+			injector.resolve("nsCloudRequestService").call = (options: ICloudRequestOptions) => {
 				hasCalledCloudRequestService = true;
 				assert.deepEqual(options.method, HTTP_METHODS.POST, "create is not called upon missing credentials");
 
 				return emulatorCredentials;
 			};
 
-			const cloudEmulatorService: ICloudEmulatorService = injector.resolve(CloudEmulatorService);
-			await cloudEmulatorService.deployApp(filePath, platform);
+			const nsCloudEmulatorService: ICloudEmulatorService = injector.resolve(CloudEmulatorService);
+			await nsCloudEmulatorService.deployApp(filePath, platform);
 
 			assert.isTrue(hasCalledCloudRequestService);
 		});
@@ -67,15 +67,15 @@ describe("cloud emulator service", () => {
 			injector.resolve("fs").readJson = () => ({
 				[platform]: emulatorCredentials
 			});
-			injector.resolve("cloudRequestService").call = (options: ICloudRequestOptions) => {
+			injector.resolve("nsCloudRequestService").call = (options: ICloudRequestOptions) => {
 				hasCalledCloudRequestService = true;
 				assert.deepEqual(options.method, HTTP_METHODS.PUT, "update is not called upon existing credentials");
 
 				return emulatorCredentials;
 			};
 
-			const cloudEmulatorService: ICloudEmulatorService = injector.resolve(CloudEmulatorService);
-			await cloudEmulatorService.deployApp(filePath, platform);
+			const nsCloudEmulatorService: ICloudEmulatorService = injector.resolve(CloudEmulatorService);
+			await nsCloudEmulatorService.deployApp(filePath, platform);
 
 			assert.isTrue(hasCalledCloudRequestService);
 		});

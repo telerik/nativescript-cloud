@@ -2,15 +2,15 @@ export class CloudBuild implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
 	constructor(private $errors: IErrors,
-		private $buildCommandHelper: IBuildCommandHelper,
+		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $projectData: IProjectData,
-		private $cloudBuildService: ICloudBuildService) {
+		private $nsCloudBuildService: ICloudBuildService) {
 		this.$projectData.initializeProjectData();
 	}
 
 	public async execute(args: string[]): Promise<void> {
-		const buildData = this.$buildCommandHelper.getCloudBuildData(args[0]);
-		await this.$cloudBuildService.build(buildData.projectSettings,
+		const buildData = this.$nsCloudBuildCommandHelper.getCloudBuildData(args[0]);
+		await this.$nsCloudBuildService.build(buildData.projectSettings,
 			buildData.platform, buildData.buildConfiguration,
 			buildData.androidBuildData,
 			buildData.iOSBuildData);

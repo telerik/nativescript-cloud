@@ -16,7 +16,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
-		private $buildCloudService: IBuildCloudService,
+		private $nsCloudBuildCloudService: IBuildCloudService,
 		private $errors: IErrors,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
@@ -74,7 +74,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 
 		const projectData = this.$projectDataService.getProjectData(projectDir);
 		const codesignRequest = await this.prepareCodesignRequest(buildId, codesignData, projectData);
-		const codesignResponse: IServerResponse = await this.$buildCloudService.generateCodesignFiles(codesignRequest);
+		const codesignResponse: IServerResponse = await this.$nsCloudBuildCloudService.generateCodesignFiles(codesignRequest);
 		this.$logger.trace(`Codesign response: ${JSON.stringify(codesignResponse)}`);
 
 		try {
@@ -138,4 +138,4 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 	}
 }
 
-$injector.register("cloudCodesignService", CloudCodesignService);
+$injector.register("nsCloudCodesignService", CloudCodesignService);

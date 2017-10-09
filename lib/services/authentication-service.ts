@@ -8,12 +8,12 @@ export class AuthenticationService implements IAuthenticationService {
 	private localhostServer: Server;
 	private rejectLoginPromiseAction: (data: any) => void;
 
-	constructor(private $authCloudService: IAuthCloudService,
+	constructor(private $nsCloudAuthCloudService: IAuthCloudService,
 		private $fs: IFileSystem,
-		private $httpServer: IHttpServer,
+		private $nsCloudHttpServer: IHttpServer,
 		private $logger: ILogger,
 		private $opener: IOpener,
-		private $userService: IUserService) { }
+		private $nsCloudUserService: IUserService) { }
 
 	public async login(options?: ILoginOptions): Promise<IUser> {
 		options = options || {};
@@ -30,7 +30,7 @@ export class AuthenticationService implements IAuthenticationService {
 		this.$logger.info("Launching login page in browser.");
 
 		let loginUrl: string;
-		this.localhostServer = this.$httpServer.createServer({
+		this.localhostServer = this.$nsCloudHttpServer.createServer({
 			routes: {
 				"/": (request: ServerRequest, response: ServerResponse) => {
 					this.$logger.debug("Login complete: " + request.url);
@@ -48,7 +48,7 @@ export class AuthenticationService implements IAuthenticationService {
 						authCompleteResolveAction(decodedResponse);
 						response.end();
 					} else {
-						this.$httpServer.redirect(response, loginUrl);
+						this.$nsCloudHttpServer.redirect(response, loginUrl);
 					}
 				}
 			}
@@ -64,7 +64,7 @@ export class AuthenticationService implements IAuthenticationService {
 
 			const port = this.localhostServer.address().port;
 
-			loginUrl = this.$authCloudService.getLoginUrl(port);
+			loginUrl = this.$nsCloudAuthCloudService.getLoginUrl(port);
 
 			this.$logger.debug("Login URL is '%s'", loginUrl);
 
@@ -97,7 +97,7 @@ export class AuthenticationService implements IAuthenticationService {
 		}
 
 		const userData: IUserData = JSON.parse(loginResponse);
-		this.$userService.setUserData(userData);
+		this.$nsCloudUserService.setUserData(userData);
 
 		const userInfo = userData.userInfo;
 
@@ -105,8 +105,8 @@ export class AuthenticationService implements IAuthenticationService {
 	}
 
 	public async devLogin(username: string, password: string): Promise<IUser> {
-		const userData = await this.$authCloudService.devLogin(username, password);
-		this.$userService.setUserData(userData);
+		const userData = await this.$nsCloudAuthCloudService.devLogin(username, password);
+		this.$nsCloudUserService.setUserData(userData);
 
 		return userData.userInfo;
 	}
@@ -128,7 +128,7 @@ export class AuthenticationService implements IAuthenticationService {
 	public logout(options?: IOpenActionOptions): void {
 		options = options || {};
 
-		const logoutUrl = this.$authCloudService.getLogoutUrl();
+		const logoutUrl = this.$nsCloudAuthCloudService.getLogoutUrl();
 		this.$logger.trace(`Logging out. Logout url is: ${logoutUrl}`);
 
 		if (options.openAction) {
@@ -137,17 +137,17 @@ export class AuthenticationService implements IAuthenticationService {
 			this.$opener.open(logoutUrl);
 		}
 
-		this.$userService.clearUserData();
+		this.$nsCloudUserService.clearUserData();
 	}
 
 	public async refreshCurrentUserToken(): Promise<void> {
-		const userData = this.$userService.getUserData();
-		const token = await this.$authCloudService.refreshToken(userData.refreshToken);
-		this.$userService.setToken(token);
+		const userData = this.$nsCloudUserService.getUserData();
+		const token = await this.$nsCloudAuthCloudService.refreshToken(userData.refreshToken);
+		this.$nsCloudUserService.setToken(token);
 	}
 
 	public async isUserLoggedIn(): Promise<boolean> {
-		if (this.$userService.hasUser()) {
+		if (this.$nsCloudUserService.hasUser()) {
 			const tokenState = await this.getCurrentUserTokenState();
 			if (tokenState.isTokenValid) {
 				return true;
@@ -169,8 +169,8 @@ export class AuthenticationService implements IAuthenticationService {
 	}
 
 	private async getCurrentUserTokenState(): Promise<ITokenState> {
-		const userData = this.$userService.getUserData();
-		const tokenState = await this.$authCloudService.getTokenState(userData.accessToken);
+		const userData = this.$nsCloudUserService.getUserData();
+		const tokenState = await this.$nsCloudAuthCloudService.getTokenState(userData.accessToken);
 		return tokenState;
 	}
 
@@ -180,4 +180,4 @@ export class AuthenticationService implements IAuthenticationService {
 	}
 }
 
-$injector.register("authenticationService", AuthenticationService);
+$injector.register("nsCloudAuthenticationService", AuthenticationService);

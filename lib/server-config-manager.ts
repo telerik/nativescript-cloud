@@ -70,4 +70,4 @@ export class ServerConfigManager implements IServerConfigManager {
 	}
 }
 
-$injector.register("serverConfigManager", ServerConfigManager);
+$injector.register("nsCloudServerConfigManager", ServerConfigManager);

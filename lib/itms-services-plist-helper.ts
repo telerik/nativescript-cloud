@@ -34,4 +34,4 @@ export class ItmsServicesPlistHelper implements IItmsServicesPlistHelper { // Us
 	}
 }
 
-$injector.register("itmsServicesPlistHelper", ItmsServicesPlistHelper);
+$injector.register("nsCloudItmsServicesPlistHelper", ItmsServicesPlistHelper);

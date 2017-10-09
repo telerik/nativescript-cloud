@@ -1,12 +1,12 @@
 export class CloudLibVersion implements ICommand {
-	constructor(private $packageInfoService: IPackageInfoService,
+	constructor(private $nsCloudPackageInfoService: IPackageInfoService,
 		private $logger: ILogger) {
 	}
 
 	public allowedParameters: ICommandParameter[] = [];
 
 	public async execute(args: string[]): Promise<void> {
-		this.$logger.info(this.$packageInfoService.getVersion());
+		this.$logger.info(this.$nsCloudPackageInfoService.getVersion());
 	}
 }
 

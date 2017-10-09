@@ -1,10 +1,10 @@
 export class ConfigGetCommand implements ICommand {
-	constructor(private $serverConfigManager: IServerConfigManager) { }
+	constructor(private $nsCloudServerConfigManager: IServerConfigManager) { }
 
 	public allowedParameters: ICommandParameter[] = [];
 
 	public async execute(args: string[]): Promise<void> {
-		this.$serverConfigManager.printConfigData();
+		this.$nsCloudServerConfigManager.printConfigData();
 	}
 }
 

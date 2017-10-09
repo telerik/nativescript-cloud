@@ -3,11 +3,11 @@ import { EOL } from "os";
 export class UserCommand implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
 
-	constructor(private $userService: IUserService,
+	constructor(private $nsCloudUserService: IUserService,
 		private $logger: ILogger) { }
 
 	public async execute(args: string[]): Promise<void> {
-		const user = this.$userService.getUser();
+		const user = this.$nsCloudUserService.getUser();
 		let message: string;
 
 		if (!user) {

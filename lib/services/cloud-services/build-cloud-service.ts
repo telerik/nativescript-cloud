@@ -5,8 +5,8 @@ import { CloudServiceBase } from "./cloud-service-base";
 export class BuildCloudService extends CloudServiceBase implements IBuildCloudService {
 	protected serviceName: string = BUILD_SERVICE_NAME;
 
-	constructor(protected $cloudRequestService: ICloudRequestService) {
-		super($cloudRequestService);
+	constructor(protected $nsCloudRequestService: ICloudRequestService) {
+		super($nsCloudRequestService);
 	}
 
 	public startBuild(buildRequest: IBuildRequestData): Promise<IServerResponse> {
@@ -30,4 +30,4 @@ export class BuildCloudService extends CloudServiceBase implements IBuildCloudSe
 	}
 }
 
-$injector.register("buildCloudService", BuildCloudService);
+$injector.register("nsCloudBuildCloudService", BuildCloudService);

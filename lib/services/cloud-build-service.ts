@@ -23,18 +23,18 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
-		private $buildCloudService: IBuildCloudService,
-		private $gitService: IGitService,
+		private $nsCloudBuildCloudService: IBuildCloudService,
+		private $nsCloudGitService: IGitService,
 		private $errors: IErrors,
-		private $itmsServicesPlistHelper: IItmsServicesPlistHelper,
+		private $nsCloudItmsServicesPlistHelper: IItmsServicesPlistHelper,
 		private $platformService: IPlatformService,
-		private $cloudBuildOutputFilter: ICloudBuildOutputFilter,
+		private $nsCloudBuildOutputFilter: ICloudBuildOutputFilter,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
 		private $qr: IQrCodeGenerator,
-		private $uploadService: IUploadService,
-		private $userService: IUserService) {
+		private $nsCloudUploadService: IUploadService,
+		private $nsCloudUserService: IUserService) {
 		super($fs, $httpClient, $logger);
 	}
 
@@ -104,7 +104,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		const fileNames = buildFiles.map(buildFile => buildFile.filename);
-		const buildCredentials = await this.$buildCloudService.getBuildCredentials({ appId: projectSettings.projectId, fileNames: fileNames });
+		const buildCredentials = await this.$nsCloudBuildCloudService.getBuildCredentials({ appId: projectSettings.projectId, fileNames: fileNames });
 
 		const filesToUpload = this.prepareFilesToUpload(buildCredentials.urls, buildFiles);
 		let buildProps = await this.prepareBuildRequest(buildId, projectSettings, platform, buildConfiguration, buildCredentials, filesToUpload);
@@ -115,7 +115,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.START);
-		const buildResponse: IServerResponse = await this.$buildCloudService.startBuild(buildProps);
+		const buildResponse: IServerResponse = await this.$nsCloudBuildCloudService.startBuild(buildProps);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
 		await this.waitForServerOperationToFinish(buildId, buildResponse);
@@ -306,7 +306,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.START);
 		let buildFiles;
 		try {
-			await this.$gitService.gitPushChanges(projectSettings.projectDir,
+			await this.$nsCloudGitService.gitPushChanges(projectSettings.projectDir,
 				{ httpRemoteUrl: buildCredentials.codeCommit.cloneUrlHttp },
 				buildCredentials.codeCommit.credentials,
 				{ isNewRepository: buildCredentials.codeCommit.isNewRepository });
@@ -320,7 +320,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		} catch (err) {
 			this.$logger.warn(err.message);
 			const filePath = await this.zipProject(projectSettings.projectDir);
-			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(uuid.v4());
+			const preSignedUrlData = await this.$nsCloudBuildCloudService.getPresignedUploadUrlObject(uuid.v4());
 			const disposition = constants.DISPOSITIONS.PACKAGE_ZIP;
 			filesToUpload.push(_.merge({ filePath, disposition }, preSignedUrlData));
 			buildFiles = [
@@ -332,7 +332,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		for (const fileToUpload of filesToUpload) {
-			await this.$uploadService.uploadToS3(fileToUpload.filePath, fileToUpload.fileName, fileToUpload.uploadPreSignedUrl);
+			await this.$nsCloudUploadService.uploadToS3(fileToUpload.filePath, fileToUpload.fileName, fileToUpload.uploadPreSignedUrl);
 		}
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.END);
@@ -361,7 +361,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				projectName: sanitizedProjectName,
 				framework: "tns",
 				useIncrementalBuild: !projectSettings.clean,
-				userEmail: this.$userService.getUser().email
+				userEmail: this.$nsCloudUserService.getUser().email
 			},
 			targets: [],
 			buildFiles
@@ -476,7 +476,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		try {
 			const logs = await this.getContentOfS3File(logsUrl);
 			// The logs variable will contain the full server log and we need to log only the logs that we don't have.
-			const contentToLog = this.$cloudBuildOutputFilter.filter(logs.substr(this.outputCursorPosition));
+			const contentToLog = this.$nsCloudBuildOutputFilter.filter(logs.substr(this.outputCursorPosition));
 			if (contentToLog) {
 				const data: IBuildLog = { buildId, data: contentToLog, pipe: "stdout" };
 				this.emit(constants.CLOUD_BUILD_EVENT_NAMES.BUILD_OUTPUT, data);
@@ -618,8 +618,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				return null;
 			}
 
-			const preSignedUrlData = await this.$buildCloudService.getPresignedUploadUrlObject(uuid.v4());
-			await this.$uploadService.uploadToS3(this.$itmsServicesPlistHelper.createPlistContent(options), preSignedUrlData.fileName, preSignedUrlData.uploadPreSignedUrl);
+			const preSignedUrlData = await this.$nsCloudBuildCloudService.getPresignedUploadUrlObject(uuid.v4());
+			await this.$nsCloudUploadService.uploadToS3(this.$nsCloudItmsServicesPlistHelper.createPlistContent(options), preSignedUrlData.fileName, preSignedUrlData.uploadPreSignedUrl);
 			return this.$qr.generateDataUri(`itms-services://?action=download-manifest&amp;url=${escape(preSignedUrlData.publicDownloadUrl)}`);
 		}
 
@@ -657,4 +657,4 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	}
 }
 
-$injector.register("cloudBuildService", CloudBuildService);
+$injector.register("nsCloudBuildService", CloudBuildService);

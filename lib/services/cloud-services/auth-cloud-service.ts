@@ -4,8 +4,8 @@ import { CloudServiceBase } from "./cloud-service-base";
 export class AuthCloudService extends CloudServiceBase implements IAuthCloudService {
 	protected serviceName: string = AUTH_SERVICE_NAME;
 
-	constructor(protected $cloudServicesProxy: ICloudServicesProxy) {
-		super($cloudServicesProxy);
+	constructor(protected $nsCloudServicesProxy: ICloudServicesProxy) {
+		super($nsCloudServicesProxy);
 	}
 
 	public getLoginUrl(port: number): string {
@@ -34,11 +34,11 @@ export class AuthCloudService extends CloudServiceBase implements IAuthCloudServ
 	}
 
 	private getAuthUrl(urlPath: string): string {
-		const proto = this.$cloudServicesProxy.getServiceProto(AUTH_SERVICE_NAME);
-		const host = this.$cloudServicesProxy.getServiceAddress(AUTH_SERVICE_NAME);
-		const url = this.$cloudServicesProxy.getUrlPath(AUTH_SERVICE_NAME, urlPath);
+		const proto = this.$nsCloudServicesProxy.getServiceProto(AUTH_SERVICE_NAME);
+		const host = this.$nsCloudServicesProxy.getServiceAddress(AUTH_SERVICE_NAME);
+		const url = this.$nsCloudServicesProxy.getUrlPath(AUTH_SERVICE_NAME, urlPath);
 		return `${proto}://${host}${url}`;
 	}
 }
 
-$injector.register("authCloudService", AuthCloudService);
+$injector.register("nsCloudAuthCloudService", AuthCloudService);

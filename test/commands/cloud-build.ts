@@ -19,7 +19,7 @@ describe("cloud lib version command", () => {
 			info: loggerInfo
 		});
 
-		testInjector.register("packageInfoService", PackageInfoService);
+		testInjector.register("nsCloudPackageInfoService", PackageInfoService);
 		testInjector.registerCommand("command", CloudLibVersion);
 
 		await testInjector.resolveCommand("command").execute([]);

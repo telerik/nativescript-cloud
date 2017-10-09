@@ -1,11 +1,11 @@
 export class LogoutCommand implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
 
-	constructor(private $authenticationService: IAuthenticationService,
+	constructor(private $nsCloudAuthenticationService: IAuthenticationService,
 		private $logger: ILogger) { }
 
 	public async execute(args: string[]): Promise<void> {
-		this.$authenticationService.logout();
+		this.$nsCloudAuthenticationService.logout();
 		this.$logger.info("Successfully logged out.");
 	}
 }

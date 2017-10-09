@@ -6,7 +6,7 @@ export class CloudEmulatorDeviceDiscovery extends EventEmitter implements Mobile
 	private devices: IDictionary<Mobile.IDevice> = {};
 	private _hasStartedLookingForDevices = false;
 
-	constructor(private $cloudDeviceEmulator: ICloudDeviceEmulator,
+	constructor(private $nsCloudDeviceEmulator: ICloudDeviceEmulator,
 		private $injector: IInjector) {
 		super();
 	}
@@ -29,15 +29,15 @@ export class CloudEmulatorDeviceDiscovery extends EventEmitter implements Mobile
 	public async startLookingForDevices(): Promise<void> {
 		if (!this._hasStartedLookingForDevices) {
 			this._hasStartedLookingForDevices = true;
-			_.values(this.$cloudDeviceEmulator.deviceEmitter.getCurrentlyAttachedDevices()).forEach(basicInfo => {
+			_.values(this.$nsCloudDeviceEmulator.deviceEmitter.getCurrentlyAttachedDevices()).forEach(basicInfo => {
 				this.addCloudDevice(basicInfo);
 			});
 
-			this.$cloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (basicInfo: ICloudEmulatorDeviceBasicInfo) => {
+			this.$nsCloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (basicInfo: ICloudEmulatorDeviceBasicInfo) => {
 				this.addCloudDevice(basicInfo);
 			});
 
-			this.$cloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (basicInfo: ICloudEmulatorDeviceBasicInfo) => {
+			this.$nsCloudDeviceEmulator.deviceEmitter.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (basicInfo: ICloudEmulatorDeviceBasicInfo) => {
 				this.removeDevice(basicInfo.identifier);
 			});
 		}
@@ -59,4 +59,4 @@ export class CloudEmulatorDeviceDiscovery extends EventEmitter implements Mobile
 	}
 }
 
-$injector.register("cloudEmulatorDeviceDiscovery", CloudEmulatorDeviceDiscovery);
+$injector.register("nsCloudEmulatorDeviceDiscovery", CloudEmulatorDeviceDiscovery);

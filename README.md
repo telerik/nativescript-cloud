@@ -7,8 +7,8 @@ This section describes all methods that can be invoked when you have installed t
 const tns = require("nativescript");
 ```
 
-### Module cloudBuildService
-The `cloudBuildService` allows build of applications in the cloud. You can call the following methods:
+### Module nsCloudBuildService
+The `nsCloudBuildService` allows build of applications in the cloud. You can call the following methods:
 * `build` method - it validates passed arguments and tries to build the application in the cloud. In case of successful build, the build result (.apk, .ipa or .zip) is downloaded. The result contains information about the whole build process, path to the downloaded build result and information used to generate a QR code, pointing to the latest build result (in S3). </br>
 Definition:
 
@@ -84,7 +84,7 @@ const androidReleaseConfigurationData = {
 const platform = "android";
 const buildConfiguration = "release";
 
-tns.cloudBuildService.on("buildOutput", (data) => {
+tns.nsCloudBuildService.on("buildOutput", (data) => {
 	console.log(data);
 	/*
 		Sample data object:
@@ -96,7 +96,7 @@ tns.cloudBuildService.on("buildOutput", (data) => {
 	*/
 });
 
-tns.cloudBuildService.on("stepChanged", (data) => {
+tns.nsCloudBuildService.on("stepChanged", (data) => {
 	console.log(data);
 	/*
 		Sample data object:
@@ -108,7 +108,7 @@ tns.cloudBuildService.on("stepChanged", (data) => {
 	*/
 });
 
-tns.cloudBuildService
+tns.nsCloudBuildService
 	.build(projectSettings, platform, buildConfiguration, androidReleaseConfigurationData)
 	.then(buildResult => console.log(buildResult))
 	.catch(err => console.error(err));
@@ -154,7 +154,7 @@ const androidReleaseConfigurationData = {
 const platform = "android";
 const buildConfiguration = "release";
 
-tns.cloudBuildService
+tns.nsCloudBuildService
 	.validateBuildProperties(platform, buildConfiguration, projectId, androidReleaseConfigurationData)
 	.then(buildResult => console.log("Data is valid"))
 	.catch(err => console.error("Data is invalid:", err));
@@ -179,7 +179,7 @@ Detailed description of the parameter can be found [here](./lib/definitions/clou
 Usage:
 ```JavaScript
 const tns = require("nativescript");
-const cloudBuildOutputDirectory = tns.cloudBuildService
+const cloudBuildOutputDirectory = tns.nsCloudBuildService
 			.getBuildOutputDirectory({
 				platform: "ios",
 				projectDir: "/tmp/myProject"
@@ -187,8 +187,8 @@ const cloudBuildOutputDirectory = tns.cloudBuildService
 			});
 ```
 
-### Module cloudCodesignService
-The `cloudCodesignService` allows generation of codesign files (currently only iOS .p12 and .mobileprovision) in the cloud. You can call the following methods:
+### Module nsCloudCodesignService
+The `nsCloudCodesignService` allows generation of codesign files (currently only iOS .p12 and .mobileprovision) in the cloud. You can call the following methods:
 * `generateCodesignFiles` method - it validates passed arguments and tries to generate codesign files in the cloud. In case of success, the result files (.p12 and/or .mobileprovision) are downloaded. The result contains information about errors, if any, and path to the downloaded codesign files (in S3). </br>
 Definition:
 
@@ -206,7 +206,7 @@ Detailed description of the parameter can be found [here](./lib/definitions/clou
 Usage:
 ```JavaScript
 const tns = require("nativescript");
-const codesignResultData = tns.cloudBuildService
+const codesignResultData = tns.nsCloudBuildService
 			.generateCodesignFiles({
 				username:'appleuser@mail.com',
 				password:'password',
@@ -235,7 +235,7 @@ Detailed description of the parameter can be found [here](./lib/definitions/clou
 Usage:
 ```JavaScript
 const tns = require("nativescript");
-const generateCodesignFilesOutputDirectory = tns.cloudBuildService
+const generateCodesignFilesOutputDirectory = tns.nsCloudBuildService
 				.getServerOperationOutputDirectory({
 					platform: "ios",
 					projectDir: "/tmp/myProject"
@@ -243,8 +243,8 @@ const generateCodesignFilesOutputDirectory = tns.cloudBuildService
 				});
 ```
 
-### Module cloudPublishService
-The `cloudPublishService` allows publishing build packages to an application store (either GooglePlay or iTunesConnect). You can call the following methods:
+### Module nsCloudPublishService
+The `nsCloudPublishService` allows publishing build packages to an application store (either GooglePlay or iTunesConnect). You can call the following methods:
 * `publishToItunesConnect` method - it will try to publish the provided package to iTunes Connect. </br>
 Definition:
 
@@ -261,7 +261,7 @@ Detailed description of the parameter can be found [here](./lib/definitions/clou
 Usage:
 ```JavaScript
 const tns = require("nativescript");
-tns.cloudPublishService
+tns.nsCloudPublishService
 	.publishToItunesConnect({
 		credentials: {
 			username: "user",
@@ -292,7 +292,7 @@ Detailed description of the parameter can be found [here](./lib/definitions/clou
 Usage:
 ```JavaScript
 const tns = require("nativescript");
-tns.cloudPublishService
+tns.nsCloudPublishService
 	.publishToGooglePlay({
 		track: "alpha",
 		pathToAuthJson: "/tmp/myAuthJson.json",
@@ -305,8 +305,8 @@ tns.cloudPublishService
 	.catch(err => console.error(err));
 ```
 
-### Module applicationService
-The `applicationService` allows for application management and gathering more information about the app's current state. You can call the following methods:
+### Module nsCloudApplicationService
+The `nsCloudApplicationService` allows for application management and gathering more information about the app's current state. You can call the following methods:
 * `shouldBuild` method - it will determine whether the current application should be built or not. </br>
 Definition:
 
@@ -323,7 +323,7 @@ Detailed description of the parameter can be found [here](./lib/definitions/appl
 Usage:
 ```JavaScript
 const tns = require("nativescript");
-tns.cloudPublishService
+tns.nsCloudApplicationService
 	.shouldBuild({
 		projectDir: "/tmp/myProject",
 		platform: "android",
@@ -351,7 +351,7 @@ Detailed description of the parameter can be found [here](./lib/definitions/appl
 Usage:
 ```JavaScript
 const tns = require("nativescript");
-tns.cloudPublishService
+tns.nsCloudPublishService
 	.shouldInstall({
 		projectDir: "/tmp/myProject",
 		deviceIdentifier: "192.168.56.101:5555",
@@ -363,8 +363,8 @@ tns.cloudPublishService
 	.catch(err => console.error(err));
 ```
 
-### Module cloudEmulatorLauncher
-The `cloudEmulatorLauncher` provides a way for initial interaction with cloud emulators. You can call the following methods:
+### Module nsCloudEmulatorLauncher
+The `nsCloudEmulatorLauncher` provides a way for initial interaction with cloud emulators. You can call the following methods:
 * `startEmulator` method - starts an cloud emulator and returns a url where an html page is located, containing an iframe with the actual emulator. </br>
 Definition:
 
@@ -405,7 +405,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.cloudEmulatorLauncher.startEmulator({
+tns.nsCloudEmulatorLauncher.startEmulator({
 			packageFile: "test.apk",
 			platform: "android",
 			model: "nexus5"
@@ -415,8 +415,8 @@ tns.cloudEmulatorLauncher.startEmulator({
 		});
 ```
 
-### Module authenticationService
-The `authenticationService` is used for authentication related operations (login, logout etc.). You can call the following methods </br>
+### Module nsCloudAuthenticationService
+The `nsCloudAuthenticationService` is used for authentication related operations (login, logout etc.). You can call the following methods </br>
 * `login` - Starts localhost server on which the login response will be returned. After that if there is `options.openAction` it will be used to open the login url. If this option is not defined the default opener will be used. After successful login returns the user information.
 </br>
 Definition:
@@ -436,7 +436,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.authenticationService
+tns.nsCloudAuthenticationService
 	.login()
 	.then(userInfo => console.log(userInfo))
 	.catch(err => console.error(err));
@@ -453,7 +453,7 @@ const openAction = url => {
 };
 const loginOptions = { openAction: openAction };
 
-tns.authenticationService
+tns.nsCloudAuthenticationService
 	.login(loginOptions)
 	.then(userInfo => console.log(userInfo))
 	.catch(err => console.error(err));
@@ -478,7 +478,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.authenticationService.logout();
+tns.nsCloudAuthenticationService.logout();
 ```
 
 ```JavaScript
@@ -492,7 +492,7 @@ const openAction = url => {
 };
 const logoutOptions = { openAction: openAction };
 
-tns.authenticationService.logout(logoutOptions);
+tns.nsCloudAuthenticationService.logout(logoutOptions);
 ```
 
 * `isUserLoggedIn` - Checks if the access token of the current user is valid. If it is - the method will return true. If it isn't - the method will try to issue new access token. If the method can't issue new token it will return false.
@@ -513,7 +513,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.authenticationService
+tns.nsCloudAuthenticationService
 	.isUserLoggedIn()
 	.then(isLoggedIn => console.log(isLoggedIn))
 	.catch(err => console.error(err));
@@ -536,7 +536,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.authenticationService.refreshCurrentUserToken()
+tns.nsCloudAuthenticationService.refreshCurrentUserToken()
 	.then(() => console.log("Success"))
 	.catch(err => console.error(err));
 ```
@@ -559,12 +559,12 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.authenticationService
+tns.nsCloudAuthenticationService
 	.login()
 	.then(userInfo => console.log(userInfo))
 	.catch(err => console.error(err));
 
-tns.authenticationService.cancelLogin();
+tns.nsCloudAuthenticationService.cancelLogin();
 ```
 
 #### Interfaces:
@@ -646,8 +646,8 @@ interface ITokenState {
 }
 ```
 
-### Module userService
-The `userService` is used to get information aboud the current user or modify it. You can call the following methods </br>
+### Module nsCloudUserService
+The `nsCloudUserService` is used to get information aboud the current user or modify it. You can call the following methods </br>
 * `hasUser` - Checks if there is user information.
 </br>
 Definition:
@@ -665,7 +665,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-const hasUser = tns.userService.hasUser();
+const hasUser = tns.nsCloudUserService.hasUser();
 console.log(hasUser);
 ```
 
@@ -686,7 +686,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-const user = tns.userService.getUser();
+const user = tns.nsCloudUserService.getUser();
 console.log(user);
 ```
 
@@ -717,7 +717,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-const userData = tns.userService.getUserData();
+const userData = tns.nsCloudUserService.getUserData();
 console.log(userData);
 ```
 
@@ -764,7 +764,7 @@ const userData = {
 	}
 };
 
-tns.userService.setUserData(userData);
+tns.nsCloudUserService.setUserData(userData);
 ```
 
 * `setToken` - Sets only the token of the current user.
@@ -791,7 +791,7 @@ const token = {
 	accessToken: "some token"
 };
 
-tns.userService.setToken(token);
+tns.nsCloudUserService.setToken(token);
 ```
 
 * `clearUserData` - Removes the current user data.
@@ -811,7 +811,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.userService.clearUserData();
+tns.nsCloudUserService.clearUserData();
 ```
 
 * `getUserAvatar` - Return the URL where the avatar picture can be downloaded from.
@@ -831,7 +831,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.userService.hasUser()
+tns.nsCloudUserService.hasUser()
 	.then(userAvatar => console.log(userAvatar));
 ```
 
