@@ -66,4 +66,4 @@ export class HttpServer implements IHttpServer {
 	}
 }
 
-$injector.register("httpServer", HttpServer);
+$injector.register("nsCloudHttpServer", HttpServer);

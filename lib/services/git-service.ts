@@ -21,7 +21,7 @@ export class GitService implements IGitService {
 		private $hostInfo: IHostInfo,
 		private $logger: ILogger,
 		private $options: IProfileDir,
-		private $userService: IUserService) { }
+		private $nsCloudUserService: IUserService) { }
 
 	public async gitPushChanges(projectDir: string, remoteUrl: IRemoteUrl, codeCommitCredential: ICodeCommitCredentials, repositoryState?: IRepositoryState): Promise<void> {
 		this.cleanLocalRepositories();
@@ -159,7 +159,7 @@ export class GitService implements IGitService {
 
 	private getGitDirName(projectDir: string): string {
 		const shasumData = crypto.createHash("sha1");
-		shasumData.update(`${this.$userService.getUser().email}_${projectDir}`);
+		shasumData.update(`${this.$nsCloudUserService.getUser().email}_${projectDir}`);
 		const gitDirName = shasumData.digest("hex");
 
 		return gitDirName;
@@ -203,4 +203,4 @@ export class GitService implements IGitService {
 	}
 }
 
-$injector.register("gitService", GitService);
+$injector.register("nsCloudGitService", GitService);

@@ -8,4 +8,4 @@ export class CloudOptionsProvider implements ICloudOptionsProvider {
 		};
 	}
 }
-$injector.register("cloudOptionsProvider", CloudOptionsProvider);
+$injector.register("nsCloudOptionsProvider", CloudOptionsProvider);

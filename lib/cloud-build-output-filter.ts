@@ -24,4 +24,4 @@ export class CloudBuildOutputFilter implements ICloudBuildOutputFilter {
 	}
 }
 
-$injector.register("cloudBuildOutputFilter", CloudBuildOutputFilter);
+$injector.register("nsCloudBuildOutputFilter", CloudBuildOutputFilter);

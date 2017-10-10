@@ -7,23 +7,23 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 
 	protected serviceName = EMULATORS_SERVICE_NAME;
 
-	constructor(private $cloudDeviceEmulator: ICloudDeviceEmulator,
-		protected $cloudRequestService: ICloudRequestService,
-		private $uploadService: IUploadService,
+	constructor(private $nsCloudDeviceEmulator: ICloudDeviceEmulator,
+		protected $nsCloudRequestService: ICloudRequestService,
+		private $nsCloudUploadService: IUploadService,
 		private $fs: IFileSystem,
 		protected $options: IProfileDir) {
 
-		super($cloudRequestService);
+		super($nsCloudRequestService);
 	}
 
 	public async startEmulator(publicKey: string, platform: string, deviceType: string): Promise<string> {
-		const serverInfo = await this.$cloudDeviceEmulator.getSeverAddress();
+		const serverInfo = await this.$nsCloudDeviceEmulator.getSeverAddress();
 		return `http://${serverInfo.host}:${serverInfo.port}?publicKey=${publicKey}&device=${deviceType}`;
 	}
 
 	public async deployApp(fileLocation: string, platform: string): Promise<ICloudEmulatorResponse> {
 		if (this.$fs.exists(path.resolve(fileLocation))) {
-			fileLocation = await this.$uploadService.uploadToS3(fileLocation);
+			fileLocation = await this.$nsCloudUploadService.uploadToS3(fileLocation);
 		}
 
 		const cloudEmulatorKeys = this.getEmulatorCredentials(platform);
@@ -35,7 +35,7 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 	}
 
 	public refereshEmulator(deviceIdentifier: string): Promise<void> {
-		return this.$cloudDeviceEmulator.refresh(deviceIdentifier);
+		return this.$nsCloudDeviceEmulator.refresh(deviceIdentifier);
 	}
 
 	private async createApp(url: string, platform: string): Promise<ICloudEmulatorResponse> {
@@ -69,4 +69,4 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 	}
 }
 
-$injector.register("cloudEmulatorService", CloudEmulatorService);
+$injector.register("nsCloudEmulatorService", CloudEmulatorService);

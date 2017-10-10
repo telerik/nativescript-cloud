@@ -6,9 +6,9 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 	constructor(private $errors: IErrors,
 		private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
-		private $serverConfigManager: IServerConfigManager,
-		private $userService: IUserService) {
-		this.serverConfig = this.$serverConfigManager.getCurrentConfigData();
+		private $nsCloudServerConfigManager: IServerConfigManager,
+		private $nsCloudUserService: IUserService) {
+		this.serverConfig = this.$nsCloudServerConfigManager.getCurrentConfigData();
 	}
 
 	public async call<T>(options: ICloudRequestOptions): Promise<T> {
@@ -17,8 +17,8 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 
 		const headers = options.headers || Object.create(null);
 
-		if (!_.has(headers, HTTP_HEADERS.AUTHORIZATION) && this.$userService.hasUser()) {
-			headers[HTTP_HEADERS.AUTHORIZATION] = `Bearer ${this.$userService.getUserData().accessToken}`;
+		if (!_.has(headers, HTTP_HEADERS.AUTHORIZATION) && this.$nsCloudUserService.hasUser()) {
+			headers[HTTP_HEADERS.AUTHORIZATION] = `Bearer ${this.$nsCloudUserService.getUserData().accessToken}`;
 		}
 
 		if (options.accept) {
@@ -102,4 +102,4 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 	}
 }
 
-$injector.register("cloudServicesProxy", CloudServicesProxy);
+$injector.register("nsCloudServicesProxy", CloudServicesProxy);

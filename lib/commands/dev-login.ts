@@ -4,14 +4,14 @@ export class DevLoginCommand implements ICommand {
 		this.$stringParameterBuilder.createMandatoryParameter("Missing user name or password.")
 	];
 
-	constructor(private $authenticationService: IAuthenticationService,
+	constructor(private $nsCloudAuthenticationService: IAuthenticationService,
 		private $errors: IErrors,
 		private $logger: ILogger,
 		private $stringParameterBuilder: IStringParameterBuilder) { }
 
 	public async execute(args: string[]): Promise<void> {
 		try {
-			await this.$authenticationService.devLogin(args[0], args[1]);
+			await this.$nsCloudAuthenticationService.devLogin(args[0], args[1]);
 		} catch (err) {
 			this.$errors.failWithoutHelp(err.message);
 		}

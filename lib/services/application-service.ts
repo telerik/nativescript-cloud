@@ -20,4 +20,4 @@ export class ApplicationService implements IApplicationService {
 	}
 }
 
-$injector.register("applicationService", ApplicationService);
+$injector.register("nsCloudApplicationService", ApplicationService);

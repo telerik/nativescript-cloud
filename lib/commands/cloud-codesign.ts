@@ -13,7 +13,7 @@ export class CloudCodesignCommand implements ICommand {
 		private $errors: IErrors,
 		private $projectData: IProjectData,
 		private $prompter: IPrompter,
-		private $cloudCodesignService: ICloudCodesignService) {
+		private $nsCloudCodesignService: ICloudCodesignService) {
 		this.$projectData.initializeProjectData();
 	}
 
@@ -38,7 +38,7 @@ export class CloudCodesignCommand implements ICommand {
 			attachedDevices: this.devices
 		};
 
-		await this.$cloudCodesignService.generateCodesignFiles(codesignData, this.$projectData.projectDir);
+		await this.$nsCloudCodesignService.generateCodesignFiles(codesignData, this.$projectData.projectDir);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {

@@ -40,4 +40,4 @@ export class CloudDeviceEmulatorWrapper implements ICloudDeviceEmulator {
 	}
 }
 
-$injector.register("cloudDeviceEmulator", CloudDeviceEmulatorWrapper);
+$injector.register("nsCloudDeviceEmulator", CloudDeviceEmulatorWrapper);

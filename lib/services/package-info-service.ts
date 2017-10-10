@@ -14,4 +14,4 @@ export class PackageInfoService implements IPackageInfoService {
 	}
 }
 
-$injector.register("packageInfoService", PackageInfoService);
+$injector.register("nsCloudPackageInfoService", PackageInfoService);

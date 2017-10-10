@@ -5,8 +5,8 @@ import { CloudServiceBase } from "./cloud-service-base";
 export class CodeCommitService extends CloudServiceBase implements ICodeCommitService {
 	protected serviceName: string = CODE_COMMIT_SERVICE_NAME;
 
-	constructor(protected $cloudRequestService: ICloudRequestService) {
-		super($cloudRequestService);
+	constructor(protected $nsCloudRequestService: ICloudRequestService) {
+		super($nsCloudRequestService);
 	}
 
 	public getRepository(appId: string): Promise<IGetRepositoryResponse> {
@@ -18,4 +18,4 @@ export class CodeCommitService extends CloudServiceBase implements ICodeCommitSe
 	}
 }
 
-$injector.register("codeCommitService", CodeCommitService);
+$injector.register("nsCloudCodeCommitService", CodeCommitService);

@@ -6,7 +6,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		return this.$injector.resolve<ILocalBuildService>("localBuildService");
 	}
 
-	constructor(private $cloudBuildService: ICloudBuildService,
+	constructor(private $nsCloudBuildService: ICloudBuildService,
 		private $errors: IErrors,
 		private $logger: ILogger,
 		private $prompter: IPrompter,
@@ -87,7 +87,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		} else {
 			const buildData = this.getCloudBuildData(platform);
 			buildData.buildConfiguration = CLOUD_BUILD_CONFIGURATIONS.RELEASE;
-			packagePath = (await this.$cloudBuildService.build(buildData.projectSettings,
+			packagePath = (await this.$nsCloudBuildService.build(buildData.projectSettings,
 				buildData.platform, buildData.buildConfiguration,
 				buildData.androidBuildData,
 				buildData.iOSBuildData)).qrData.originalUrl;
@@ -97,4 +97,4 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 	}
 }
 
-$injector.register("buildCommandHelper", BuildCommandHelper);
+$injector.register("nsCloudBuildCommandHelper", BuildCommandHelper);

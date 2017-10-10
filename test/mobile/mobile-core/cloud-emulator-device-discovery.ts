@@ -34,12 +34,12 @@ describe("cloud emulator device discovery", () => {
 			const customEventEmitter = new CustomDeviceEmitter(devices);
 			const testInjector = new Yok();
 			testInjector.register("injector", testInjector);
-			testInjector.register("cloudDeviceEmulator", {
+			testInjector.register("nsCloudDeviceEmulator", {
 				get deviceEmitter() {
 					return customEventEmitter;
 				}
 			});
-			testInjector.register("cloudEmulatorService", { /* empty */ });
+			testInjector.register("nsCloudEmulatorService", { /* empty */ });
 			testInjector.register("mobileHelper", {
 				normalizePlatformName: (platform: string) => platform.toLowerCase()
 			});
@@ -50,10 +50,10 @@ describe("cloud emulator device discovery", () => {
 		it(`should attach ${DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND}/${DEVICE_DISCOVERY_EVENTS.DEVICE_LOST}`, async () => {
 			const injector = createTestInjector();
 
-			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
-			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
+			const nsCloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			await nsCloudEmulatorDeviceDiscovery.startLookingForDevices();
 
-			const deviceEmitter = injector.resolve("cloudDeviceEmulator").deviceEmitter;
+			const deviceEmitter = injector.resolve("nsCloudDeviceEmulator").deviceEmitter;
 
 			assert.deepEqual(deviceEmitter.listenerCount(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND), 1);
 			assert.deepEqual(deviceEmitter.listenerCount(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST), 1);
@@ -62,11 +62,11 @@ describe("cloud emulator device discovery", () => {
 		it(`should not attach ${DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND}/${DEVICE_DISCOVERY_EVENTS.DEVICE_LOST} multiple times upon multiple calls`, async () => {
 			const injector = createTestInjector();
 
-			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
-			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
-			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
+			const nsCloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			await nsCloudEmulatorDeviceDiscovery.startLookingForDevices();
+			await nsCloudEmulatorDeviceDiscovery.startLookingForDevices();
 
-			const deviceEmitter = injector.resolve("cloudDeviceEmulator").deviceEmitter;
+			const deviceEmitter = injector.resolve("nsCloudDeviceEmulator").deviceEmitter;
 
 			assert.deepEqual(deviceEmitter.listenerCount(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND), 1);
 			assert.deepEqual(deviceEmitter.listenerCount(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST), 1);
@@ -76,14 +76,14 @@ describe("cloud emulator device discovery", () => {
 			const injector = createTestInjector(initialDevices);
 			let hasDetectedDevice = false;
 
-			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
-			cloudEmulatorDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (device: Mobile.IDevice) => {
+			const nsCloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			nsCloudEmulatorDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (device: Mobile.IDevice) => {
 				hasDetectedDevice = true;
 				assert.deepEqual(device.deviceInfo.identifier, customDevice.identifier);
 				assert.deepEqual(device.deviceInfo.model, customDevice.model);
 			});
 
-			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
+			await nsCloudEmulatorDeviceDiscovery.startLookingForDevices();
 			assert.isTrue(hasDetectedDevice);
 		});
 
@@ -91,16 +91,16 @@ describe("cloud emulator device discovery", () => {
 			const injector = createTestInjector();
 			let hasDetectedDevice = false;
 
-			const deviceEmitter: EventEmitter = injector.resolve("cloudDeviceEmulator").deviceEmitter;
+			const deviceEmitter: EventEmitter = injector.resolve("nsCloudDeviceEmulator").deviceEmitter;
 
-			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
-			cloudEmulatorDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (device: Mobile.IDevice) => {
+			const nsCloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			nsCloudEmulatorDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, (device: Mobile.IDevice) => {
 				hasDetectedDevice = true;
 				assert.deepEqual(device.deviceInfo.identifier, customDevice.identifier);
 				assert.deepEqual(device.deviceInfo.model, customDevice.model);
 			});
 
-			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
+			await nsCloudEmulatorDeviceDiscovery.startLookingForDevices();
 			deviceEmitter.emit(DEVICE_DISCOVERY_EVENTS.DEVICE_FOUND, customDevice);
 			assert.isTrue(hasDetectedDevice);
 		});
@@ -109,16 +109,16 @@ describe("cloud emulator device discovery", () => {
 			const injector = createTestInjector(initialDevices);
 			let hasLostDevice = false;
 
-			const deviceEmitter: EventEmitter = injector.resolve("cloudDeviceEmulator").deviceEmitter;
+			const deviceEmitter: EventEmitter = injector.resolve("nsCloudDeviceEmulator").deviceEmitter;
 
-			const cloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
-			cloudEmulatorDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (device: Mobile.IDevice) => {
+			const nsCloudEmulatorDeviceDiscovery: Mobile.IDeviceDiscovery = injector.resolve(CloudEmulatorDeviceDiscovery);
+			nsCloudEmulatorDeviceDiscovery.on(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, (device: Mobile.IDevice) => {
 				hasLostDevice = true;
 				assert.deepEqual(device.deviceInfo.identifier, customDevice.identifier);
 				assert.deepEqual(device.deviceInfo.model, customDevice.model);
 			});
 
-			await cloudEmulatorDeviceDiscovery.startLookingForDevices();
+			await nsCloudEmulatorDeviceDiscovery.startLookingForDevices();
 			deviceEmitter.emit(DEVICE_DISCOVERY_EVENTS.DEVICE_LOST, customDevice);
 
 			assert.isTrue(hasLostDevice);

@@ -21,9 +21,9 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
 		private $errors: IErrors,
-		private $buildCloudService: IBuildCloudService,
+		private $nsCloudBuildCloudService: IBuildCloudService,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
-		private $uploadService: IUploadService,
+		private $nsCloudUploadService: IUploadService,
 		private $projectDataService: IProjectDataService) {
 		super($fs, $httpClient, $logger);
 	}
@@ -93,7 +93,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		publishRequestData.packagePaths = await this.getPreparePackagePaths(publishDataCore);
 
 		this.$logger.info("Starting publishing.");
-		const response = await this.$buildCloudService.publish(publishRequestData);
+		const response = await this.$nsCloudBuildCloudService.publish(publishRequestData);
 
 		this.$logger.trace("Publish response", response);
 		const buildId = uuid.v4();
@@ -127,7 +127,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	private async getPreparePackagePaths(publishData: IPackagePaths): Promise<string[]> {
 		const preparedPackagePaths: string[] = [];
 		for (const packagePath of publishData.packagePaths) {
-			preparedPackagePaths.push(this.$fs.exists(packagePath) ? await this.$uploadService.uploadToS3(packagePath, basename(packagePath)) : packagePath);
+			preparedPackagePaths.push(this.$fs.exists(packagePath) ? await this.$nsCloudUploadService.uploadToS3(packagePath, basename(packagePath)) : packagePath);
 		}
 
 		return preparedPackagePaths;
@@ -148,4 +148,4 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 }
 
-$injector.register("cloudPublishService", CloudPublishService);
+$injector.register("nsCloudPublishService", CloudPublishService);
