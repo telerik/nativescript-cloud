@@ -9,7 +9,6 @@ export class CloudBuild implements ICommand {
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudBuildService: ICloudBuildService,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
-		private $errors: IErrors,
 		private $options: ICloudOptions,
 		private $projectData: IProjectData) {
 		this.$projectData.initializeProjectData();

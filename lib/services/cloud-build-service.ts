@@ -23,19 +23,19 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
+		private $errors: IErrors,
+		private $mobileHelper: Mobile.IMobileHelper,
 		private $nsCloudAccountsService: IAccountsService,
 		private $nsCloudBuildCloudService: IBuildCloudService,
-		private $nsCloudGitService: IGitService,
-		private $errors: IErrors,
-		private $nsCloudItmsServicesPlistHelper: IItmsServicesPlistHelper,
-		private $platformService: IPlatformService,
 		private $nsCloudBuildOutputFilter: ICloudBuildOutputFilter,
-		private $mobileHelper: Mobile.IMobileHelper,
+		private $nsCloudGitService: IGitService,
+		private $nsCloudItmsServicesPlistHelper: IItmsServicesPlistHelper,
+		private $nsCloudUploadService: IUploadService,
+		private $nsCloudUserService: IUserService,
+		private $platformService: IPlatformService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
-		private $qr: IQrCodeGenerator,
-		private $nsCloudUploadService: IUploadService,
-		private $nsCloudUserService: IUserService) {
+		private $qr: IQrCodeGenerator) {
 		super($fs, $httpClient, $logger);
 	}
 
@@ -62,7 +62,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
 		const buildId = uuid.v4();
-		const account = await this.$accountsService.getAccountFromOption(accountId);
+		const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
 		try {
 			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, buildId, account.id, androidBuildData, iOSBuildData);
 			return buildResult;

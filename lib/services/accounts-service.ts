@@ -1,14 +1,14 @@
 export class AccountsService implements IAccountsService {
-	constructor(private $accountsCloudService: IAccountsCloudService,
+	constructor(private $nsCloudAccountsCloudService: IAccountsCloudService,
 		private $errors: IErrors) { }
 
 	public getMyAccounts(): Promise<IAccount[]> {
-		return this.$accountsCloudService.getAccounts();
+		return this.$nsCloudAccountsCloudService.getAccounts();
 	}
 
 	public async getUsageInfo(accountIdOption: string): Promise<IUsageInfo[]> {
 		const account = await this.getAccountFromOption(accountIdOption);
-		return this.$accountsCloudService.getUsageInfo(account.id);
+		return this.$nsCloudAccountsCloudService.getUsageInfo(account.id);
 	}
 
 	public async getAccountFromOption(accountIdOption: string): Promise<IAccount> {
@@ -36,4 +36,4 @@ export class AccountsService implements IAccountsService {
 	}
 }
 
-$injector.register("accountsService", AccountsService);
+$injector.register("nsCloudAccountsService", AccountsService);

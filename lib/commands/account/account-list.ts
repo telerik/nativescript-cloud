@@ -5,10 +5,10 @@ export class AccountListCommand extends AccountCommandBase implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
 
 	constructor($errors: IErrors,
-		$userService: IUserService,
+		$nsCloudUserService: IUserService,
 		private $nsCloudAccountsService: IAccountsService,
 		private $logger: ILogger) {
-		super($errors, $userService);
+		super($errors, $nsCloudUserService);
 	}
 
 	public async execute(args: string[]): Promise<void> {

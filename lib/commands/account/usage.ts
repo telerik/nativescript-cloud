@@ -6,16 +6,16 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
 
 	public get dashedOptions() {
-		return this.$cloudOptionsProvider.dashedOptions;
+		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
 	constructor($errors: IErrors,
-		$userService: IUserService,
+		$nsCloudUserService: IUserService,
 		private $nsCloudAccountsService: IAccountsCloudService,
-		private $cloudOptionsProvider: ICloudOptionsProvider,
+		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
 		private $logger: ILogger) {
-		super($errors, $userService);
+		super($errors, $nsCloudUserService);
 	}
 
 	public async execute(args: string[]): Promise<void> {
