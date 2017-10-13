@@ -15,23 +15,19 @@ export class AccountsService implements IAccountsService {
 		const accounts = await this.getMyAccounts();
 		if (!accountIdOption) {
 			this.$errors.failWithoutHelp("Please provide accountId.");
+		}
+
+		let selectedAccount = _.find(accounts, a => a.id === accountIdOption);
+		if (selectedAccount) {
+			return selectedAccount;
 		} else {
-			let selectedAccount = _.find(accounts, a => a.id === accountIdOption);
-			if (selectedAccount) {
-				return selectedAccount;
-			} else {
-				try {
-					const accountIndex = Number.parseInt(accountIdOption);
-					selectedAccount = accounts[accountIndex - 1];
-					if (selectedAccount) {
-						return selectedAccount;
-					} else {
-						this.$errors.failWithoutHelp("Invalid accountId index provided.");
-					}
-				} catch (err) {
-					this.$errors.failWithoutHelp("Invalid accountId option provided.");
-				}
+			const accountIndex = Number.parseInt(accountIdOption);
+			selectedAccount = accounts[accountIndex - 1];
+			if (!selectedAccount) {
+				this.$errors.failWithoutHelp("Invalid accountId index provided.");
 			}
+
+			return selectedAccount;
 		}
 	}
 }

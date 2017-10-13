@@ -17,3 +17,7 @@ export function createTable(headers: string[], data: string[][]): any {
 	_.forEach(data, row => table.push(row));
 	return table;
 }
+
+export function stringifyWithIndentation(data: any, indentation?: string): string {
+	return JSON.stringify(data, null, indentation || "  ");
+}

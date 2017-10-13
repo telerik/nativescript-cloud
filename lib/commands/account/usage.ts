@@ -1,6 +1,6 @@
 import { AccountCommandBase } from "./account-command-base";
 import { UNLIMITED } from "../../constants";
-import { createTable } from "../../helpers";
+import { createTable, stringifyWithIndentation } from "../../helpers";
 
 export class UsageCommand extends AccountCommandBase implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
@@ -20,19 +20,27 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 
 	public async execute(args: string[]): Promise<void> {
 		const usage = await this.$nsCloudAccountsService.getUsageInfo(this.$options.accountId);
-		const table = createTable(["Feature", "Remaining usage"], usage.map(u => {
-			const result = [u.feature];
-			if (u.unlimited) {
-				result.push(UNLIMITED);
-			} else {
-				let remainingUsage = u.allowedUsage - u.usage;
-				result.push(remainingUsage.toString());
-			}
+		let output: string;
 
-			return result;
-		}));
+		if (this.$options.json) {
+			output = stringifyWithIndentation(usage);
+		} else {
+			const table = createTable(["Feature", "Remaining usage"], usage.map(u => {
+				const result = [u.feature];
+				if (u.unlimited) {
+					result.push(UNLIMITED);
+				} else {
+					const remainingUsage = u.allowedUsage - u.usage;
+					result.push(remainingUsage.toString());
+				}
 
-		this.$logger.out(table.toString());
+				return result;
+			}));
+
+			output = table.toString();
+		}
+
+		this.$logger.out(output);
 	}
 }
 
