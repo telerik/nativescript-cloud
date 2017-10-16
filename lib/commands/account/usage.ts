@@ -1,3 +1,4 @@
+import { EOL } from "os";
 import { AccountCommandBase } from "./account-command-base";
 import { UNLIMITED } from "../../constants";
 import { createTable, stringifyWithIndentation } from "../../helpers";
@@ -22,22 +23,39 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 		const usage = await this.$nsCloudAccountsService.getUsageInfo(this.$options.accountId);
 		let output: string;
 
-		if (this.$options.json) {
-			output = stringifyWithIndentation(usage);
-		} else {
-			const table = createTable(["Feature", "Remaining usage"], usage.map(u => {
-				const result = [u.feature];
-				if (u.unlimited) {
-					result.push(UNLIMITED);
-				} else {
-					const remainingUsage = u.allowedUsage - u.usage;
-					result.push(remainingUsage.toString());
-				}
+		const groupedUsage = _(usage)
+			.map(u => {
+				const result: IFeatureUsage = {
+					feature: u.feature,
+					allowedUsage: u.allowedUsage,
+					performed: u.usage,
+					remaining: u.unlimited ? u.allowedUsage : u.allowedUsage - u.usage,
+					unlimited: !!u.unlimited
+				};
 
 				return result;
-			}));
+			})
+			.groupBy(u => u.feature)
+			.value();
 
-			output = table.toString();
+		if (this.$options.json) {
+			output = stringifyWithIndentation(groupedUsage);
+		} else {
+			const tables = _.map(groupedUsage, (g, feature) => {
+				return createTable([`${feature} performed`, `${feature} remaining`], g.map(u => {
+					const result = [u.performed.toString()];
+					if (u.unlimited) {
+						result.push(UNLIMITED);
+					} else {
+						const remainingUsage = u.allowedUsage - u.performed;
+						result.push(remainingUsage.toString());
+					}
+
+					return result;
+				}));
+			});
+
+			output = tables.join(EOL);
 		}
 
 		this.$logger.out(output);

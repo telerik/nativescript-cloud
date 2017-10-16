@@ -18,6 +18,6 @@ export function createTable(headers: string[], data: string[][]): any {
 	return table;
 }
 
-export function stringifyWithIndentation(data: any, indentation?: string): string {
+export function stringifyWithIndentation(data: any, indentation?: string | number): string {
 	return JSON.stringify(data, null, indentation || "  ");
 }
