@@ -23,18 +23,19 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
-		private $nsCloudBuildCloudService: IBuildCloudService,
-		private $nsCloudGitService: IGitService,
 		private $errors: IErrors,
-		private $nsCloudItmsServicesPlistHelper: IItmsServicesPlistHelper,
-		private $platformService: IPlatformService,
-		private $nsCloudBuildOutputFilter: ICloudBuildOutputFilter,
 		private $mobileHelper: Mobile.IMobileHelper,
+		private $nsCloudAccountsService: IAccountsService,
+		private $nsCloudBuildCloudService: IBuildCloudService,
+		private $nsCloudBuildOutputFilter: ICloudBuildOutputFilter,
+		private $nsCloudGitService: IGitService,
+		private $nsCloudItmsServicesPlistHelper: IItmsServicesPlistHelper,
+		private $nsCloudUploadService: IUploadService,
+		private $nsCloudUserService: IUserService,
+		private $platformService: IPlatformService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
-		private $qr: IQrCodeGenerator,
-		private $nsCloudUploadService: IUploadService,
-		private $nsCloudUserService: IUserService) {
+		private $qr: IQrCodeGenerator) {
 		super($fs, $httpClient, $logger);
 	}
 
@@ -57,12 +58,13 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	public async build(projectSettings: IProjectSettings,
 		platform: string,
 		buildConfiguration: string,
+		accountId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
 		const buildId = uuid.v4();
-
+		const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
 		try {
-			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, buildId, androidBuildData, iOSBuildData);
+			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, buildId, account.id, androidBuildData, iOSBuildData);
 			return buildResult;
 		} catch (err) {
 			err.buildId = buildId;
@@ -74,6 +76,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		platform: string,
 		buildConfiguration: string,
 		buildId: string,
+		accountId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
 		const buildInformationString = `cloud build of '${projectSettings.projectDir}', platform: '${platform}', ` +
@@ -107,7 +110,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const buildCredentials = await this.$nsCloudBuildCloudService.getBuildCredentials({ appId: projectSettings.projectId, fileNames: fileNames });
 
 		const filesToUpload = this.prepareFilesToUpload(buildCredentials.urls, buildFiles);
-		let buildProps = await this.prepareBuildRequest(buildId, projectSettings, platform, buildConfiguration, buildCredentials, filesToUpload);
+		let buildProps = await this.prepareBuildRequest(buildId, projectSettings, platform, buildConfiguration, buildCredentials, filesToUpload, accountId);
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {
 			buildProps = await this.getAndroidBuildProperties(projectSettings, buildProps, filesToUpload, androidBuildData);
 		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
@@ -302,7 +305,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		platform: string,
 		buildConfiguration: string,
 		buildCredentials: IBuildCredentialResponse,
-		filesToUpload: IAmazonStorageEntryData[]): Promise<IBuildRequestData> {
+		filesToUpload: IAmazonStorageEntryData[],
+		accountId: string): Promise<IBuildRequestData> {
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.START);
 		let buildFiles;
 		try {
@@ -349,6 +353,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		 * behavior in the tooling.
 		 */
 		return {
+			accountId,
 			properties: {
 				buildId,
 				buildConfiguration: buildConfiguration,

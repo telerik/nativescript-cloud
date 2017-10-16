@@ -5,8 +5,8 @@ export class UserService implements IUserService {
 	private userData: IUserData;
 	private userInfoDirectory: string;
 
-	private get $nsCloudAuthCloudService(): IAuthCloudService {
-		return this.$injector.resolve("nsCloudAuthCloudService");
+	private get $nsCloudAccountsService(): IAccountsCloudService {
+		return this.$injector.resolve("nsCloudAccountsService");
 	}
 
 	constructor(private $injector: IInjector,
@@ -78,7 +78,7 @@ export class UserService implements IUserService {
 			return null;
 		}
 
-		const userInfo = await this.$nsCloudAuthCloudService.getUserInfo();
+		const userInfo = await this.$nsCloudAccountsService.getUserInfo();
 		return userInfo.externalAvatarUrl;
 	}
 

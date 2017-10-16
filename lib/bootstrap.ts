@@ -19,6 +19,7 @@ $injector.requirePublicClass("nsCloudCodesignService", path.join(__dirname, "ser
 $injector.requirePublicClass("nsCloudEmulatorLauncher", path.join(__dirname, "services", "cloud-emulator-emulator-launcher"));
 $injector.requirePublicClass("nsCloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
 $injector.requirePublicClass("nsCloudUserService", path.join(__dirname, "services", "user-service"));
+$injector.requirePublicClass("nsCloudAccountsService", path.join(__dirname, "services", "accounts-service"));
 
 // Services.
 $injector.require("nsCloudAuthCloudService", path.join(__dirname, "services", "cloud-services", "auth-cloud-service"));
@@ -27,6 +28,7 @@ $injector.require("nsCloudServicesProxy", path.join(__dirname, "services", "clou
 $injector.require("nsCloudRequestService", path.join(__dirname, "services", "cloud-services", "cloud-request-service"));
 $injector.require("nsCloudEmulatorService", path.join(__dirname, "services", "cloud-services", "cloud-emulator-service"));
 $injector.require("nsCloudCodeCommitService", path.join(__dirname, "services", "cloud-services", "code-commit-service"));
+$injector.require("nsCloudAccountsCloudService", path.join(__dirname, "services", "cloud-services", "accounts-cloud-service"));
 $injector.require("nsCloudPackageInfoService", path.join(__dirname, "services", "package-info-service"));
 $injector.require("nsCloudUploadService", path.join(__dirname, "services", "upload-service"));
 $injector.require("nsCloudGitService", path.join(__dirname, "services", "git-service"));
@@ -49,3 +51,6 @@ $injector.requireCommand(["cloud|codesign", "codesign|cloud"], path.join(__dirna
 $injector.requireCommand("cloud|publish|android", path.join(__dirname, "commands", "cloud-publish"));
 $injector.requireCommand("cloud|publish|ios", path.join(__dirname, "commands", "cloud-publish"));
 $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "cloud-lib-version"));
+
+$injector.requireCommand("account|*list", path.join(__dirname, "commands", "account", "account-list"));
+$injector.requireCommand("account|usage", path.join(__dirname, "commands", "account", "usage"));

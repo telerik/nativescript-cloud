@@ -22,7 +22,11 @@ interface ICodeSignRequestData extends IBuildId, IAppId, IClean, ICredentials {
 	devices: Mobile.IDeviceInfo[];
 }
 
-interface IBuildRequestData extends IServerRequestData {
+interface IAccountId {
+	accountId: string
+}
+
+interface IBuildRequestData extends IAccountId, IServerRequestData {
 	targets: string[];
 	buildFiles: IBuildFile[];
 }

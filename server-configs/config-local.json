@@ -13,6 +13,12 @@
 		},
 		"code-commit-service": {
 			"fullHostName": "localhost:8003"
+		},
+		"misc-service": {
+			"fullHostName": "localhost:8004"
+		},
+		"accounts-service": {
+			"fullHostName": "localhost:8005"
 		}
 	}
 }

@@ -1,5 +1,5 @@
 {
-	"apiVersion": "v1",
+	"apiVersion": "v2",
 	"domainName": "digitalfactory.rocks",
 	"serverProto": "https",
 	"stage": "production",
@@ -15,6 +15,12 @@
 		},
 		"code-commit-service": {
 			"subdomain": "code-commit"
+		},
+		"misc-service": {
+			"subdomain": "misc"
+		},
+		"accounts-service": {
+			"subdomain": "accounts"
 		}
 	}
 }

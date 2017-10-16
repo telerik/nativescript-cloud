@@ -23,7 +23,10 @@ export const AUTH_SERVICE_NAME = "auth-service";
 export const BUILD_SERVICE_NAME = "build-service";
 export const EMULATORS_SERVICE_NAME = "emulators-service";
 export const CODE_COMMIT_SERVICE_NAME = "code-commit-service";
+export const MISC_SERVICE_NAME = "misc-service";
+export const ACCOUNTS_SERVICE_NAME = "accounts-service";
 export const DEFAULT_ANDROID_PUBLISH_TRACK = "beta";
+export const UNLIMITED = "unlimited";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
 	BUILD_OUTPUT: "buildOutput",

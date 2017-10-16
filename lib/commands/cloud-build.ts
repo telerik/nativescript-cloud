@@ -1,10 +1,16 @@
 export class CloudBuild implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
+	public get dashedOptions() {
+		return this.$nsCloudOptionsProvider.dashedOptions;
+	}
+
 	constructor(private $errors: IErrors,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
-		private $projectData: IProjectData,
-		private $nsCloudBuildService: ICloudBuildService) {
+		private $nsCloudBuildService: ICloudBuildService,
+		private $nsCloudOptionsProvider: ICloudOptionsProvider,
+		private $options: ICloudOptions,
+		private $projectData: IProjectData) {
 		this.$projectData.initializeProjectData();
 	}
 
@@ -12,6 +18,7 @@ export class CloudBuild implements ICommand {
 		const buildData = this.$nsCloudBuildCommandHelper.getCloudBuildData(args[0]);
 		await this.$nsCloudBuildService.build(buildData.projectSettings,
 			buildData.platform, buildData.buildConfiguration,
+			this.$options.accountId,
 			buildData.androidBuildData,
 			buildData.iOSBuildData);
 	}
