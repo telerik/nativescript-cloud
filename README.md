@@ -883,6 +883,54 @@ interface IUserService {
 }
 ```
 
+### Module nsCloudAccountsService
+The `nsCloudAccountsService` provides methods for working with accounts. You can call the following methods:
+* `getMyAccounts` method - returns the accounts which the current user can use. Each user will have personal account and shared accounts. Shared accounts are those accounts in which the user is added as developer. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns all accounts which can be used from the current user.
+ * Each user can have personal account and shared accounts.
+ * @returns {Promise<IAccount[]>}
+ */
+getMyAccounts(): Promise<IAccount[]>
+```
+Detailed description of each parameter can be found [here](./lib/definitions/accounts-service.d.ts).
+</br>
+
+Usage:
+
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudAccountsService.getMyAccounts()
+	.then(accounts => console.log(accounts));
+```
+
+* `getUsageInfo` method - returns the usage information for the provided account. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns the usage information for the provided account.
+ * @param {string} accountId Account id which will be used to get the usage info.
+ * @returns {Promise<IUsageInfo[]>}.
+ */
+getUsageInfo(accountId: string): Promise<IUsageInfo[]>;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/accounts-service.d.ts).
+</br>
+
+Usage:
+
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudAccountsService.getUsageInfo("d0ce3ac0-36c2-427f-8d27-955915ffe189")
+	.then(usageInfo => console.log(usageInfo));
+```
+
 ### Development
 The project is written in TypeScript. After cloning it, you can set it up by executing the following commands in your terminal:
 * `$ npm i --ignore-scripts` - NOTE: `--ignore-scripts` is a must.
