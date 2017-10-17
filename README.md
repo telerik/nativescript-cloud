@@ -18,12 +18,15 @@ Definition:
  * @param {IProjectSettings} projectSettings Describes the current project - project dir, application identifier, name and nativescript data.
  * @param {string} platform The mobile platform for which the application should be built: Android or iOS.
  * @param {string} buildConfiguration The build configuration - Debug or Release.
- * @param {IAndroidBuildData} androidBuildData Android speicific information for the build.
- * @param {IIOSBuildData} iOSBuildData iOS speicific information for the build.
- * @returns {Promise<IBuildResultData>} Information about the build process. It is returned only on successfull build. In case the build fails, the Promise is rejected with the server information.
+ * @param {string} accountId the account which will be charged for the build.
+ * @param {IAndroidBuildData} androidBuildData Android specific information for the build.
+ * @param {IIOSBuildData} iOSBuildData iOS specific information for the build.
+ * @returns {Promise<IBuildResultData>} Information about the build process. It is returned only on successful build. In case the build fails, the Promise is rejected with the server information.
  */
 build(projectSettings: IProjectSettings,
-	platform: string, buildConfiguration: string,
+	platform: string,
+	buildConfiguration: string,
+	accountId: string,
 	androidBuildData?: IAndroidBuildData,
 	iOSBuildData?: IIOSBuildData): Promise<IBuildResultData>;
 ```
@@ -108,8 +111,10 @@ tns.nsCloudBuildService.on("stepChanged", (data) => {
 	*/
 });
 
+const accountId = "d0ce3ac0-36c2-427f-8d27-955915ffe189";
+
 tns.nsCloudBuildService
-	.build(projectSettings, platform, buildConfiguration, androidReleaseConfigurationData)
+	.build(projectSettings, platform, buildConfiguration, accountId, androidReleaseConfigurationData)
 	.then(buildResult => console.log(buildResult))
 	.catch(err => console.error(err));
 ```
