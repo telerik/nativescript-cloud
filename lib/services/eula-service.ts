@@ -15,12 +15,31 @@ export class EulaService implements IEulaService {
 
 	}
 
-	public async shouldAcceptEula(): Promise<boolean> {
-		// TODO: Add timeout
-		const response = await this.$httpClient.httpRequest("https://www.nativescript.org/nativescript-sidekick/eula");
-
+	private async getHash1(): Promise<any> {
 		const acceptedEulaHash = await this.$userSettingsService.getSettingValue<string>(EulaConstants.acceptedEulaHashKey);
+		const response = await this.$httpClient.httpRequest("https://www.nativescript.org/nativescript-sidekick/eula");
+		console.log(response.body.length); // 275887        // 275888
+		const currentEulaHash = getHash(response.body);
+		console.log("current hash: ".red, currentEulaHash);
+		console.log("acceptedEulaHash hash: ".green, acceptedEulaHash);
+		return response.body;
+	}
 
+	public async shouldAcceptEula(): Promise<boolean> {
+		let previousData: any = null;
+		for(let i = 0; i < 10; i++) {
+			const currentData = await this.getHash1();
+			if (previousData && previousData.length !== currentData.length) {
+				console.log("_.difference(currentData, previousData) = ", previousData.toString().replace(currentData, ""));
+				console.log("_.difference(previousData, currentData) = ", currentData.toString().replace(previousData, ""));
+			}
+
+			previousData = currentData;
+		}
+
+		// TODO: Add timeout
+		const acceptedEulaHash = await this.$userSettingsService.getSettingValue<string>(EulaConstants.acceptedEulaHashKey);
+		const response = await this.$httpClient.httpRequest("https://www.nativescript.org/nativescript-sidekick/eula");
 		console.log(response.body.length); // 275887        // 275888
 		const currentEulaHash = getHash(response.body);
 		console.log("current hash: ".red, currentEulaHash);
