@@ -32,7 +32,14 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		}
 
 		const pathToProvision = this.$options.provision ? path.resolve(this.$options.provision) : "";
-		const projectSettings = { projectDir: this.$projectData.projectDir, projectId: this.$projectData.projectId, projectName: this.$projectData.projectName, nativescriptData, clean: this.$options.clean };
+		const projectSettings: IProjectSettings = {
+			nativescriptData,
+			projectDir: this.$projectData.projectDir,
+			projectId: this.$projectData.projectId,
+			projectName: this.$projectData.projectName,
+			clean: this.$options.clean,
+			env: this.$options.env
+		};
 		const buildConfiguration = this.$options.release ? CLOUD_BUILD_CONFIGURATIONS.RELEASE : CLOUD_BUILD_CONFIGURATIONS.DEBUG;
 		return {
 			projectSettings,
@@ -82,7 +89,8 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 				keyStoreAlias: this.$options.keyStoreAlias,
 				keyStoreAliasPassword: this.$options.keyStoreAliasPassword,
 				keyStorePassword: this.$options.keyStorePassword,
-				keyStorePath: this.$options.keyStorePath
+				keyStorePath: this.$options.keyStorePath,
+				env: this.$options.env
 			}, this.$options.platformTemplate);
 		} else {
 			const buildData = this.getCloudBuildData(platform);
