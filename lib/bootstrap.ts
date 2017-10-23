@@ -20,6 +20,7 @@ $injector.requirePublicClass("nsCloudEmulatorLauncher", path.join(__dirname, "se
 $injector.requirePublicClass("nsCloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
 $injector.requirePublicClass("nsCloudUserService", path.join(__dirname, "services", "user-service"));
 $injector.requirePublicClass("nsCloudAccountsService", path.join(__dirname, "services", "accounts-service"));
+$injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "services", "eula-service"));
 
 // Services.
 $injector.require("nsCloudAuthCloudService", path.join(__dirname, "services", "cloud-services", "auth-cloud-service"));
