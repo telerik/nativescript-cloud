@@ -44,6 +44,21 @@ interface IUsageInfoBase {
 	 * If this property is set to true the allowed usage is unlimited.
 	 */
 	unlimited: boolean;
+
+	/**
+	 * When the license expires.
+	 */
+	licenseExpiration: string;
+
+	/**
+	 * The type of the license.
+	 */
+	licenseType: string;
+
+	/**
+	 * Subscription edition type.
+	 */
+	editionType: string;
 }
 
 interface IUsageInfo extends IUsageInfoBase {

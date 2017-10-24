@@ -30,7 +30,10 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 					allowedUsage: u.allowedUsage,
 					performed: u.usage,
 					remaining: u.unlimited ? u.allowedUsage : u.allowedUsage - u.usage,
-					unlimited: !!u.unlimited
+					unlimited: !!u.unlimited,
+					editionType: u.editionType,
+					licenseExpiration: u.licenseExpiration,
+					licenseType: u.licenseType
 				};
 
 				return result;
@@ -42,7 +45,7 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 			output = stringifyWithIndentation(groupedUsage);
 		} else {
 			const tables = _.map(groupedUsage, (g, feature) => {
-				return createTable([`${feature} performed`, `${feature} remaining`], g.map(u => {
+				return createTable([`${feature} performed`, `${feature} remaining`, "License Expiration", "License Type", "Edition Type"], g.map(u => {
 					const result = [u.performed.toString()];
 					if (u.unlimited) {
 						result.push(UNLIMITED);
@@ -51,7 +54,7 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 						result.push(remainingUsage.toString());
 					}
 
-					return result;
+					return result.concat(new Date(u.licenseExpiration).toDateString(), u.licenseType, u.editionType);
 				}));
 			});
 
