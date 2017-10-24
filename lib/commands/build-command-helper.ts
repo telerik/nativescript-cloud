@@ -1,5 +1,6 @@
 import * as path from "path";
 import { CLOUD_BUILD_CONFIGURATIONS } from "../constants";
+import { getProjectId } from "../helpers";
 
 export class BuildCommandHelper implements IBuildCommandHelper {
 	private get $localBuildService(): ILocalBuildService {
@@ -43,10 +44,11 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		}
 
 		const pathToProvision = this.$options.provision ? path.resolve(this.$options.provision) : "";
+		const projectId = getProjectId(this.$projectData, platform.toLowerCase());
 		const projectSettings: INSCloudProjectSettings = {
 			nativescriptData,
 			projectDir: this.$projectData.projectDir,
-			projectId: this.$projectData.projectId,
+			projectId,
 			projectName: this.$projectData.projectName,
 			bundle: !!this.$options.bundle,
 			sharedCloud: this.$options.sharedCloud,
@@ -56,6 +58,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			clean: this.$options.clean,
 			env: this.$options.env
 		};
+
 		const buildConfiguration = this.$options.release ? CLOUD_BUILD_CONFIGURATIONS.RELEASE : CLOUD_BUILD_CONFIGURATIONS.DEBUG;
 		return {
 			projectSettings,

@@ -37,3 +37,11 @@ export function isUrl(data: string): boolean {
 export function getRandomString(options?: randomstring.GenerateOptions | number): string {
 	return randomstring.generate(options);
 }
+
+export function getProjectId(projectData: IProjectData, platform: string): string {
+	if (projectData.projectIdentifiers) {
+		return projectData.projectIdentifiers[platform];
+	}
+
+	return projectData.projectId;
+}
