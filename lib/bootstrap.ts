@@ -7,6 +7,7 @@ $injector.require("nsCloudBuildOutputFilter", path.join(__dirname, "cloud-build-
 $injector.require("nsCloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
 $injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
 $injector.require("nsCloudBuildCommandHelper", path.join(__dirname, "commands", "build-command-helper"));
+$injector.require("nsCloudEulaCommandHelper", path.join(__dirname, "commands", "eula-command-helper"));
 
 // Mobile.
 $injector.require("nsCloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
@@ -55,3 +56,4 @@ $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "
 
 $injector.requireCommand("account|*list", path.join(__dirname, "commands", "account", "account-list"));
 $injector.requireCommand("account|usage", path.join(__dirname, "commands", "account", "usage"));
+$injector.requireCommand("accept|eula", path.join(__dirname, "commands", "accept-eula-command"));

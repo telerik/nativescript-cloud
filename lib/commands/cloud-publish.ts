@@ -22,6 +22,7 @@ abstract class CloudPublish implements ICommand {
 export class CloudPublishAndroid extends CloudPublish implements ICommand {
 	constructor($nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
+		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudPublishService: ICloudPublishService,
 		private $errors: IErrors,
 		protected $prompter: IPrompter,
@@ -53,6 +54,8 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
+		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+
 		if (args.length > 1 || (!isInteractive() && args.length < 1)) {
 			this.$errors.fail("The command accepts only one parameter - Path to authentication JSON");
 		}
@@ -66,6 +69,7 @@ $injector.registerCommand("cloud|publish|android", CloudPublishAndroid);
 export class CloudPublishIos extends CloudPublish implements ICommand {
 	constructor($nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
+		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudPublishService: ICloudPublishService,
 		private $errors: IErrors,
 		protected $prompter: IPrompter,
@@ -88,6 +92,8 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
+		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+
 		if (args.length > 2 || (!isInteractive() && args.length < 1)) {
 			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
 		}
