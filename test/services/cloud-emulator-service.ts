@@ -26,6 +26,9 @@ describe("cloud emulator service", () => {
 			testInjector.register("options", {
 				profileDir: "test"
 			});
+			testInjector.register("nsCloudEulaService", {
+				getEulaDataWithCache: () => Promise.resolve({})
+			});
 
 			return testInjector;
 		}
