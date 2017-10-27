@@ -34,6 +34,7 @@ $injector.require("nsCloudAccountsCloudService", path.join(__dirname, "services"
 $injector.require("nsCloudPackageInfoService", path.join(__dirname, "services", "package-info-service"));
 $injector.require("nsCloudUploadService", path.join(__dirname, "services", "upload-service"));
 $injector.require("nsCloudGitService", path.join(__dirname, "services", "git-service"));
+$injector.require("nsCloudDateTimeService", path.join(__dirname, "services", "date-time-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
