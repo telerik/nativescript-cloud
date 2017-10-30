@@ -11,7 +11,7 @@ export class CloudRequestService implements ICloudRequestService {
 			return await this.$nsCloudServicesProxy.call<T>(options);
 		} catch (requestError) {
 			// If the server returns 401 we must try to get new access token using the refresh token and retry the request.
-			if (requestError.response.statusCode === HTTP_STATUS_CODES.UNAUTHORIZED) {
+			if (requestError.response && requestError.response.statusCode === HTTP_STATUS_CODES.UNAUTHORIZED) {
 				this.$logger.trace("Access token expired. Trying to issue a new one.");
 				try {
 					await this.$nsCloudAuthenticationService.refreshCurrentUserToken();

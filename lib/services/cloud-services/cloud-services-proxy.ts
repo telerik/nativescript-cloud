@@ -49,7 +49,7 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 			response = await this.$httpClient.httpRequest(requestOpts);
 		} catch (err) {
 			if (err.response && err.response.statusCode === 402) {
-				this.$errors.failWithoutHelp(JSON.parse(err.body).Message);
+				this.$errors.failWithoutHelp(JSON.parse(err.body).message);
 			}
 
 			throw err;
