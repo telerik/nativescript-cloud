@@ -68,7 +68,6 @@ export class EulaService implements IEulaService {
 	}
 
 	private async downloadLatestEula(opts: { shouldThrowError: boolean } = { shouldThrowError: false }): Promise<void> {
-		// TODO: Lock this action as multiple processes may end up doing this simultaneously
 		if (this.isEulaDownloadedInCurrentProcess) {
 			this.$logger.trace("EULA is already downloaded in current process. Skip new download.");
 			return;
@@ -90,7 +89,7 @@ export class EulaService implements IEulaService {
 			this.isEulaDownloadedInCurrentProcess = true;
 		} catch (err) {
 			if (opts.shouldThrowError) {
-				this.$logger.trace("Unable to download latest EULA, but will rethrow the error as requested by called. Error is:", err);
+				this.$logger.trace("Unable to download latest EULA, but will rethrow the error as requested by caller. Error is:", err);
 
 				throw err;
 			}
@@ -115,7 +114,6 @@ export class EulaService implements IEulaService {
 			const timeToCheck = 24 * 60 * 60 * 1000;
 			const currentTime = this.$nsCloudDateTimeService.getCurrentEpochTime();
 
-			// TODO: Check if mtime is the correct fstat data.
 			const shouldDownloadEula = !eulaFstat || ((currentTime - eulaFstat.mtime.getTime()) > timeToCheck);
 			if (shouldDownloadEula) {
 				this.$logger.trace("Will download new EULA as either local EULA does not exist or the cache time has passed.");

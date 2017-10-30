@@ -164,8 +164,6 @@ describe("eulaService", () => {
 	});
 
 	describe("acceptEula", () => {
-		// should fail in case unable to download eula
-		// should save to user settings hash of the accepted eula
 		const testInfo: IAcceptEulaTestData[] = [
 			{
 				httpRequestShouldFail: true,
