@@ -1,15 +1,59 @@
 # nativescript-cloud
 Used for cloud support in NativeScript CLI
 
+# Contents
+* [Public API](#public-api)
+* [Development](#development)
+
 ## Public API
 This section describes all methods that can be invoked when you have installed the `nativescript-cloud` extension and NativeScript CLI is required as library, i.e.:
 ```JavaScript
 const tns = require("nativescript");
 ```
 
-### Module nsCloudBuildService
+## Contents
+* [nsCloudBuildService](#nscloudbuildservice)
+  * [build](#build-method)
+  * [Events](#nscloudbuildservice-events)
+    * [buildOutput](#buildoutput)
+    * [stepChanged](#stepchanged)
+    * [Events usage](#events-usage)
+  * [validateBuildProperties](#validatebuildproperties)
+  * [getBuildOutputDirectory](#getbuildoutputdirectory)
+* [nsCloudCodesignService](#nscloudcodesignservice)
+  * [generateCodesignFiles](#generatecodesignfiles)
+  * [getServerOperationOutputDirectory](#getserveroperationoutputdirectory)
+* [nsCloudPublishService](#nscloudpublishservice)
+  * [publishToItunesConnect](#publishtoitunesconnect)
+  * [publishToGooglePlay](#publishtogoogleplay)
+* [nsCloudApplicationService](#nscloudapplicationservice)
+  * [shouldBuild](#shouldbuild)
+  * [shouldInstall](#shouldinstall)
+* [nsCloudEmulatorLauncher](#nscloudemulatorlauncher)
+  * [login](#login)
+  * [logout](#logout)
+  * [isUserLoggedIn](#isuserloggedin)
+  * [refreshCurrentUserToken](#refreshcurrentusertoken)
+  * [cancelLogin](#cancellogin)
+  * [Interfaces describing returned information](#interfaces)
+* [nsCloudUserService](#nsclouduserservice)
+  * [hasUser](#hasuser)
+  * [getUser](#getuser)
+  * [getUserData](#getuserdata)
+  * [setUserData](#setuserdata)
+  * [setToken](#settoken)
+  * [clearUserData](#clearuserdata)
+  * [getUserAvatar](#getuseravatar)
+* [nsCloudAccountsService](#nscloudaccountsservice)
+  * [getMyAccounts](#getmyaccounts)
+  * [getUsageInfo](#getusageinfo)
+
+
+### nsCloudBuildService
 The `nsCloudBuildService` allows build of applications in the cloud. You can call the following methods:
-* `build` method - it validates passed arguments and tries to build the application in the cloud. In case of successful build, the build result (.apk, .ipa or .zip) is downloaded. The result contains information about the whole build process, path to the downloaded build result and information used to generate a QR code, pointing to the latest build result (in S3). </br>
+
+#### build method
+`build` method validates passed arguments and tries to build the application in the cloud. In case of successful build, the build result (.apk, .ipa or .zip) is downloaded. The result contains information about the whole build process, path to the downloaded build result and information used to generate a QR code, pointing to the latest build result (in S3). </br>
 Definition:
 
 ```TypeScript
@@ -33,39 +77,43 @@ build(projectSettings: IProjectSettings,
 Detailed description of each parameter can be found [here](./lib/definitions/cloud-build-service.d.ts).
 </br>
 
-Events:
-1. buildOutput - contains parts of the current build output:
-	```TypeScript
-	interface IBuildLog {
-		buildId: string;
-		data: string;
-		pipe: string;
-	}
-	```
-2. stepChanged - contains the name of the changed build step and its progress:
-	```TypeScript
+#### nsCloudBuildService events
+`nsCloudBuildService` raises the following events:
+
+##### buildOutput
+`buildOutput` event contains parts of the current build output:
+```TypeScript
+interface IBuildLog {
+	buildId: string;
+	data: string;
+	pipe: string;
+}
+```
+##### stepChanged
+`stepChanged` event contains the name of the changed build step and its progress:
+```TypeScript
+/**
+* Describes build step.
+*/
+interface IBuildStep {
 	/**
-	* Describes build step.
+	* The ID of the build.
 	*/
-	interface IBuildStep {
-		/**
-		* The ID of the build.
-		*/
-		buildId: string;
+	buildId: string;
 
-		/**
-		* The name of the step - prepare, upload, build or download.
-		*/
-		step: string;
+	/**
+	* The name of the step - prepare, upload, build or download.
+	*/
+	step: string;
 
-		/**
-		* The progress of the step in percents. The value will be between 0 and 100.
-		*/
-		progress: number;
-	}
-	```
+	/**
+	* The progress of the step in percents. The value will be between 0 and 100.
+	*/
+	progress: number;
+}
+```
 
-Usage:
+##### Events usage
 ```JavaScript
 const tns = require("nativescript");
 const fs = require("fs");
@@ -119,7 +167,8 @@ tns.nsCloudBuildService
 	.catch(err => console.error(err));
 ```
 
-* `validateBuildProperties` - validates all properties required for specific platform. This includes a check if current application identifier matches the CodeSigning identity for iOS operations, a check if the specified device identifier (in case it is passed) is included in the mobile provision, validation of the password, etc.
+#### validateBuildProperties
+`validateBuildProperties` method validates all properties required for specific platform. This includes a check if current application identifier matches the CodeSigning identity for iOS operations, a check if the specified device identifier (in case it is passed) is included in the mobile provision, validation of the password, etc.
 </br>
 Definition:
 
@@ -165,7 +214,8 @@ tns.nsCloudBuildService
 	.catch(err => console.error("Data is invalid:", err));
 ```
 
-* `getBuildOutputDirectory` - Returns the path to the directory where the build output may be found.
+#### getBuildOutputDirectory
+`getBuildOutputDirectory` - Returns the path to the directory where the build output may be found.
 > This method is currently available only for backwards compatibility. The module now implements base module for server operations that exposes same functionality with more generic method:
 > `getServerOperationOutputDirectory`. Detailed description of the parameter can be found [here](./lib/definitions/cloud-service.d.ts).
 </br>
@@ -192,9 +242,11 @@ const cloudBuildOutputDirectory = tns.nsCloudBuildService
 			});
 ```
 
-### Module nsCloudCodesignService
+### nsCloudCodesignService
 The `nsCloudCodesignService` allows generation of codesign files (currently only iOS .p12 and .mobileprovision) in the cloud. You can call the following methods:
-* `generateCodesignFiles` method - it validates passed arguments and tries to generate codesign files in the cloud. In case of success, the result files (.p12 and/or .mobileprovision) are downloaded. The result contains information about errors, if any, and path to the downloaded codesign files (in S3). </br>
+
+#### generateCodesignFiles
+`generateCodesignFiles` method validates passed arguments and tries to generate codesign files in the cloud. In case of success, the result files (.p12 and/or .mobileprovision) are downloaded. The result contains information about errors, if any, and path to the downloaded codesign files (in S3). </br>
 Definition:
 
 ```TypeScript
@@ -224,7 +276,8 @@ const codesignResultData = tns.nsCloudBuildService
 			}, '/tmp/projects/myproj');
 ```
 
-* `getServerOperationOutputDirectory` - Returns the path to the directory where the server request output files may be found, if any. In this implementation - the generated codesign files. </br>
+#### getServerOperationOutputDirectory
+`getServerOperationOutputDirectory` method returns the path to the directory where the server request output files may be found, if any. In this implementation - the generated codesign files. </br>
 Definition:
 
 ```TypeScript
@@ -248,9 +301,11 @@ const generateCodesignFilesOutputDirectory = tns.nsCloudBuildService
 				});
 ```
 
-### Module nsCloudPublishService
+### nsCloudPublishService
 The `nsCloudPublishService` allows publishing build packages to an application store (either GooglePlay or iTunesConnect). You can call the following methods:
-* `publishToItunesConnect` method - it will try to publish the provided package to iTunes Connect. </br>
+
+#### publishToItunesConnect
+`publishToItunesConnect` method -will try to publish the provided package to iTunes Connect. </br>
 Definition:
 
 ```TypeScript
@@ -281,7 +336,8 @@ tns.nsCloudPublishService
 	.catch(err => console.error(err));
 ```
 
-* `publishToGooglePlay` - method - it will try to publish the provided packages to Google Play. </br>
+#### publishToGooglePlay
+`publishToGooglePlay` method will try to publish the provided packages to Google Play. </br>
 Definition:
 
 ```TypeScript
@@ -310,9 +366,11 @@ tns.nsCloudPublishService
 	.catch(err => console.error(err));
 ```
 
-### Module nsCloudApplicationService
+### nsCloudApplicationService
 The `nsCloudApplicationService` allows for application management and gathering more information about the app's current state. You can call the following methods:
-* `shouldBuild` method - it will determine whether the current application should be built or not. </br>
+
+#### shouldBuild
+`shouldBuild` method will determine whether the current application should be built or not. </br>
 Definition:
 
 ```TypeScript
@@ -340,7 +398,8 @@ tns.nsCloudApplicationService
 	.catch(err => console.error(err));
 ```
 
-* `shouldInstall` - method - it will determine whether the current application's package should be installed on the given device or not. </br>
+#### shouldInstall
+`shouldInstall` method will determine whether the current application's package should be installed on the given device or not. </br>
 Definition:
 
 ```TypeScript
@@ -368,7 +427,7 @@ tns.nsCloudPublishService
 	.catch(err => console.error(err));
 ```
 
-### Module nsCloudEmulatorLauncher
+### nsCloudEmulatorLauncher
 The `nsCloudEmulatorLauncher` provides a way for initial interaction with cloud emulators. You can call the following methods:
 * `startEmulator` method - starts an cloud emulator and returns a url where an html page is located, containing an iframe with the actual emulator. </br>
 Definition:
@@ -420,9 +479,11 @@ tns.nsCloudEmulatorLauncher.startEmulator({
 		});
 ```
 
-### Module nsCloudAuthenticationService
+### nsCloudAuthenticationService
 The `nsCloudAuthenticationService` is used for authentication related operations (login, logout etc.). You can call the following methods </br>
-* `login` - Starts localhost server on which the login response will be returned. After that if there is `options.openAction` it will be used to open the login url. If this option is not defined the default opener will be used. After successful login returns the user information.
+
+#### login
+`login` mehod starts localhost server on which the login response will be returned. After that if there is `options.openAction` it will be used to open the login url. If this option is not defined the default opener will be used. After successful login returns the user information.
 </br>
 Definition:
 
@@ -464,7 +525,8 @@ tns.nsCloudAuthenticationService
 	.catch(err => console.error(err));
 ```
 
-* `logout` - Invalidates the current user authentication data.
+#### logout
+`logout` method invalidates the current user authentication data.
 </br>
 Definition:
 
@@ -500,7 +562,8 @@ const logoutOptions = { openAction: openAction };
 tns.nsCloudAuthenticationService.logout(logoutOptions);
 ```
 
-* `isUserLoggedIn` - Checks if the access token of the current user is valid. If it is - the method will return true. If it isn't - the method will try to issue new access token. If the method can't issue new token it will return false.
+#### isUserLoggedIn
+`isUserLoggedIn` method checks if the access token of the current user is valid. If it is - the method will return true. If it isn't - the method will try to issue new access token. If the method can't issue new token it will return false.
 </br>
 
 Definition:
@@ -524,7 +587,8 @@ tns.nsCloudAuthenticationService
 	.catch(err => console.error(err));
 ```
 
-* `refreshCurrentUserToken` - Uses the refresh token of the current user to issue new access token.
+#### refreshCurrentUserToken
+`refreshCurrentUserToken` method uses the refresh token of the current user to issue new access token.
 </br>
 
 Definition:
@@ -546,7 +610,9 @@ tns.nsCloudAuthenticationService.refreshCurrentUserToken()
 	.catch(err => console.error(err));
 ```
 
-* `cancelLogin` - Stops the current login process and rejects the login promise with an error.
+
+#### cancelLogin
+`cancelLogin` method stops the current login process and rejects the login promise with an error.
 </br>
 
 Definition:
@@ -572,7 +638,7 @@ tns.nsCloudAuthenticationService
 tns.nsCloudAuthenticationService.cancelLogin();
 ```
 
-#### Interfaces:
+#### Interfaces
 ```TypeScript
 interface IUser {
 	email: string;
@@ -651,9 +717,11 @@ interface ITokenState {
 }
 ```
 
-### Module nsCloudUserService
+### nsCloudUserService
 The `nsCloudUserService` is used to get information aboud the current user or modify it. You can call the following methods </br>
-* `hasUser` - Checks if there is user information.
+
+#### hasUser
+`hasUser` method checks if there is user information.
 </br>
 Definition:
 
@@ -674,7 +742,8 @@ const hasUser = tns.nsCloudUserService.hasUser();
 console.log(hasUser);
 ```
 
-* `getUser` - Returns the current user information.
+#### getUser
+`getUser` method returns the current user information.
 </br>
 Definition:
 
@@ -704,7 +773,8 @@ Sample result for `user` will be:
 }
 ```
 
-* `getUserData` - Returns the user information and the authentication data for the current user.
+#### getUserData
+`getUserData` method returns the user information and the authentication data for the current user.
 </br>
 
 Definition:
@@ -739,7 +809,8 @@ Sample result for `userData` will be:
 }
 ```
 
-* `setUserData` - Sets the user information and the authentication data for the current user.
+#### setUserData
+`setUserData` method sets the user information and the authentication data for the current user.
 </br>
 
 Definition:
@@ -772,7 +843,8 @@ const userData = {
 tns.nsCloudUserService.setUserData(userData);
 ```
 
-* `setToken` - Sets only the token of the current user.
+#### setToken
+`setToken` method sets only the token of the current user.
 </br>
 
 Definition:
@@ -799,7 +871,8 @@ const token = {
 tns.nsCloudUserService.setToken(token);
 ```
 
-* `clearUserData` - Removes the current user data.
+#### clearUserData
+`clearUserData` method removes the current user data.
 </br>
 
 Definition:
@@ -819,7 +892,8 @@ const tns = require("nativescript");
 tns.nsCloudUserService.clearUserData();
 ```
 
-* `getUserAvatar` - Return the URL where the avatar picture can be downloaded from.
+#### getUserAvatar
+`getUserAvatar` methods returns the URL where the avatar picture can be downloaded from.
 </br>
 Definition:
 
@@ -888,9 +962,11 @@ interface IUserService {
 }
 ```
 
-### Module nsCloudAccountsService
+### nsCloudAccountsService
 The `nsCloudAccountsService` provides methods for working with accounts. You can call the following methods:
-* `getMyAccounts` method - returns the accounts which the current user can use. Each user will have personal account and shared accounts. Shared accounts are those accounts in which the user is added as developer. </br>
+
+#### getMyAccounts
+`getMyAccounts` method returns the accounts which the current user can use. Each user will have personal account and shared accounts. Shared accounts are those accounts in which the user is added as developer. </br>
 Definition:
 
 ```TypeScript
@@ -913,7 +989,8 @@ tns.nsCloudAccountsService.getMyAccounts()
 	.then(accounts => console.log(accounts));
 ```
 
-* `getUsageInfo` method - returns the usage information for the provided account. </br>
+#### getUsageInfo
+`getUsageInfo` method returns the usage information for the provided account. </br>
 Definition:
 
 ```TypeScript
@@ -936,7 +1013,7 @@ tns.nsCloudAccountsService.getUsageInfo("d0ce3ac0-36c2-427f-8d27-955915ffe189")
 	.then(usageInfo => console.log(usageInfo));
 ```
 
-### Development
+## Development
 The project is written in TypeScript. After cloning it, you can set it up by executing the following commands in your terminal:
 * `$ npm i --ignore-scripts` - NOTE: `--ignore-scripts` is a must.
 * `$ npm i -g grunt-cli` (only in case you do not have it installed globally)
