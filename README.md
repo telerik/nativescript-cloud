@@ -47,7 +47,10 @@ const tns = require("nativescript");
 * [nsCloudAccountsService](#nscloudaccountsservice)
   * [getMyAccounts](#getmyaccounts)
   * [getUsageInfo](#getusageinfo)
-
+* [nsCloudEulaService](#nscloudeulaservice)
+  * [getEulaData](#geteuladata)
+  * [getEulaDataWithCache](#geteuladatawithcache)
+  * [acceptEula](#acceptEula)
 
 ### nsCloudBuildService
 The `nsCloudBuildService` allows build of applications in the cloud. You can call the following methods:
@@ -1011,6 +1014,103 @@ const tns = require("nativescript");
 
 tns.nsCloudAccountsService.getUsageInfo("d0ce3ac0-36c2-427f-8d27-955915ffe189")
 	.then(usageInfo => console.log(usageInfo));
+```
+
+### nsCloudEulaService
+`nsCloudEulaService` allows interaction with EULA - check if current EULA should be accepted, accepting it, etc.
+
+#### getEulaData
+`getEulaData` method gives information for the current EULA - url where to find it and if the user should accept it. When this method is called, it will download the latest EULA in case it has not been already downloaded in the current process. EULA must be accepted in the following condition:
+* In case it has never been accepted.
+* In case it has been accepted before, but current EULA is different, i.e. user had not accepted it before.
+
+In all other cases (current EULA is the same as the one user had accepted before, new EULA cannot be downloaded, but user had accepted EULA in the past), the method will return that EULA should not be accepted.
+
+Definition:
+
+```TypeScript
+/**
+ * Gives information about the EULA. This method downloads the EULA to a local file (once for process).
+ * @returns {Promise<IEulaData>} Information about the EULA - url and should the user accept it.
+ */
+getEulaData(): Promise<IEulaData>;
+```
+The returned result is of the following type:
+```TypeScript
+/**
+ * Contains information about EULA.
+ */
+interface IEulaData {
+	/**
+	 * URL where the EULA can be found.
+	 */
+	url: string;
+
+	/**
+	 * Defines if EULA should be accepted by user.
+	 */
+	shouldAcceptEula: boolean;
+}
+```
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudEulaService.getEulaData()
+	.then(eulaData => console.log(`EULA url is: ${eulaData.url}. This EULA should ${eulaData.shouldAcceptEula ? "" : "not" } be accepted.`));
+```
+
+#### getEulaDataWitCache
+`getEulaDataWithCache` method gives information for the current EULA - url where to find it and if the user should accept it. When this method is called, it will download the latest EULA ONLY in case it has not been downloaded in the latest 24 hours. That's the main difference between this method and `getEulaData`. EULA must be accepted in the following condition:
+* In case it has never been accepted.
+* In case it has been accepted before, but current EULA is different, i.e. user had not accepted it before.
+
+In all other cases (current EULA is the same as the one user had accepted before, new EULA cannot be downloaded, but user had accepted EULA in the past), the method will return that EULA should not be accepted.
+
+Definition:
+
+```TypeScript
+/**
+ * Gives information about the EULA. This method downloads the EULA to a local file (once for process)
+ * only in case the local copy has not been modified for more than 24 hours.
+ * @returns {Promise<IEulaData>} Information about the EULA - url and should the user accept it.
+ */
+getEulaDataWithCache(): Promise<IEulaData>;
+```
+The returned result has the same type as the one returned by `getEulaData`.
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudEulaService.getEulaDataWithCache()
+	.then(eulaData => console.log(`EULA url is: ${eulaData.url}. This EULA should ${eulaData.shouldAcceptEula ? "" : "not" } be accepted.`));
+```
+
+#### acceptEula
+`acceptEula` method downloads the latest EULA (in case it has not been downloaded in the current process), calculates its shasum and saves it in the user setings file. In case any of the operations fails, the `acceptEula` Promise will be rejected with the error.
+</br>
+Definition:
+
+```TypeScript
+/**
+ * Accepts the EULA. The method first downloads the latest EULA (in case it has not been already downloaded in current process) and saves its shasum to user settings file.
+ * @returns {Promise<void>}
+ */
+acceptEula(): Promise<void>;
+```
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudEulaService.acceptEula()
+	.then(eulaData => console.log(`Successfully accepted EULA.`))
+	.catch(err => console.error("Unable to accept EULA. Error is: ", err));
 ```
 
 ## Development
