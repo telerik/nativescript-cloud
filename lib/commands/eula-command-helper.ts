@@ -15,7 +15,8 @@ export class EulaCommandHelper implements IEulaCommandHelper {
 	public async ensureEulaIsAccepted(): Promise<void> {
 		const eulaData = await this.$nsCloudEulaService.getEulaDataWithCache();
 		if (!eulaData.shouldAcceptEula) {
-			this.$logger.trace("Ensure EULA accepted - no need to accept EULA - already accepted.");
+			this.$logger.trace("Ensure EULA accepted: no need to accept EULA - already accepted.");
+			return;
 		}
 
 		this.$logger.printMarkdown(`In order to use cloud services, you must accept our EULA. You can read it here: ${EulaConstants.eulaUrl}.`);

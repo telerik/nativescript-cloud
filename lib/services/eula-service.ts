@@ -13,6 +13,7 @@ export class EulaService implements IEulaService {
 		private $logger: ILogger,
 		private $fs: IFileSystem,
 		private $nsCloudDateTimeService: IDateTimeService,
+		private $lockfile: ILockFile,
 		private $options: IOptions) { }
 
 	// Exposed for Sidekick
@@ -66,7 +67,6 @@ export class EulaService implements IEulaService {
 		return acceptedEulaHash !== currentEulaHash;
 	}
 
-	// cache
 	private async downloadLatestEula(opts: { shouldThrowError: boolean } = { shouldThrowError: false }): Promise<void> {
 		// TODO: Lock this action as multiple processes may end up doing this simultaneously
 		if (this.isEulaDownloadedInCurrentProcess) {
@@ -74,7 +74,9 @@ export class EulaService implements IEulaService {
 			return;
 		}
 
+		const lockFilePath = this.getLockFilePath("eula.download.lock");
 		try {
+			await this.$lockfile.lock(lockFilePath, this.getLockFileParams());
 			this.$logger.trace(`Downloading EULA to ${this.pathToEula}.`);
 
 			await this.$httpClient.httpRequest({
@@ -94,6 +96,8 @@ export class EulaService implements IEulaService {
 			}
 
 			this.$logger.trace("Unable to download latest EULA. Error is:", err);
+		} finally {
+			this.$lockfile.unlock(lockFilePath);
 		}
 	}
 
@@ -103,16 +107,22 @@ export class EulaService implements IEulaService {
 			return;
 		}
 
-		// download file only in case it has not been modified in the last 24 hours
-		const eulaFstat = this.$fs.exists(this.pathToEula) && this.$fs.getFsStats(this.pathToEula);
-		const timeToCheck = 24 * 60 * 60 * 1000; // 24 hours
-		const currentTime = this.$nsCloudDateTimeService.getCurrentEpochTime();
+		const lockFilePath = this.getLockFilePath("eula.check_download.lock");
+		try {
+			await this.$lockfile.lock(lockFilePath, this.getLockFileParams());
+			// download file only in case it has not been modified in the last 24 hours
+			const eulaFstat = this.$fs.exists(this.pathToEula) && this.$fs.getFsStats(this.pathToEula);
+			const timeToCheck = 24 * 60 * 60 * 1000;
+			const currentTime = this.$nsCloudDateTimeService.getCurrentEpochTime();
 
-		// TODO: Check if mtime is the correct fstat data.
-		const shouldDownloadEula = !eulaFstat || ((currentTime - eulaFstat.mtime.getTime()) > timeToCheck);
-		if (shouldDownloadEula) {
-			this.$logger.trace("Will download new EULA as either local EULA does not exist or the cache time has passed.");
-			await this.downloadLatestEula();
+			// TODO: Check if mtime is the correct fstat data.
+			const shouldDownloadEula = !eulaFstat || ((currentTime - eulaFstat.mtime.getTime()) > timeToCheck);
+			if (shouldDownloadEula) {
+				this.$logger.trace("Will download new EULA as either local EULA does not exist or the cache time has passed.");
+				await this.downloadLatestEula();
+			}
+		} finally {
+			this.$lockfile.unlock(lockFilePath);
 		}
 	}
 
@@ -131,6 +141,21 @@ export class EulaService implements IEulaService {
 		}
 
 		return null;
+	}
+
+	private getLockFileParams(): ILockFileOptions {
+		// We'll retry 100 times and time between retries is 100ms, i.e. full wait in case we are unable to get lock will be 10 seconds.
+		// In case lock is older than 10 minutes, consider it stale and try to get a new lock.
+		return {
+			retryWait: 100,
+			retries: 100,
+			stale: 10 * 60 * 1000
+		};
+	}
+
+	private getLockFilePath(lockFileName: string): string {
+		const dirName = path.dirname(this.pathToEula);
+		return path.join(dirName, lockFileName);
 	}
 }
 
