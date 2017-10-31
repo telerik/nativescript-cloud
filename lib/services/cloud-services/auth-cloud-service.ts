@@ -4,8 +4,9 @@ import { CloudServiceBase } from "./cloud-service-base";
 export class AuthCloudService extends CloudServiceBase implements IAuthCloudService {
 	protected serviceName: string = AUTH_SERVICE_NAME;
 
-	constructor(protected $nsCloudServicesProxy: ICloudServicesProxy) {
-		super($nsCloudServicesProxy);
+	constructor(protected $nsCloudServicesProxy: ICloudServicesProxy,
+		$injector: IInjector) {
+		super($nsCloudServicesProxy, $injector);
 	}
 
 	public getLoginUrl(port: number): string {

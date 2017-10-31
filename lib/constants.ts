@@ -110,3 +110,9 @@ export const BUILD_STEP_PROGRESS = {
 export const ERROR_MESSAGES = {
 	COMMAND_REQUIRES_APPLE_USERNAME_PASS: "The command accepts only two parameters - Apple account id and Apple account password."
 };
+
+export class EulaConstants {
+	public static eulaUrl = "https://www.nativescript.org/nativescript-sidekick/eula";
+	public static acceptedEulaHashKey = "acceptedEulaHash";
+	public static timeout = 60000;
+}

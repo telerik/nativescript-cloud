@@ -7,6 +7,7 @@ $injector.require("nsCloudBuildOutputFilter", path.join(__dirname, "cloud-build-
 $injector.require("nsCloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
 $injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
 $injector.require("nsCloudBuildCommandHelper", path.join(__dirname, "commands", "build-command-helper"));
+$injector.require("nsCloudEulaCommandHelper", path.join(__dirname, "commands", "eula-command-helper"));
 
 // Mobile.
 $injector.require("nsCloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
@@ -20,6 +21,7 @@ $injector.requirePublicClass("nsCloudEmulatorLauncher", path.join(__dirname, "se
 $injector.requirePublicClass("nsCloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
 $injector.requirePublicClass("nsCloudUserService", path.join(__dirname, "services", "user-service"));
 $injector.requirePublicClass("nsCloudAccountsService", path.join(__dirname, "services", "accounts-service"));
+$injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "services", "eula-service"));
 
 // Services.
 $injector.require("nsCloudAuthCloudService", path.join(__dirname, "services", "cloud-services", "auth-cloud-service"));
@@ -32,6 +34,7 @@ $injector.require("nsCloudAccountsCloudService", path.join(__dirname, "services"
 $injector.require("nsCloudPackageInfoService", path.join(__dirname, "services", "package-info-service"));
 $injector.require("nsCloudUploadService", path.join(__dirname, "services", "upload-service"));
 $injector.require("nsCloudGitService", path.join(__dirname, "services", "git-service"));
+$injector.require("nsCloudDateTimeService", path.join(__dirname, "services", "date-time-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
@@ -54,3 +57,4 @@ $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "
 
 $injector.requireCommand("account|*list", path.join(__dirname, "commands", "account", "account-list"));
 $injector.requireCommand("account|usage", path.join(__dirname, "commands", "account", "usage"));
+$injector.requireCommand("accept|eula", path.join(__dirname, "commands", "accept-eula-command"));

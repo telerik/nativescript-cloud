@@ -3,10 +3,13 @@ import { EOL } from "os";
 export class UserCommand implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
 
-	constructor(private $nsCloudUserService: IUserService,
+	constructor(private $nsCloudEulaCommandHelper: IEulaCommandHelper,
+		private $nsCloudUserService: IUserService,
 		private $logger: ILogger) { }
 
 	public async execute(args: string[]): Promise<void> {
+		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+
 		const user = this.$nsCloudUserService.getUser();
 		let message: string;
 

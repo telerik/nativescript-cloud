@@ -13,6 +13,7 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 	constructor($errors: IErrors,
 		$nsCloudUserService: IUserService,
 		private $nsCloudAccountsService: IAccountsCloudService,
+		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
 		private $logger: ILogger) {
@@ -20,6 +21,8 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 	}
 
 	public async execute(args: string[]): Promise<void> {
+		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+
 		const usage = await this.$nsCloudAccountsService.getUsageInfo(this.$options.accountId);
 		let output: string;
 

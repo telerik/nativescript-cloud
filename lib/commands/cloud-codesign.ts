@@ -7,7 +7,8 @@ export class CloudCodesignCommand implements ICommand {
 	private devices: Mobile.IDeviceInfo[];
 	public allowedParameters: ICommandParameter[];
 
-	constructor(private $logger: ILogger,
+	constructor(private $nsCloudEulaCommandHelper: IEulaCommandHelper,
+		private $logger: ILogger,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $devicesService: Mobile.IDevicesService,
 		private $errors: IErrors,
@@ -42,6 +43,8 @@ export class CloudCodesignCommand implements ICommand {
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
+		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+
 		if (args.length > 2 || (!isInteractive() && args.length < 2)) {
 			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
 		}

@@ -5,7 +5,8 @@ export class CloudBuild implements ICommand {
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
-	constructor(private $errors: IErrors,
+	constructor(private $nsCloudEulaCommandHelper: IEulaCommandHelper,
+		private $errors: IErrors,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudBuildService: ICloudBuildService,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
@@ -24,6 +25,8 @@ export class CloudBuild implements ICommand {
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
+		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+
 		if (!args || !args.length) {
 			this.$errors.fail("Provide platform.");
 		}

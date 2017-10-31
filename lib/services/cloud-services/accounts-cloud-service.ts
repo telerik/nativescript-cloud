@@ -4,8 +4,9 @@ import { CloudServiceBase } from "./cloud-service-base";
 export class AccountsCloudService extends CloudServiceBase implements IAccountsCloudService {
 	protected serviceName: string = ACCOUNTS_SERVICE_NAME;
 
-	constructor(protected $nsCloudRequestService: ICloudRequestService) {
-		super($nsCloudRequestService);
+	constructor(protected $nsCloudRequestService: ICloudServicesProxy,
+		$injector: IInjector) {
+		super($nsCloudRequestService, $injector);
 	}
 
 	public getAccounts(): Promise<IAccount[]> {

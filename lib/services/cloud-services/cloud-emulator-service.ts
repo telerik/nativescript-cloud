@@ -11,9 +11,10 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 		protected $nsCloudRequestService: ICloudRequestService,
 		private $nsCloudUploadService: IUploadService,
 		private $fs: IFileSystem,
-		protected $options: IProfileDir) {
+		protected $options: IProfileDir,
+		$injector: IInjector) {
 
-		super($nsCloudRequestService);
+		super($nsCloudRequestService, $injector);
 	}
 
 	public async startEmulator(publicKey: string, platform: string, deviceType: string): Promise<string> {

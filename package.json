@@ -1,6 +1,6 @@
 {
   "name": "nativescript-cloud",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "Used for cloud support in NativeScript CLI",
   "main": "lib/bootstrap.js",
   "scripts": {
@@ -19,15 +19,15 @@
   },
   "homepage": "https://github.com/NativeScript/nativescript-cloud#readme",
   "devDependencies": {
-    "@types/chai": "3.4.34",
-    "@types/chai-as-promised": "0.0.29",
+    "@types/chai": "4.0.1",
+    "@types/chai-as-promised": "0.0.31",
     "@types/node": "6.0.61",
     "@types/node-forge": "0.6.7",
     "@types/semver": "5.3.30",
     "@types/source-map": "0.5.0",
     "@types/uuid": "2.0.29",
     "chai": "3.5.0",
-    "chai-as-promised": "6.0.0",
+    "chai-as-promised": "7.0.0",
     "grunt": "1.0.1",
     "grunt-contrib-clean": "1.0.0",
     "grunt-contrib-copy": "1.0.0",
