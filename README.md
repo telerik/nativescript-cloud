@@ -1109,7 +1109,7 @@ Usage:
 const tns = require("nativescript");
 
 tns.nsCloudEulaService.acceptEula()
-	.then(eulaData => console.log(`Successfully accepted EULA.`))
+	.then(() => console.log(`Successfully accepted EULA.`))
 	.catch(err => console.error("Unable to accept EULA. Error is: ", err));
 ```
 
