@@ -296,7 +296,16 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		};
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
-		await this.$platformService.preparePlatform(platform, appFilesUpdaterOptions, null, projectData, config, [], { skipNativePrepare: true });
+		await this.$platformService.preparePlatform({
+			platform,
+			appFilesUpdaterOptions,
+			projectData,
+			config,
+			filesToSync: [],
+			nativePrepare: { skipNativePrepare: true },
+			platformTemplate: null,
+			env: projectSettings.env
+		});
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.END);
 	}
 

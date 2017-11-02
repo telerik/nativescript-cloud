@@ -149,7 +149,7 @@ interface IItmsPlistOptions {
 /**
  * Describes the project settings required for different operations.
  */
-interface IProjectSettings {
+interface IProjectSettings extends IEnvOptions {
 	/**
 	 * The directory where the project is located. This should be the path to the directory where application's package.json is located.
 	 */
