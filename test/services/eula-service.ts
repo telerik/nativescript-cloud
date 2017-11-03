@@ -52,7 +52,8 @@ describe("eulaService", () => {
 			getFileShasum: async (fileName: string, options?: { algorithm?: string, encoding?: string }): Promise<string> => testInfo.eulaFileShasum,
 			getFsStats: (path: string): IFsStats => (<any>{
 				mtime: { getTime: (): number => testInfo.eulaLastModifiedTimeInEpoch || 0 }
-			})
+			}),
+			copyFile: (sourceFileName: string, destinationFileName: string): void => undefined
 		});
 
 		testInjector.register("options", {
