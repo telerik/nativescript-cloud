@@ -38,7 +38,7 @@
     "mobile-cli-lib": "https://github.com/telerik/mobile-cli-lib/tarball/master",
     "mocha": "3.5.3",
     "mocha-typescript": "1.1.8",
-    "nativescript": "https://github.com/NativeScript/nativescript-cli/tarball/master",
+    "nativescript": "https://github.com/NativeScript/nativescript-cli/tarball/0f861bb36ae2ecafe198b15c892c5fe082163732",
     "should": "7.0.2",
     "spec-xunit-file": "0.0.1-3",
     "tslint": "5.7.0",
