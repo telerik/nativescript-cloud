@@ -1,5 +1,6 @@
 import * as path from "path";
 import { EulaConstants } from "../constants";
+import * as temp from "temp";
 
 export class EulaService implements IEulaService {
 	private isEulaDownloadedInCurrentProcess = false;
@@ -75,16 +76,21 @@ export class EulaService implements IEulaService {
 
 		const lockFilePath = this.getLockFilePath("eula.download.lock");
 		try {
+			const tempEulaPath = temp.path({ prefix: "eula", suffix: ".pdf" });
+			temp.track();
+
 			await this.$lockfile.lock(lockFilePath, this.getLockFileParams());
 			this.$logger.trace(`Downloading EULA to ${this.pathToEula}.`);
 
 			await this.$httpClient.httpRequest({
 				url: EulaConstants.eulaUrl,
-				pipeTo: this.$fs.createWriteStream(this.pathToEula),
+				pipeTo: this.$fs.createWriteStream(tempEulaPath),
 				timeout: EulaConstants.timeout
 			});
 
-			this.$logger.trace(`Successfully downloaded EULA to ${this.pathToEula}.`);
+			this.$logger.trace(`Successfully downloaded EULA to ${tempEulaPath}.`);
+			this.$fs.copyFile(tempEulaPath, this.pathToEula);
+			this.$logger.trace(`Successfully copied EULA to ${this.pathToEula}.`);
 
 			this.isEulaDownloadedInCurrentProcess = true;
 		} catch (err) {
