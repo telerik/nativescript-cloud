@@ -331,6 +331,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				}
 			];
 		} catch (err) {
+			this.$logger.warn("Unable to use git, reason is:");
 			this.$logger.warn(err.message);
 			const filePath = await this.zipProject(projectSettings.projectDir);
 			const preSignedUrlData = await this.$nsCloudBuildCloudService.getPresignedUploadUrlObject(uuid.v4());
