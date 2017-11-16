@@ -33,6 +33,16 @@ export class GitService implements IGitService {
 			await this.gitInit(projectSettings);
 		}
 
+		const isRemoteAdded = await this.gitCheckIfRemoteIsAdded(projectSettings, GitService.REMOTE_NAME);
+		if (isRemoteAdded) {
+			const isGitRemoteCorrect = await this.isGitRemoteSetToCorrectUrl(projectSettings, remoteUrl);
+			if (!isGitRemoteCorrect) {
+				await this.gitSetRemoteUrl(projectSettings, GitService.REMOTE_NAME, remoteUrl);
+			}
+		} else {
+			await this.gitRemoteAdd(projectSettings, remoteUrl);
+		}
+
 		await this.ensureGitIgnoreExists(projectSettings.projectDir);
 
 		await this.configureEnvironment(projectSettings, remoteUrl);
@@ -47,10 +57,6 @@ export class GitService implements IGitService {
 
 		await this.gitAdd(projectSettings);
 		await this.gitCommit(projectSettings);
-
-		if (!(await this.isGitRemoteSet(projectSettings, remoteUrl))) {
-			await this.gitRemoteAdd(projectSettings, remoteUrl);
-		}
 
 		await this.gitPush(projectSettings, codeCommitCredential);
 	}
@@ -70,7 +76,7 @@ export class GitService implements IGitService {
 		});
 	}
 
-	private async isGitRemoteSet(projectSettings: INSCloudProjectSettings, remoteUrl: IRemoteUrl): Promise<boolean> {
+	private async isGitRemoteSetToCorrectUrl(projectSettings: INSCloudProjectSettings, remoteUrl: IRemoteUrl): Promise<boolean> {
 		const result = await this.executeCommand(projectSettings, ["remote", "-v"]);
 		return result.stdout.indexOf(remoteUrl.httpRemoteUrl) !== -1;
 	}
@@ -128,6 +134,20 @@ export class GitService implements IGitService {
 
 	private async gitRemoteAdd(projectSettings: INSCloudProjectSettings, remoteUrl: IRemoteUrl, ) {
 		return this.executeCommand(projectSettings, ["remote", "add", GitService.REMOTE_NAME, remoteUrl.httpRemoteUrl]);
+	}
+
+	private async gitSetRemoteUrl(projectSettings: INSCloudProjectSettings, remoteName: string, remoteUrl: IRemoteUrl) {
+		await this.executeCommand(projectSettings, ["remote", "set-url", remoteName, remoteUrl.httpRemoteUrl]);
+	}
+
+	private async gitCheckIfRemoteIsAdded(projectSettings: INSCloudProjectSettings, remoteName: string) {
+		try {
+			await this.executeCommand(projectSettings, ["remote", "get-url", remoteName]);
+			return true;
+		} catch (err) {
+			this.$logger.trace("Error while checking if remote is added: ", err);
+			return false;
+		}
 	}
 
 	private async executeCommand(projectSettings: INSCloudProjectSettings, args: string[], options?: any, spawnFromEventOptions?: ISpawnFromEventOptions): Promise<ISpawnResult> {
