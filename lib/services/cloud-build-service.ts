@@ -55,7 +55,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return this.getServerOperationOutputDirectory(options);
 	}
 
-	public async build(projectSettings: IProjectSettings,
+	public async build(projectSettings: INSCloudProjectSettings,
 		platform: string,
 		buildConfiguration: string,
 		accountId: string,
@@ -72,7 +72,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 	}
 
-	public async executeBuild(projectSettings: IProjectSettings,
+	public async executeBuild(projectSettings: INSCloudProjectSettings,
 		platform: string,
 		buildConfiguration: string,
 		buildId: string,
@@ -264,7 +264,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	}
 
 	private async prepareProject(buildId: string,
-		projectSettings: IProjectSettings,
+		projectSettings: INSCloudProjectSettings,
 		platform: string,
 		buildConfiguration: string,
 		iOSBuildData: IIOSBuildData): Promise<void> {
@@ -310,7 +310,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	}
 
 	private async prepareBuildRequest(buildId: string,
-		projectSettings: IProjectSettings,
+		projectSettings: INSCloudProjectSettings,
 		platform: string,
 		buildConfiguration: string,
 		buildCredentials: IBuildCredentialResponse,
@@ -319,7 +319,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.START);
 		let buildFiles;
 		try {
-			await this.$nsCloudGitService.gitPushChanges(projectSettings.projectDir,
+			await this.$nsCloudGitService.gitPushChanges(projectSettings,
 				{ httpRemoteUrl: buildCredentials.codeCommit.cloneUrlHttp },
 				buildCredentials.codeCommit.credentials,
 				{ isNewRepository: buildCredentials.codeCommit.isNewRepository });
@@ -387,7 +387,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return cert.replace(/\s/g, "").substr(constants.CRYPTO.CERTIFICATE_HEADER.length).slice(0, -constants.CRYPTO.CERTIFICATE_FOOTER.length);
 	}
 
-	private async getAndroidBuildProperties(projectSettings: IProjectSettings,
+	private async getAndroidBuildProperties(projectSettings: INSCloudProjectSettings,
 		buildProps: any,
 		amazonStorageEntriesData: IAmazonStorageEntryData[],
 		androidBuildData?: IAndroidBuildData): Promise<any> {
@@ -410,7 +410,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return buildProps;
 	}
 
-	private async getiOSBuildProperties(projectSettings: IProjectSettings,
+	private async getiOSBuildProperties(projectSettings: INSCloudProjectSettings,
 		buildProps: any,
 		amazonStorageEntriesData: IAmazonStorageEntryData[],
 		iOSBuildData: IIOSBuildData): Promise<any> {

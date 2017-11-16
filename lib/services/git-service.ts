@@ -23,36 +23,36 @@ export class GitService implements IGitService {
 		private $options: IProfileDir,
 		private $nsCloudUserService: IUserService) { }
 
-	public async gitPushChanges(projectDir: string, remoteUrl: IRemoteUrl, codeCommitCredential: ICodeCommitCredentials, repositoryState?: IRepositoryState): Promise<void> {
+	public async gitPushChanges(projectSettings: INSCloudProjectSettings, remoteUrl: IRemoteUrl, codeCommitCredential: ICodeCommitCredentials, repositoryState?: IRepositoryState): Promise<void> {
 		this.cleanLocalRepositories();
 		if (repositoryState && repositoryState.isNewRepository) {
-			this.deleteLocalRepository(projectDir);
+			this.deleteLocalRepository(projectSettings);
 		}
 
-		if (!this.isGitRepository(projectDir)) {
-			await this.gitInit(projectDir);
+		if (!this.isGitRepository(projectSettings)) {
+			await this.gitInit(projectSettings);
 		}
 
-		await this.ensureGitIgnoreExists(projectDir);
+		await this.ensureGitIgnoreExists(projectSettings.projectDir);
 
-		await this.configureEnvironment(projectDir, remoteUrl);
-		const statusResult = await this.gitStatus(projectDir);
+		await this.configureEnvironment(projectSettings, remoteUrl);
+		const statusResult = await this.gitStatus(projectSettings);
 		this.$logger.trace(`Result of git status: ${statusResult}.`);
 
 		if (this.hasNothingToCommit(statusResult.stdout)) {
 			this.$logger.trace("Nothing to commit. Just push force the branch.");
-			await this.gitPush(projectDir, codeCommitCredential);
+			await this.gitPush(projectSettings, codeCommitCredential);
 			return;
 		}
 
-		await this.gitAdd(projectDir);
-		await this.gitCommit(projectDir);
+		await this.gitAdd(projectSettings);
+		await this.gitCommit(projectSettings);
 
-		if (!(await this.isGitRemoteSet(projectDir, remoteUrl))) {
-			await this.gitRemoteAdd(projectDir, remoteUrl);
+		if (!(await this.isGitRemoteSet(projectSettings, remoteUrl))) {
+			await this.gitRemoteAdd(projectSettings, remoteUrl);
 		}
 
-		await this.gitPush(projectDir, codeCommitCredential);
+		await this.gitPush(projectSettings, codeCommitCredential);
 	}
 
 	private cleanLocalRepositories(): void {
@@ -70,12 +70,12 @@ export class GitService implements IGitService {
 		});
 	}
 
-	private async isGitRemoteSet(projectDir: string, remoteUrl: IRemoteUrl): Promise<boolean> {
-		const result = await this.executeCommand(projectDir, ["remote", "-v"]);
+	private async isGitRemoteSet(projectSettings: INSCloudProjectSettings, remoteUrl: IRemoteUrl): Promise<boolean> {
+		const result = await this.executeCommand(projectSettings, ["remote", "-v"]);
 		return result.stdout.indexOf(remoteUrl.httpRemoteUrl) !== -1;
 	}
 
-	private async configureEnvironment(projectDir: string, remoteUrl: IRemoteUrl): Promise<void> {
+	private async configureEnvironment(projectSettings: INSCloudProjectSettings, remoteUrl: IRemoteUrl): Promise<void> {
 		const gitVersion = await sysInfo.getGitVersion();
 		if (gitVersion) {
 			const match = gitVersion.match(/^(\d+?)\.(\d+?)\.\d+.*$/);
@@ -89,77 +89,77 @@ export class GitService implements IGitService {
 			if (this.$hostInfo.isWindows) {
 				if (gitMajorVersion === GitService.MINIMAL_GIT_MAJOR_VERSION &&
 					gitMinorVersion >= GitService.MINIMAL_GIT_MINOR_VERSION) {
-					await this.executeCommand(projectDir, ["config", "--local", `credential.${remoteUrl.httpRemoteUrl}.helper`, ""]);
+					await this.executeCommand(projectSettings, ["config", "--local", `credential.${remoteUrl.httpRemoteUrl}.helper`, ""]);
 				} else {
 					throw new Error(`Unsupported Git version: ${gitVersion}. The minimal supported version is 2.9.0. Please update.`);
 				}
 			}
 		}
 
-		await this.executeCommand(projectDir, ["config", "--local", "credential.helper", this.getCredentialHelperPath()]);
-		await this.executeCommand(projectDir, ["config", "--local", "credential.UseHttpPath", "true"]);
+		await this.executeCommand(projectSettings, ["config", "--local", "credential.helper", this.getCredentialHelperPath()]);
+		await this.executeCommand(projectSettings, ["config", "--local", "credential.UseHttpPath", "true"]);
 	}
 
-	private async gitInit(projectDir: string): Promise<ISpawnResult> {
-		return this.executeCommand(projectDir, ["init"]);
+	private async gitInit(projectSettings: INSCloudProjectSettings): Promise<ISpawnResult> {
+		return this.executeCommand(projectSettings, ["init"]);
 	}
 
-	private async gitCommit(projectDir: string): Promise<ISpawnResult> {
-		return this.executeCommand(projectDir, ["commit", `-m "cloud-commit-${new Date().toString()}"`]);
+	private async gitCommit(projectSettings: INSCloudProjectSettings): Promise<ISpawnResult> {
+		return this.executeCommand(projectSettings, ["commit", `-m "cloud-commit-${new Date().toString()}"`]);
 	}
 
-	private async gitAdd(projectDir: string): Promise<ISpawnResult> {
-		return this.executeCommand(projectDir, ["add", projectDir]);
+	private async gitAdd(projectSettings: INSCloudProjectSettings): Promise<ISpawnResult> {
+		return this.executeCommand(projectSettings, ["add", projectSettings.projectDir]);
 	}
 
-	private async gitStatus(projectDir: string): Promise<ISpawnResult> {
-		return this.executeCommand(projectDir, ["status"]);
+	private async gitStatus(projectSettings: INSCloudProjectSettings): Promise<ISpawnResult> {
+		return this.executeCommand(projectSettings, ["status"]);
 	}
 
-	private async gitPush(projectDir: string, codeCommitCredential: ICodeCommitCredentials): Promise<ISpawnResult> {
+	private async gitPush(projectSettings: INSCloudProjectSettings, codeCommitCredential: ICodeCommitCredentials): Promise<ISpawnResult> {
 		const env = _.assign({}, process.env, {
 			AWS_ACCESS_KEY_ID: codeCommitCredential.accessKeyId,
 			AWS_SECRET_ACCESS_KEY: codeCommitCredential.secretAccessKey,
 			AWS_SESSION_TOKEN: codeCommitCredential.sessionToken
 		});
 
-		return this.executeCommand(projectDir, ["push", "--force", GitService.REMOTE_NAME, GitService.BRANCH_NAME], { env, cwd: projectDir });
+		return this.executeCommand(projectSettings, ["push", "--force", GitService.REMOTE_NAME, GitService.BRANCH_NAME], { env, cwd: projectSettings.projectDir });
 	}
 
-	private async gitRemoteAdd(projectDir: string, remoteUrl: IRemoteUrl, ) {
-		return this.executeCommand(projectDir, ["remote", "add", GitService.REMOTE_NAME, remoteUrl.httpRemoteUrl]);
+	private async gitRemoteAdd(projectSettings: INSCloudProjectSettings, remoteUrl: IRemoteUrl, ) {
+		return this.executeCommand(projectSettings, ["remote", "add", GitService.REMOTE_NAME, remoteUrl.httpRemoteUrl]);
 	}
 
-	private async executeCommand(projectDir: string, args: string[], options?: any, spawnFromEventOptions?: ISpawnFromEventOptions): Promise<ISpawnResult> {
-		options = options || { cwd: projectDir };
-		const gitDir = this.getGitDirPath(projectDir);
+	private async executeCommand(projectSettings: INSCloudProjectSettings, args: string[], options?: any, spawnFromEventOptions?: ISpawnFromEventOptions): Promise<ISpawnResult> {
+		options = options || { cwd: projectSettings.projectDir };
+		const gitDir = this.getGitDirPath(projectSettings);
 		this.$fs.ensureDirectoryExists(gitDir);
 		const command = await this.getGitFilePath();
-		args = [`--git-dir=${gitDir}`, `--work-tree=${projectDir}`].concat(args);
+		args = [`--git-dir=${gitDir}`, `--work-tree=${projectSettings.projectDir}`].concat(args);
 		return this.$childProcess.spawnFromEvent(command, args, "close", options, spawnFromEventOptions);
 	}
 
-	private deleteLocalRepository(projectDir: string) {
-		if (this.isGitRepository(projectDir)) {
-			this.$fs.deleteDirectory(this.getGitDirPath(projectDir));
+	private deleteLocalRepository(projectSettings: INSCloudProjectSettings) {
+		if (this.isGitRepository(projectSettings)) {
+			this.$fs.deleteDirectory(this.getGitDirPath(projectSettings));
 		}
 	}
 
-	private isGitRepository(projectDir: string): boolean {
-		return this.$fs.exists(this.getGitDirPath(projectDir));
+	private isGitRepository(projectSettings: INSCloudProjectSettings): boolean {
+		return this.$fs.exists(this.getGitDirPath(projectSettings));
 	}
 
-	private getGitDirPath(projectDir: string): string {
-		return path.join(this.getGitDirBasePath(), this.getGitDirName(projectDir));
+	private getGitDirPath(projectSettings: INSCloudProjectSettings): string {
+		return path.join(this.getGitDirBasePath(), this.getGitDirName(projectSettings));
 	}
 
 	private getGitDirBasePath(): string {
 		return path.join(this.$options.profileDir, GitService.GIT_DIR_NAME);
 	}
 
-	private getGitDirName(projectDir: string): string {
+	private getGitDirName(projectSettings: INSCloudProjectSettings): string {
 		const shasumData = crypto.createHash("sha1");
-		shasumData.update(`${this.$nsCloudUserService.getUser().email}_${projectDir}`);
+		shasumData.update(`${this.$nsCloudUserService.getUser().email}_${projectSettings.projectDir}_${projectSettings.projectId}`);
 		const gitDirName = shasumData.digest("hex");
 
 		return gitDirName;
