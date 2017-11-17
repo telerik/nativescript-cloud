@@ -32,7 +32,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		}
 
 		const pathToProvision = this.$options.provision ? path.resolve(this.$options.provision) : "";
-		const projectSettings: IProjectSettings = {
+		const projectSettings: INSCloudProjectSettings = {
 			nativescriptData,
 			projectDir: this.$projectData.projectDir,
 			projectId: this.$projectData.projectId,

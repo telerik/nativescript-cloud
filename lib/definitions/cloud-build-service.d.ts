@@ -64,7 +64,7 @@ interface IBuildData {
 	/**
 	 * Describes the current project - project dir, application identifier, name and nativescript data.
 	 */
-	projectSettings: IProjectSettings;
+	projectSettings: INSCloudProjectSettings;
 	/**
 	 * The mobile platform for which the application should be built: Android or iOS.
 	 */
@@ -89,7 +89,7 @@ interface IBuildData {
 interface ICloudBuildService extends ICloudOperationService {
 	/**
 	 * Builds the specified application in the cloud and returns information about the whole build process.
-	 * @param {IProjectSettings} projectSettings Describes the current project - project dir, application identifier, name and nativescript data.
+	 * @param {INSCloudProjectSettings} projectSettings Describes the current project - project dir, application identifier, name and nativescript data.
 	 * @param {string} platform The mobile platform for which the application should be built: Android or iOS.
 	 * @param {string} buildConfiguration The build configuration - Debug or Release.
 	 * @param {string} accountId the account which will be charged for the build.
@@ -97,7 +97,7 @@ interface ICloudBuildService extends ICloudOperationService {
 	 * @param {IIOSBuildData} iOSBuildData iOS specific information for the build.
 	 * @returns {Promise<IBuildResultData>} Information about the build process. It is returned only on successful build. In case the build fails, the Promise is rejected with the server information.
 	 */
-	build(projectSettings: IProjectSettings,
+	build(projectSettings: INSCloudProjectSettings,
 		platform: string,
 		buildConfiguration: string,
 		accountId: string,
@@ -149,7 +149,7 @@ interface IItmsPlistOptions {
 /**
  * Describes the project settings required for different operations.
  */
-interface IProjectSettings extends IEnvOptions {
+interface INSCloudProjectSettings extends IEnvOptions {
 	/**
 	 * The directory where the project is located. This should be the path to the directory where application's package.json is located.
 	 */
