@@ -1,6 +1,6 @@
 {
   "name": "nativescript-cloud",
-  "version": "1.0.0",
+  "version": "1.0.0-added-debug-info",
   "description": "Used for cloud support in NativeScript CLI",
   "main": "lib/bootstrap.js",
   "scripts": {

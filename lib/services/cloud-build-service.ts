@@ -72,6 +72,20 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 	}
 
+	private printCustomMsg(msg: any): void {
+		let messageToPrint = msg;
+		if (_.isBuffer(msg)) {
+			messageToPrint = msg.toString();
+		}
+
+		if (!_.isString(msg)) {
+			console.log(msg);
+			return;
+		}
+
+		console.log("### " + messageToPrint.yellow);
+	}
+
 	public async executeBuild(projectSettings: IProjectSettings,
 		platform: string,
 		buildConfiguration: string,
@@ -84,7 +98,10 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		this.$logger.info(`Starting ${buildInformationString}.`);
 
 		await this.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
+		this.printCustomMsg("executeBuild After validating Build properties.");
 		await this.prepareProject(buildId, projectSettings, platform, buildConfiguration, iOSBuildData);
+		this.printCustomMsg("executeBuild After project preparation.");
+
 		let buildFiles: IServerItemBase[] = [];
 		if (this.$mobileHelper.isAndroidPlatform(platform) && this.isReleaseConfiguration(buildConfiguration)) {
 			buildFiles.push({
@@ -107,9 +124,15 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		const fileNames = buildFiles.map(buildFile => buildFile.filename);
+		this.printCustomMsg("executeBuild Before getBuildCredentials.");
+
 		const buildCredentials = await this.$nsCloudBuildCloudService.getBuildCredentials({ appId: projectSettings.projectId, fileNames: fileNames });
 
+		this.printCustomMsg("executeBuild After getBuildCredentials.");
+
 		const filesToUpload = this.prepareFilesToUpload(buildCredentials.urls, buildFiles);
+		this.printCustomMsg("executeBuild After prepareFilesToUpload.");
+
 		let buildProps = await this.prepareBuildRequest(buildId, projectSettings, platform, buildConfiguration, buildCredentials, filesToUpload, accountId);
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {
 			buildProps = await this.getAndroidBuildProperties(projectSettings, buildProps, filesToUpload, androidBuildData);
@@ -118,7 +141,11 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.START);
+		this.printCustomMsg("executeBuild Before startBuild.");
+
 		const buildResponse: IServerResponse = await this.$nsCloudBuildCloudService.startBuild(buildProps);
+		this.printCustomMsg("executeBuild After startBuild.");
+
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
 		await this.waitForServerOperationToFinish(buildId, buildResponse);
@@ -188,6 +215,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		appId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<void> {
+		this.printCustomMsg("validateBuildProperties started");
+
 		if (this.$mobileHelper.isAndroidPlatform(platform) && this.isReleaseConfiguration(buildConfiguration)) {
 			if (!androidBuildData || !androidBuildData.pathToCertificate) {
 				this.$errors.failWithoutHelp("When building for Release configuration, you must specify valid Certificate and its password.");
@@ -205,6 +234,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				this.$errors.failWithoutHelp("The password for Android certificate must be at least 6 characters long.");
 			}
 		} else if (this.$mobileHelper.isiOSPlatform(platform) && iOSBuildData.buildForDevice) {
+			this.printCustomMsg("validateBuildProperties platform is iOS and build is for device");
+
 			if (!iOSBuildData || !iOSBuildData.pathToCertificate || !iOSBuildData.certificatePassword || !iOSBuildData.pathToProvision) {
 				this.$errors.failWithoutHelp("When building for iOS you must specify valid Mobile Provision, Certificate and its password.");
 			}
@@ -217,18 +248,36 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				this.$errors.failWithoutHelp(`The specified provision: ${iOSBuildData.pathToProvision} does not exist. Verify the location is correct.`);
 			}
 
+			this.printCustomMsg("validateBuildProperties iOSBuildData contains required information");
+
 			const certInfo = this.getCertificateInfo(iOSBuildData.pathToCertificate, iOSBuildData.certificatePassword);
+			this.printCustomMsg(`validateBuildProperties certInfo is: ${certInfo.commonName} ${certInfo.validity}`);
+
 			const certBase64 = this.getCertificateBase64(certInfo.pemCert);
+			this.printCustomMsg("validateBuildProperties After got certBase64 is:");
+
 			const provisionData = this.getMobileProvisionData(iOSBuildData.pathToProvision);
+			this.printCustomMsg("validateBuildProperties after getting provisionData");
 			const provisionCertificatesBase64 = _.map(provisionData.DeveloperCertificates, c => c.toString('base64'));
+			this.printCustomMsg("validateBuildProperties after getting provisionCertificatesBase64");
+
 			const now = Date.now();
 
 			let provisionAppId = provisionData.Entitlements['application-identifier'];
+			this.printCustomMsg("validateBuildProperties provisionAppId is:");
+			this.printCustomMsg(provisionAppId);
+
+			this.printCustomMsg("validateBuildProperties provisionData.ApplicationIdentifierPrefix is:");
+			this.printCustomMsg(provisionData.ApplicationIdentifierPrefix);
+
 			_.each(provisionData.ApplicationIdentifierPrefix, prefix => {
 				provisionAppId = provisionAppId.replace(`${prefix}.`, "");
 			});
 
 			let errors: string[] = [];
+
+			this.printCustomMsg("validateBuildProperties after iterations provisionAppId is:");
+			this.printCustomMsg(provisionAppId);
 
 			if (provisionAppId !== "*") {
 				let provisionIdentifierPattern = new RegExp(this.getRegexPattern(provisionAppId));
@@ -257,10 +306,15 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				errors.push(`The specified provision: ${iOSBuildData.pathToProvision} does not include the specified device: ${iOSBuildData.deviceIdentifier}.`);
 			}
 
+			this.printCustomMsg("validateBuildProperties errors are:");
+			this.printCustomMsg(errors);
 			if (errors.length) {
 				this.$errors.failWithoutHelp(errors.join(EOL));
 			}
 		}
+
+		this.printCustomMsg("validateBuildProperties finished");
+
 	}
 
 	private async prepareProject(buildId: string,
@@ -269,7 +323,10 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		buildConfiguration: string,
 		iOSBuildData: IIOSBuildData): Promise<void> {
 
+		this.printCustomMsg("prepareProject started");
 		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
+		this.printCustomMsg(`prepareProject projectData: projectDir: ${projectData.projectDir} projectData.projectName: ${projectData.projectName} projectData.projectType: ${projectData.projectType}`);
+
 		const appFilesUpdaterOptions: IAppFilesUpdaterOptions = {
 			// This option is used for webpack. As currently we do not support webpack, set it to false.
 			// TODO: Once we have a way to use webpack in cloud builds, we should pass correct value here.
@@ -279,13 +336,21 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		let mobileProvisionData: IMobileProvisionData;
 		let provision: string;
+		this.printCustomMsg("prepareProject before getting provision info");
 
 		if (iOSBuildData && iOSBuildData.pathToProvision) {
+			this.printCustomMsg("prepareProject before getting mobileProvisionData");
 			mobileProvisionData = this.getMobileProvisionData(iOSBuildData.pathToProvision);
+			this.printCustomMsg("prepareProject after getting mobileProvisionData");
+
+			this.printCustomMsg("prepareProject before getting mobileProvisionData.Type");
 			mobileProvisionData.Type = this.getProvisionType(mobileProvisionData);
+			this.printCustomMsg("prepareProject after getting mobileProvisionData.Type");
+
 			provision = mobileProvisionData.UUID;
 		}
 
+		this.printCustomMsg("prepareProject after getting provision info");
 		const config: IPlatformOptions = {
 			provision,
 			mobileProvisionData,
@@ -296,8 +361,11 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		};
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
+
+		this.printCustomMsg("prepareProject starting preparePlatform");
 		await this.$platformService.preparePlatform(platform, appFilesUpdaterOptions, null, projectData, config, [], { skipNativePrepare: true });
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.END);
+		this.printCustomMsg("prepareProject finished");
 	}
 
 	private async prepareBuildRequest(buildId: string,
@@ -632,8 +700,14 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	}
 
 	private getMobileProvisionData(provisionPath: string): IMobileProvisionData {
+		this.printCustomMsg(`getMobileProvisionData before reading file ${path.resolve(provisionPath)}`);
+
 		const provisionText = this.$fs.readText(path.resolve(provisionPath));
+		this.printCustomMsg(`getMobileProvisionData after reading file ${path.resolve(provisionPath)}`);
+
 		const provisionPlistText = provisionText.substring(provisionText.indexOf(constants.CRYPTO.PLIST_HEADER), provisionText.indexOf(constants.CRYPTO.PLIST_FOOTER) + constants.CRYPTO.PLIST_FOOTER.length);
+		this.printCustomMsg("getMobileProvisionData before calling plist.parse");
+
 		return plist.parse(provisionPlistText);
 	}
 
