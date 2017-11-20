@@ -250,7 +250,15 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 			this.printCustomMsg("validateBuildProperties iOSBuildData contains required information");
 
-			const certInfo = this.getCertificateInfo(iOSBuildData.pathToCertificate, iOSBuildData.certificatePassword);
+			let certInfo: any;
+			try {
+				certInfo = this.getCertificateInfo(iOSBuildData.pathToCertificate, iOSBuildData.certificatePassword);
+			} catch (err) {
+				this.printCustomMsg("validateBuildProperties error in getting certificate info");
+				this.printCustomMsg(err);
+				throw err;
+			}
+
 			this.printCustomMsg(`validateBuildProperties certInfo is: ${certInfo.commonName} ${certInfo.validity}`);
 
 			const certBase64 = this.getCertificateBase64(certInfo.pemCert);
@@ -660,14 +668,26 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	}
 
 	private getCertificateInfo(certificatePath: string, certificatePassword: string): ICertificateInfo {
+		this.printCustomMsg(`getCertificateInfo started`);
 		const certificateAbsolutePath = path.resolve(certificatePath);
+		this.printCustomMsg(`getCertificateInfo certificateAbsolutePath ${certificateAbsolutePath}`);
 		const certificateContents: any = this.$fs.readFile(certificateAbsolutePath, { encoding: 'binary' });
+		this.printCustomMsg(`getCertificateInfo certificateContents read with binary encoding`);
 		const pkcs12Asn1 = forge.asn1.fromDer(certificateContents);
+		this.printCustomMsg(`getCertificateInfo after calling forge.asn1.fromDer`);
 		const pkcs12 = forge.pkcs12.pkcs12FromAsn1(pkcs12Asn1, false, certificatePassword);
+		this.printCustomMsg(`getCertificateInfo after calling forge.pkcs12.pkcs12FromAsn1`);
 
+		this.printCustomMsg(`getCertificateInfo start iterations for pkcs12.safeContents`);
+
+		let safeContentsIndex = 0;
 		for (let safeContens of pkcs12.safeContents) {
+			this.printCustomMsg(`getCertificateInfo start iteration for pkcs12.safeContents index ${safeContentsIndex}`);
+			let safeBagsIndex = 0;
 			for (let safeBag of safeContens.safeBags) {
+				this.printCustomMsg(`getCertificateInfo start iteration for safeContens.safeBags index ${safeBagsIndex} pkcs12.safeContents index ${safeContentsIndex}`);
 				if (safeBag.attributes.localKeyId && safeBag.type === forge.pki.oids['certBag']) {
+					this.printCustomMsg(`getCertificateInfo found certBag at safeContentsIndex ${safeContentsIndex}, certBagIndex: ${safeBagsIndex}`);
 					let issuer = safeBag.cert.issuer.getField(constants.CRYPTO.ORGANIZATION_FIELD_NAME);
 					return {
 						pemCert: forge.pki.certificateToPem(safeBag.cert),
@@ -677,7 +697,11 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 						friendlyName: _.head<string>(safeBag.attributes.friendlyName)
 					};
 				}
+
+				safeBagsIndex++;
 			}
+
+			safeContentsIndex++;
 		}
 
 		this.$errors.failWithoutHelp(`Could not read ${certificatePath}. Please make sure there is a certificate inside.`);
