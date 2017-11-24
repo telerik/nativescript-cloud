@@ -3,7 +3,7 @@ import { EventEmitter } from "events";
 export class CloudEmulatorApplicationManager extends EventEmitter implements Mobile.IDeviceApplicationManager {
 
 	constructor(private basicInfo: ICloudEmulatorDeviceBasicInfo,
-		private $nsCloudEmulatorService: ICloudEmulatorService) {
+		private $nsCloudServerEmulatorsService: IServerEmulatorsService) {
 		super();
 	}
 
@@ -12,8 +12,8 @@ export class CloudEmulatorApplicationManager extends EventEmitter implements Mob
 	}
 
 	public async installApplication(packageFilePath: string): Promise<void> {
-		await this.$nsCloudEmulatorService.deployApp(packageFilePath, this.basicInfo.os);
-		return this.$nsCloudEmulatorService.refereshEmulator(this.basicInfo.identifier);
+		await this.$nsCloudServerEmulatorsService.deployApp(packageFilePath, this.basicInfo.os);
+		return this.$nsCloudServerEmulatorsService.refereshEmulator(this.basicInfo.identifier);
 	}
 
 	public async isApplicationInstalled(appIdentifier: string): Promise<boolean> {

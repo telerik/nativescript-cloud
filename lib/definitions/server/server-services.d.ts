@@ -4,7 +4,7 @@ interface IRequestBodyElement {
 	contentType: string;
 }
 
-interface ICloudServicesProxy extends ICloudRequestService {
+interface IServerServicesProxy extends IServerRequestService {
 	getServiceAddress(serviceName: string): string;
 	getServiceProto(serviceName: string): string;
 	getUrlPath(serviceName: string, urlPath: string): string;
@@ -18,7 +18,7 @@ interface IEmulatorCredentials {
 	[key: string]: ICloudEmulatorKeys;
 }
 
-interface ICloudEmulatorService {
+interface IServerEmulatorsService {
 	startEmulator(publicKey: string, platform: string, deviceType: string): Promise<any>;
 	deployApp(fileLocation: string, platform: string): Promise<ICloudEmulatorResponse>;
 	refereshEmulator(deviceIdentifier: string): Promise<void>;
@@ -55,7 +55,7 @@ interface ICloudEmulatorKeys {
 	privateKey: string;
 }
 
-interface ICloudRequestService {
+interface IServerRequestService {
 	call<T>(options: ICloudRequestOptions): Promise<T>;
 }
 

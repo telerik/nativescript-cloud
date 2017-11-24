@@ -1,12 +1,12 @@
 import { AUTH_SERVICE_NAME, HTTP_METHODS } from "../../constants";
-import { CloudServiceBase } from "./cloud-service-base";
+import { ServerServiceBase } from "./server-service-base";
 
-export class AuthCloudService extends CloudServiceBase implements IAuthCloudService {
+export class ServerAuthService extends ServerServiceBase implements IServerAuthService {
 	protected serviceName: string = AUTH_SERVICE_NAME;
 
-	constructor(protected $nsCloudServicesProxy: ICloudServicesProxy,
+	constructor(protected $nsCloudServerServicesProxy: IServerServicesProxy,
 		$injector: IInjector) {
-		super($nsCloudServicesProxy, $injector);
+		super($nsCloudServerServicesProxy, $injector);
 	}
 
 	public getLoginUrl(port: number): string {
@@ -31,11 +31,11 @@ export class AuthCloudService extends CloudServiceBase implements IAuthCloudServ
 	}
 
 	private getAuthUrl(urlPath: string): string {
-		const proto = this.$nsCloudServicesProxy.getServiceProto(AUTH_SERVICE_NAME);
-		const host = this.$nsCloudServicesProxy.getServiceAddress(AUTH_SERVICE_NAME);
-		const url = this.$nsCloudServicesProxy.getUrlPath(AUTH_SERVICE_NAME, urlPath);
+		const proto = this.$nsCloudServerServicesProxy.getServiceProto(AUTH_SERVICE_NAME);
+		const host = this.$nsCloudServerServicesProxy.getServiceAddress(AUTH_SERVICE_NAME);
+		const url = this.$nsCloudServerServicesProxy.getUrlPath(AUTH_SERVICE_NAME, urlPath);
 		return `${proto}://${host}${url}`;
 	}
 }
 
-$injector.register("nsCloudAuthCloudService", AuthCloudService);
+$injector.register("nsCloudServerAuthService", ServerAuthService);

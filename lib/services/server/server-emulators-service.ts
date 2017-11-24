@@ -1,20 +1,20 @@
 import * as path from "path";
 
 import { EMULATORS_SERVICE_NAME, HTTP_METHODS } from "../../constants";
-import { CloudServiceBase } from "./cloud-service-base";
+import { ServerServiceBase } from "./server-service-base";
 
-export class CloudEmulatorService extends CloudServiceBase implements ICloudEmulatorService {
+export class ServerEmulatorsService extends ServerServiceBase implements IServerEmulatorsService {
 
 	protected serviceName = EMULATORS_SERVICE_NAME;
 
 	constructor(private $nsCloudDeviceEmulator: ICloudDeviceEmulator,
-		protected $nsCloudRequestService: ICloudRequestService,
+		protected $nsCloudServerRequestService: IServerRequestService,
 		private $nsCloudUploadService: IUploadService,
 		private $fs: IFileSystem,
 		protected $options: IProfileDir,
 		$injector: IInjector) {
 
-		super($nsCloudRequestService, $injector);
+		super($nsCloudServerRequestService, $injector);
 	}
 
 	public async startEmulator(publicKey: string, platform: string, deviceType: string): Promise<string> {
@@ -70,4 +70,4 @@ export class CloudEmulatorService extends CloudServiceBase implements ICloudEmul
 	}
 }
 
-$injector.register("nsCloudEmulatorService", CloudEmulatorService);
+$injector.register("nsCloudServerEmulatorsService", ServerEmulatorsService);

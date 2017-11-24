@@ -21,7 +21,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
 		private $errors: IErrors,
-		private $nsCloudBuildCloudService: IBuildCloudService,
+		private $nsCloudServerBuildService: IServerBuildService,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $nsCloudUploadService: IUploadService,
 		private $projectDataService: IProjectDataService) {
@@ -93,7 +93,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		publishRequestData.packagePaths = await this.getPreparePackagePaths(publishDataCore);
 
 		this.$logger.info("Starting publishing.");
-		const response = await this.$nsCloudBuildCloudService.publish(publishRequestData);
+		const response = await this.$nsCloudServerBuildService.publish(publishRequestData);
 
 		this.$logger.trace("Publish response", response);
 		const buildId = uuid.v4();

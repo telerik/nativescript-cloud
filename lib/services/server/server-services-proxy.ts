@@ -1,6 +1,6 @@
 import { CONTENT_TYPES, HTTP_HEADERS } from "../../constants";
 
-export class CloudServicesProxy implements ICloudServicesProxy {
+export class ServerServicesProxy implements IServerServicesProxy {
 	private serverConfig: IServerConfig;
 
 	constructor(private $errors: IErrors,
@@ -102,4 +102,4 @@ export class CloudServicesProxy implements ICloudServicesProxy {
 	}
 }
 
-$injector.register("nsCloudServicesProxy", CloudServicesProxy);
+$injector.register("nsCloudServerServicesProxy", ServerServicesProxy);

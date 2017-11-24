@@ -12,7 +12,7 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 
 	constructor($errors: IErrors,
 		$nsCloudUserService: IUserService,
-		private $nsCloudAccountsService: IAccountsCloudService,
+		private $nsCloudAccountsService: IServerAccountsService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,

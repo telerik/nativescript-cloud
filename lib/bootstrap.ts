@@ -24,13 +24,13 @@ $injector.requirePublicClass("nsCloudAccountsService", path.join(__dirname, "ser
 $injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "services", "eula-service"));
 
 // Services.
-$injector.require("nsCloudAuthCloudService", path.join(__dirname, "services", "cloud-services", "auth-cloud-service"));
-$injector.require("nsCloudBuildCloudService", path.join(__dirname, "services", "cloud-services", "build-cloud-service"));
-$injector.require("nsCloudServicesProxy", path.join(__dirname, "services", "cloud-services", "cloud-services-proxy"));
-$injector.require("nsCloudRequestService", path.join(__dirname, "services", "cloud-services", "cloud-request-service"));
-$injector.require("nsCloudEmulatorService", path.join(__dirname, "services", "cloud-services", "cloud-emulator-service"));
-$injector.require("nsCloudCodeCommitService", path.join(__dirname, "services", "cloud-services", "code-commit-service"));
-$injector.require("nsCloudAccountsCloudService", path.join(__dirname, "services", "cloud-services", "accounts-cloud-service"));
+$injector.require("nsCloudServerAuthService", path.join(__dirname, "services", "server", "server-auth-service"));
+$injector.require("nsCloudServerBuildService", path.join(__dirname, "services", "server", "server-build-service"));
+$injector.require("nsCloudServerServicesProxy", path.join(__dirname, "services", "server", "server-services-proxy"));
+$injector.require("nsCloudServerRequestService", path.join(__dirname, "services", "server", "server-request-service"));
+$injector.require("nsCloudServerEmulatorsService", path.join(__dirname, "services", "server", "server-emulators-service"));
+$injector.require("nsCloudServerCodeCommitService", path.join(__dirname, "services", "server", "server-code-commit-service"));
+$injector.require("nsCloudServerAccountsService", path.join(__dirname, "services", "server", "server-accounts-service"));
 $injector.require("nsCloudPackageInfoService", path.join(__dirname, "services", "package-info-service"));
 $injector.require("nsCloudUploadService", path.join(__dirname, "services", "upload-service"));
 $injector.require("nsCloudGitService", path.join(__dirname, "services", "git-service"));

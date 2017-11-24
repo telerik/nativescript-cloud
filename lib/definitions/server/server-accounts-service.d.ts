@@ -7,7 +7,7 @@ interface IGetUsageInfo {
 	getUsageInfo(accountId: string): Promise<IUsageInfo[]>;
 }
 
-interface IAccountsCloudService extends IGetUsageInfo {
+interface IServerAccountsService extends IGetUsageInfo {
 	getAccounts(): Promise<IAccount[]>
 	getUserInfo(): Promise<IUserInfo>;
 }

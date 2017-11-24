@@ -39,7 +39,7 @@ describe("cloud emulator device discovery", () => {
 					return customEventEmitter;
 				}
 			});
-			testInjector.register("nsCloudEmulatorService", { /* empty */ });
+			testInjector.register("nsCloudServerEmulatorsService", { /* empty */ });
 			testInjector.register("mobileHelper", {
 				normalizePlatformName: (platform: string) => platform.toLowerCase()
 			});
