@@ -913,7 +913,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.nsCloudUserService.hasUser()
+tns.nsCloudUserService.getUserAvatar()
 	.then(userAvatar => console.log(userAvatar));
 ```
 
