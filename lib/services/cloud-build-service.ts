@@ -35,7 +35,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $platformService: IPlatformService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
-		private $qr: IQrCodeGenerator) {
+		private $qr: IQrCodeGenerator,
+		private $staticConfig: IStaticConfig) {
 		super($fs, $httpClient, $logger);
 	}
 
@@ -296,16 +297,24 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		};
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
-		await this.$platformService.preparePlatform({
-			platform,
-			appFilesUpdaterOptions,
-			projectData,
-			config,
-			filesToSync: [],
-			nativePrepare: { skipNativePrepare: true },
-			platformTemplate: null,
-			env: projectSettings.env
-		});
+		const cliVersion = this.$staticConfig.version;
+		const shouldUseOldPrepare = semver.valid(cliVersion) && semver.lt(cliVersion, semver.prerelease(cliVersion) ? "3.4.0-2017-11-02-10045" : "3.4.0");
+		if (shouldUseOldPrepare) {
+			// Backwards compatibility as preparePlatform method has different args in old versions
+			this.$logger.trace(`Using old prepare as CLI version is ${cliVersion}.`);
+			await (<any>this.$platformService).preparePlatform(platform, appFilesUpdaterOptions, null, projectData, config, [], { skipNativePrepare: true });
+		} else {
+			await this.$platformService.preparePlatform({
+				platform,
+				appFilesUpdaterOptions,
+				projectData,
+				config,
+				filesToSync: [],
+				nativePrepare: { skipNativePrepare: true },
+				platformTemplate: null,
+				env: projectSettings.env
+			});
+		}
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.END);
 	}
 
