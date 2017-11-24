@@ -1,13 +1,13 @@
 import * as querystring from "querystring";
 import { CODE_COMMIT_SERVICE_NAME, HTTP_METHODS } from "../../constants";
-import { CloudServiceBase } from "./cloud-service-base";
+import { ServerServiceBase } from "./server-service-base";
 
-export class CodeCommitService extends CloudServiceBase implements ICodeCommitService {
+export class ServerCodeCommitService extends ServerServiceBase implements IServerCodeCommitService {
 	protected serviceName: string = CODE_COMMIT_SERVICE_NAME;
 
-	constructor(protected $nsCloudRequestService: ICloudRequestService,
+	constructor(protected $nsCloudServerRequestService: IServerRequestService,
 		$injector: IInjector) {
-		super($nsCloudRequestService, $injector);
+		super($nsCloudServerRequestService, $injector);
 	}
 
 	public getRepository(appId: string): Promise<IGetRepositoryResponse> {
@@ -19,4 +19,4 @@ export class CodeCommitService extends CloudServiceBase implements ICodeCommitSe
 	}
 }
 
-$injector.register("nsCloudCodeCommitService", CodeCommitService);
+$injector.register("nsCloudServerCodeCommitService", ServerCodeCommitService);

@@ -1,12 +1,12 @@
 import { ACCOUNTS_SERVICE_NAME, HTTP_METHODS } from "../../constants";
-import { CloudServiceBase } from "./cloud-service-base";
+import { ServerServiceBase } from "./server-service-base";
 
-export class AccountsCloudService extends CloudServiceBase implements IAccountsCloudService {
+export class ServerAccountsService extends ServerServiceBase implements IServerAccountsService {
 	protected serviceName: string = ACCOUNTS_SERVICE_NAME;
 
-	constructor(protected $nsCloudRequestService: ICloudServicesProxy,
+	constructor(protected $nsCloudServerRequestService: IServerServicesProxy,
 		$injector: IInjector) {
-		super($nsCloudRequestService, $injector);
+		super($nsCloudServerRequestService, $injector);
 	}
 
 	public getAccounts(): Promise<IAccount[]> {
@@ -22,4 +22,4 @@ export class AccountsCloudService extends CloudServiceBase implements IAccountsC
 	}
 }
 
-$injector.register("nsCloudAccountsCloudService", AccountsCloudService);
+$injector.register("nsCloudServerAccountsService", ServerAccountsService);

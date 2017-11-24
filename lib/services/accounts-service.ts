@@ -1,14 +1,14 @@
 export class AccountsService implements IAccountsService {
-	constructor(private $nsCloudAccountsCloudService: IAccountsCloudService,
+	constructor(private $nsCloudServerAccountsService: IServerAccountsService,
 		private $errors: IErrors) { }
 
 	public getMyAccounts(): Promise<IAccount[]> {
-		return this.$nsCloudAccountsCloudService.getAccounts();
+		return this.$nsCloudServerAccountsService.getAccounts();
 	}
 
 	public async getUsageInfo(accountIdOption: string): Promise<IUsageInfo[]> {
 		const account = await this.getAccountFromOption(accountIdOption);
-		return this.$nsCloudAccountsCloudService.getUsageInfo(account.id);
+		return this.$nsCloudServerAccountsService.getUsageInfo(account.id);
 	}
 
 	public async getAccountFromOption(accountIdOption: string): Promise<IAccount> {

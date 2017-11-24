@@ -1,4 +1,4 @@
-interface ICodeCommitService {
+interface IServerCodeCommitService {
 	getRepository(appId: string): Promise<IGetRepositoryResponse>;
 	deleteRepository(appId: string): Promise<IDeleteRepositoryResponse>;
 }

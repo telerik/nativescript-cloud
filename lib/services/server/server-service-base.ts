@@ -1,6 +1,6 @@
 import { CONTENT_TYPES } from "../../constants";
 
-export abstract class CloudServiceBase {
+export abstract class ServerServiceBase {
 	protected abstract serviceName: string;
 
 	private get $nsCloudEulaService(): IEulaService {
@@ -11,7 +11,7 @@ export abstract class CloudServiceBase {
 		return this.$injector.resolve<IErrors>("errors");
 	}
 
-	constructor(protected requestService: ICloudRequestService,
+	constructor(protected requestService: IServerRequestService,
 		private $injector: IInjector) { }
 
 	protected async sendRequest<T>(method: string, urlPath: string, body: any, headers?: any, resultStream?: NodeJS.WritableStream): Promise<T> {

@@ -1,4 +1,4 @@
-interface IAuthCloudService {
+interface IServerAuthService {
 	devLogin(username: string, password: string): Promise<IUserData>;
 	getLoginUrl(port: number): string;
 	refreshToken(refreshToken: string): Promise<ITokenData>;

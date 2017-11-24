@@ -1,10 +1,10 @@
 export class CloudEmulatorLauncher implements ICloudEmulatorLauncher {
 
-	constructor(private $nsCloudEmulatorService: ICloudEmulatorService) { }
+	constructor(private $nsCloudServerEmulatorsService: IServerEmulatorsService) { }
 
 	public async startEmulator(data: ICloudEmulatorStartData): Promise<string> {
-		const response: ICloudEmulatorResponse = await this.$nsCloudEmulatorService.deployApp(data.packageFile, data.platform);
-		return this.$nsCloudEmulatorService.startEmulator(response.publicKey, data.platform, data.model);
+		const response: ICloudEmulatorResponse = await this.$nsCloudServerEmulatorsService.deployApp(data.packageFile, data.platform);
+		return this.$nsCloudServerEmulatorsService.startEmulator(response.publicKey, data.platform, data.model);
 	}
 }
 
