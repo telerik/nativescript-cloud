@@ -56,7 +56,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 	}
 
 	private validateParameteres(codesignData: ICodesignData,
-		projectDir: string) : void {
+		projectDir: string): void {
 		if (!codesignData || !codesignData.username || !codesignData.password) {
 			this.$errors.failWithoutHelp(`Codesign failed. Reason is missing code sign data. Apple Id and Apple Id password are required..`);
 		}
@@ -89,7 +89,13 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 
 		if (!codesignResult.buildItems || !codesignResult.buildItems.length) {
 			// Something failed.
-			const err: any = new Error(`Codesign failed. Reason is: ${codesignResult.errors}.`);
+			let errText = codesignResult.errors || "";
+			if (errText.indexOf("403 Forbidden") > -1) {
+				this.$logger.trace(`Codesign errors: ${errText}`);
+				errText = "The Code Signing Assistance service is temporary unavailable. Please try again later.";
+			}
+
+			const err = <IStdError>new Error(`Codesign failed. Reason is: ${errText}.`);
 			err.stderr = codesignResult.stderr;
 			throw err;
 		}
