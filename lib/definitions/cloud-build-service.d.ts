@@ -122,6 +122,51 @@ interface ICloudBuildService extends ICloudOperationService {
 }
 
 /**
+ * Defines properties passed to prepareBuildRequest method.
+ */
+interface IPrepareBuildRequestInfo {
+	/**
+	 * The build's id.
+	 */
+	buildId: string;
+
+	/**
+	 * Settings used to control the build workflow.
+	 */
+	projectSettings: INSCloudProjectSettings;
+
+	/**
+	 * Platform for which to build.
+	 */
+	platform: string;
+
+	/**
+	 * Build configuration - debug or release.
+	 */
+	buildConfiguration: string;
+
+	/**
+	 * Credentials for building using git.
+	 */
+	buildCredentials: IBuildCredentialResponse;
+
+	/**
+	 * Files to upload prior to build.
+	 */
+	filesToUpload: IAmazonStorageEntryData[];
+
+	/**
+	 * Account from which to subtract successful builds.
+	 */
+	accountId: string;
+
+	/**
+	 * Additional flags that can be passed to CLI in the cloud (e.g. `--env.uglify` or `--bundle`)
+	 */
+	additionalCliFlags: string[];
+}
+
+/**
  * Options that can be used to construct itms-services plist.
  */
 interface IItmsPlistOptions {
@@ -149,7 +194,7 @@ interface IItmsPlistOptions {
 /**
  * Describes the project settings required for different operations.
  */
-interface INSCloudProjectSettings extends IEnvOptions {
+interface INSCloudProjectSettings extends IEnvOptions, IBundle {
 	/**
 	 * The directory where the project is located. This should be the path to the directory where application's package.json is located.
 	 */

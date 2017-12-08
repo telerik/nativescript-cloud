@@ -111,7 +111,22 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const buildCredentials = await this.$nsCloudServerBuildService.getBuildCredentials({ appId: projectSettings.projectId, fileNames: fileNames });
 
 		const filesToUpload = this.prepareFilesToUpload(buildCredentials.urls, buildFiles);
-		let buildProps = await this.prepareBuildRequest(buildId, projectSettings, platform, buildConfiguration, buildCredentials, filesToUpload, accountId);
+		const additionalCliFlags: string[] = [];
+		if (projectSettings.bundle) {
+			const envOptions = _.keys(projectSettings.env).map(option => `--env.${option}`);
+			additionalCliFlags.push("--bundle", ...envOptions);
+		}
+
+		let buildProps = await this.prepareBuildRequest({
+			buildId,
+			projectSettings,
+			platform,
+			buildConfiguration,
+			buildCredentials,
+			filesToUpload,
+			additionalCliFlags,
+			accountId
+		});
 		if (this.$mobileHelper.isAndroidPlatform(platform)) {
 			buildProps = await this.getAndroidBuildProperties(projectSettings, buildProps, filesToUpload, androidBuildData);
 		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
@@ -272,8 +287,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
 		const appFilesUpdaterOptions: IAppFilesUpdaterOptions = {
-			// This option is used for webpack. As currently we do not support webpack, set it to false.
-			// TODO: Once we have a way to use webpack in cloud builds, we should pass correct value here.
+			// Set this option to false, so that the local prepare does not webpack in addition to the cloud one.
+			// TODO: Once we have a way to use webpack in livesync this value may need to change.
 			bundle: false,
 			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase()
 		};
@@ -318,34 +333,28 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.END);
 	}
 
-	private async prepareBuildRequest(buildId: string,
-		projectSettings: INSCloudProjectSettings,
-		platform: string,
-		buildConfiguration: string,
-		buildCredentials: IBuildCredentialResponse,
-		filesToUpload: IAmazonStorageEntryData[],
-		accountId: string): Promise<IBuildRequestData> {
-		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.START);
+	private async prepareBuildRequest(settings: IPrepareBuildRequestInfo): Promise<IBuildRequestData> {
+		this.emitStepChanged(settings.buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.START);
 		let buildFiles;
 		try {
-			await this.$nsCloudGitService.gitPushChanges(projectSettings,
-				{ httpRemoteUrl: buildCredentials.codeCommit.cloneUrlHttp },
-				buildCredentials.codeCommit.credentials,
-				{ isNewRepository: buildCredentials.codeCommit.isNewRepository });
+			await this.$nsCloudGitService.gitPushChanges(settings.projectSettings,
+				{ httpRemoteUrl: settings.buildCredentials.codeCommit.cloneUrlHttp },
+				settings.buildCredentials.codeCommit.credentials,
+				{ isNewRepository: settings.buildCredentials.codeCommit.isNewRepository });
 
 			buildFiles = [
 				{
 					disposition: constants.DISPOSITIONS.PACKAGE_GIT,
-					sourceUri: buildCredentials.codeCommitUrl
+					sourceUri: settings.buildCredentials.codeCommitUrl
 				}
 			];
 		} catch (err) {
 			this.$logger.warn("Unable to use git, reason is:");
 			this.$logger.warn(err.message);
-			const filePath = await this.zipProject(projectSettings.projectDir);
+			const filePath = await this.zipProject(settings.projectSettings.projectDir);
 			const preSignedUrlData = await this.$nsCloudServerBuildService.getPresignedUploadUrlObject(uuid.v4());
 			const disposition = constants.DISPOSITIONS.PACKAGE_ZIP;
-			filesToUpload.push(_.merge({ filePath, disposition }, preSignedUrlData));
+			settings.filesToUpload.push(_.merge({ filePath, disposition }, preSignedUrlData));
 			buildFiles = [
 				{
 					disposition,
@@ -354,17 +363,17 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			];
 		}
 
-		for (const fileToUpload of filesToUpload) {
+		for (const fileToUpload of settings.filesToUpload) {
 			await this.$nsCloudUploadService.uploadToS3(fileToUpload.filePath, fileToUpload.fileName, fileToUpload.uploadPreSignedUrl);
 		}
 
-		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.END);
+		this.emitStepChanged(settings.buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.END);
 		// HACK just for this version. After that we'll have UI for getting runtime version.
 		// Until then, use the coreModulesVersion.
-		const coreModulesVersion = this.$fs.readJson(path.join(projectSettings.projectDir, "package.json")).dependencies["tns-core-modules"];
-		const runtimeVersion = await this.getRuntimeVersion(platform, projectSettings.nativescriptData, coreModulesVersion);
+		const coreModulesVersion = this.$fs.readJson(path.join(settings.projectSettings.projectDir, "package.json")).dependencies["tns-core-modules"];
+		const runtimeVersion = await this.getRuntimeVersion(settings.platform, settings.projectSettings.nativescriptData, coreModulesVersion);
 		const cliVersion = await this.getCliVersion(runtimeVersion);
-		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectSettings.projectName);
+		const sanitizedProjectName = this.$projectHelper.sanitizeName(settings.projectSettings.projectName);
 
 		/** Although the nativescript-cloud is an extension that is used only with nativescript projects,
 		 * current implementation of the builder daemon will not add default framework. This breaks tooling when incremental build is
@@ -372,19 +381,20 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		 * behavior in the tooling.
 		 */
 		return {
-			accountId,
+			accountId: settings.accountId,
 			properties: {
-				buildId,
-				buildConfiguration: buildConfiguration,
-				platform: platform,
-				appIdentifier: projectSettings.projectId,
+				buildId: settings.buildId,
+				buildConfiguration: settings.buildConfiguration,
+				platform: settings.platform,
+				appIdentifier: settings.projectSettings.projectId,
 				frameworkVersion: cliVersion,
 				runtimeVersion: runtimeVersion,
-				sessionKey: buildCredentials.sessionKey,
+				sessionKey: settings.buildCredentials.sessionKey,
 				templateAppName: sanitizedProjectName,
 				projectName: sanitizedProjectName,
 				framework: "tns",
-				useIncrementalBuild: !projectSettings.clean,
+				additionalCliFlags: settings.additionalCliFlags,
+				useIncrementalBuild: !settings.projectSettings.clean,
 				userEmail: this.$nsCloudUserService.getUser().email
 			},
 			targets: [],

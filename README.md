@@ -62,7 +62,7 @@ Definition:
 ```TypeScript
 /**
  * Builds the specified application in the cloud and returns information about the whole build process.
- * @param {IProjectSettings} projectSettings Describes the current project - project dir, application identifier, name and nativescript data.
+ * @param {INSCloudProjectSettings} projectSettings Describes the current project - project dir, application identifier, name and nativescript data, as well as additional options to control the build workflow.
  * @param {string} platform The mobile platform for which the application should be built: Android or iOS.
  * @param {string} buildConfiguration The build configuration - Debug or Release.
  * @param {string} accountId the account which will be charged for the build.
@@ -70,7 +70,7 @@ Definition:
  * @param {IIOSBuildData} iOSBuildData iOS specific information for the build.
  * @returns {Promise<IBuildResultData>} Information about the build process. It is returned only on successful build. In case the build fails, the Promise is rejected with the server information.
  */
-build(projectSettings: IProjectSettings,
+build(projectSettings: INSCloudProjectSettings,
 	platform: string,
 	buildConfiguration: string,
 	accountId: string,
@@ -127,7 +127,11 @@ const projectSettings = {
 	projectDir: process.cwd(),
 	projectId: packageJsonContent.nativescript.id,
 	projectName: path.dirname(process.cwd()),
-	nativeScriptData: packageJsonContent.nativescript
+	nativeScriptData: packageJsonContent.nativescript,
+	bundle: true,
+	env: {
+		uglify: true
+	}
 };
 
 const androidReleaseConfigurationData = {
