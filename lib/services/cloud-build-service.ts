@@ -25,6 +25,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		$logger: ILogger,
 		private $errors: IErrors,
 		private $mobileHelper: Mobile.IMobileHelper,
+		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $nsCloudAccountsService: IAccountsService,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $nsCloudBuildOutputFilter: ICloudBuildOutputFilter,
@@ -313,6 +314,18 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
 		const cliVersion = this.$staticConfig.version;
+
+		// HACK: Ensure __PACKAGE__ is interpolated in app.gradle file in the user project.
+		// In case we don't interpolate every other cloud android build is bound to fail because it would set the application's identifier to __PACKAGE__
+		const userAppGradleFilePath = path.join(projectData.appResourcesDirectoryPath, this.$devicePlatformsConstants.Android, "app.gradle");
+		if (this.$fs.exists(userAppGradleFilePath)) {
+			const appGradleContents = this.$fs.readText(userAppGradleFilePath);
+			const appGradleReplacedContents = appGradleContents.replace(/__PACKAGE__/g, projectData.projectId);
+			if (appGradleReplacedContents !== appGradleContents) {
+				this.$fs.writeFile(userAppGradleFilePath, appGradleReplacedContents);
+			}
+		}
+
 		const shouldUseOldPrepare = semver.valid(cliVersion) && semver.lt(cliVersion, semver.prerelease(cliVersion) ? "3.4.0-2017-11-02-10045" : "3.4.0");
 		if (shouldUseOldPrepare) {
 			// Backwards compatibility as preparePlatform method has different args in old versions

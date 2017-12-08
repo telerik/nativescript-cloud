@@ -37,7 +37,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			projectDir: this.$projectData.projectDir,
 			projectId: this.$projectData.projectId,
 			projectName: this.$projectData.projectName,
-			bundle: this.$options.bundle,
+			bundle: !!this.$options.bundle,
 			clean: this.$options.clean,
 			env: this.$options.env
 		};
@@ -83,7 +83,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 				buildForDevice: true,
 				clean: this.$options.clean,
 				teamId: this.$options.teamId,
-				bundle: this.$options.bundle,
+				bundle: !!this.$options.bundle,
 				device: this.$options.device,
 				projectDir: this.$options.path,
 				provision: this.$options.provision,
