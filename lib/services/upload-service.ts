@@ -38,7 +38,7 @@ export class UploadService implements IUploadService {
 		try {
 			await this.$httpClient.httpRequest(requestOpts);
 		} catch (err) {
-			this.$errors.failWithoutHelp(`Error while uploading ${filePathOrContent} to S3. Errors is:`, err.message);
+			this.$errors.fail({ formatStr: `Error while uploading ${filePathOrContent} to S3. Errors is: ${err.message}`, proxyAuthenticationRequired: err.proxyAuthenticationRequired, suppressCommandHelp: true });
 		}
 
 		return preSignedUrlData && preSignedUrlData.publicDownloadUrl;
