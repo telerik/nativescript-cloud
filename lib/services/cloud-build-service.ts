@@ -589,7 +589,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		if (!runtimeVersion && coreModulesVersion) {
 			// no runtime added. Let's find out which one we need based on the tns-core-modules.
 			if (semver.valid(coreModulesVersion)) {
-				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, this.getVersionRangeWithTilde(coreModulesVersion));
+				runtimeVersion = process.env.TNS_CLI_CLOUD_VERSION || await this.getLatestMatchingVersion(runtimePackageName, this.getVersionRangeWithTilde(coreModulesVersion));
 			} else if (semver.validRange(coreModulesVersion)) {
 				// In case tns-core-modules in package.json are referred as `~x.x.x` - this is not a valid version, but is valid range.
 				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, coreModulesVersion);
