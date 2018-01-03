@@ -9,28 +9,31 @@ interface IServerConfigManager {
 	 * Applies specific configuration and saves it in config.json
 	 * @param {string} configName The name of the configuration to be applied.
 	 * @param optional {IConfigOptions} options The config options.
+	 * @param optional {IServerConfigBase} globalServerConfig The global server configuration which will
+	 * be used when changing the configuration. This parameter will override the default global configuration.
 	 * @returns {void}
 	 */
-	applyConfig(configName: string, options?: IConfigOptions): void;
+	applyConfig(configName: string, options?: IConfigOptions, globalServerConfig?: IServerConfigBase): void;
 
 	getCurrentConfigData(): IServerConfig;
 
 	printConfigData(): void;
 }
 
-interface IServerConfig {
+interface IServerConfigBase {
 	apiVersion?: string;
-	domainName: string;
 	serverProto?: string;
+}
+
+interface IServerConfig extends IServerConfigBase {
+	domainName: string;
 	stage?: string;
 	cloudServices: IDictionary<ICloudServiceConfig>;
 	[index: string]: string | IDictionary<ICloudServiceConfig>;
 }
 
-interface ICloudServiceConfig {
-	apiVersion?: string;
+interface ICloudServiceConfig extends IServerConfigBase {
 	fullHostName?: string;
-	serverProto?: string;
 	subdomain?: string;
 	[index: string]: string;
 }

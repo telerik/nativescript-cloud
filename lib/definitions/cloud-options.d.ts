@@ -3,7 +3,9 @@
  */
 interface ICloudOptions extends IOptions {
 	accountId: string;
+	apiVersion: string;
 	local: boolean;
+	serverProto: string;
 	track: string;
 }
 

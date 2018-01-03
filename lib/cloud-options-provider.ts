@@ -4,8 +4,10 @@ export class CloudOptionsProvider implements ICloudOptionsProvider {
 	public get dashedOptions() {
 		return {
 			accountId: { type: OptionType.String },
+			apiVersion: { type: OptionType.String },
 			local: { type: OptionType.Boolean },
-			track: { type: OptionType.String, default: DEFAULT_ANDROID_PUBLISH_TRACK }
+			serverProto: { type: OptionType.String },
+			track: { type: OptionType.String, default: DEFAULT_ANDROID_PUBLISH_TRACK },
 		};
 	}
 }
