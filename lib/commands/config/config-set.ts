@@ -12,8 +12,8 @@ export class ConfigApplyCommand implements ICommand {
 
 	public async execute(args: string[]): Promise<void> {
 		const configurationFile = args[0];
-		const globalServerConfig = { apiVersion: this.$options.apiVersion, serverProto: this.$options.serverProto };
-		this.$nsCloudServerConfigManager.applyConfig(null, { configurationFile: configurationFile }, globalServerConfig);
+		const globalServerConfig: IServerConfigBase = { apiVersion: this.$options.apiVersion, serverProto: this.$options.serverProto };
+		this.$nsCloudServerConfigManager.applyConfig(null, { configurationFile }, globalServerConfig);
 		this.$nsCloudServerConfigManager.printConfigData();
 	}
 }
