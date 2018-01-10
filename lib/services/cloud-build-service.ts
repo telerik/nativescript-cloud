@@ -589,7 +589,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		if (!runtimeVersion && coreModulesVersion) {
 			// no runtime added. Let's find out which one we need based on the tns-core-modules.
 			if (semver.valid(coreModulesVersion)) {
-				runtimeVersion = process.env.TNS_CLI_CLOUD_VERSION || await this.getLatestMatchingVersion(runtimePackageName, this.getVersionRangeWithTilde(coreModulesVersion));
+				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, this.getVersionRangeWithTilde(coreModulesVersion));
 			} else if (semver.validRange(coreModulesVersion)) {
 				// In case tns-core-modules in package.json are referred as `~x.x.x` - this is not a valid version, but is valid range.
 				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, coreModulesVersion);
@@ -601,7 +601,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 	private async getCliVersion(runtimeVersion: string): Promise<string> {
 		try {
-			const latestMatchingVersion = await this.getLatestMatchingVersion("nativescript", this.getVersionRangeWithTilde(runtimeVersion));
+			const latestMatchingVersion = process.env.TNS_CLI_CLOUD_VERSION || await this.getLatestMatchingVersion("nativescript", this.getVersionRangeWithTilde(runtimeVersion));
 			return latestMatchingVersion || CloudBuildService.DEFAULT_VERSION;
 		} catch (err) {
 			this.$logger.trace(`Unable to get information about CLI versions. Error is: ${err.message}`);
