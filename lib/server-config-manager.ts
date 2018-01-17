@@ -23,16 +23,16 @@ export class ServerConfigManager implements IServerConfigManager {
 		this.applyConfig("production");
 	}
 
-	public applyConfig(configName: string, options?: IConfigOptions): void {
+	public applyConfig(configName: string, options?: IConfigOptions, globalServerConfig?: IServerConfigBase): void {
 		const baseConfig = this.loadConfig(ServerConfigManager.BASE_CONFIG_FILE_NAME);
 		const newConfig = this.loadConfig(`${ServerConfigManager.CONFIG_FILE_NAME}-${configName}`, options);
-		this.mergeConfig(baseConfig, newConfig);
+		this.mergeConfig(baseConfig, newConfig, globalServerConfig);
 		this.saveConfig(baseConfig, ServerConfigManager.CONFIG_FILE_NAME);
 	}
 
 	public printConfigData(): void {
 		const config = this.getCurrentConfigData();
-		console.log(config);
+		console.log(JSON.stringify(config, null, 2));
 	}
 
 	public getCurrentConfigData(): IServerConfig {
@@ -65,8 +65,12 @@ export class ServerConfigManager implements IServerConfigManager {
 		return this.$fs.writeJson(configFileName, configNoFunctions);
 	}
 
-	private mergeConfig(config: any, mergeFrom: IServerConfig): void {
+	private mergeConfig(config: any, mergeFrom: IServerConfig, globalServerConfig?: IServerConfigBase): void {
 		_.extend(config, mergeFrom);
+		if (globalServerConfig) {
+			const filteredGlobalConfig = _.omitBy(globalServerConfig, _.isUndefined);
+			_.extend(config, filteredGlobalConfig);
+		}
 	}
 }
 
