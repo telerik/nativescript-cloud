@@ -77,19 +77,19 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		}, publishData, this.getAndroidError.bind(this));
 	}
 
-	private getiOSError(publishResult: IServerResult, publishRequestData: IPublishRequestData) {
+	private getiOSError(publishResult: IBuildServerResult, publishRequestData: IPublishRequestData) {
 		const itmsMessage = this.getFormattedError(publishResult.stdout, CloudPublishService.ITMS_ERROR_REGEX);
 		const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
 		const err = new Error(`${publishResult.errors}${EOL}${itmsMessage}${EOL}${generalMessage}`);
 		return err;
 	}
 
-	private getAndroidError(publishResult: IServerResult, publishRequestData: IPublishRequestData) {
+	private getAndroidError(publishResult: IBuildServerResult, publishRequestData: IPublishRequestData) {
 		const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
 		return new Error(`${publishResult.errors}${EOL}${generalMessage}`);
 	}
 
-	private async publishCore(publishRequestData: IPublishRequestData, publishDataCore: IPublishDataCore, getError: (publishResult: IServerResult, publishRequestData: IPublishRequestData) => any): Promise<void> {
+	private async publishCore(publishRequestData: IPublishRequestData, publishDataCore: IPublishDataCore, getError: (publishResult: IBuildServerResult, publishRequestData: IPublishRequestData) => any): Promise<void> {
 		publishRequestData.packagePaths = await this.getPreparePackagePaths(publishDataCore);
 
 		this.$logger.info("Starting publishing.");
@@ -103,7 +103,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 			this.$logger.trace("Codesign generation failed with err: ", ex);
 		}
 
-		const publishResult = await this.getObjectFromS3File<IServerResult>(response.resultUrl);
+		const publishResult = await this.getObjectFromS3File<IBuildServerResult>(response.resultUrl);
 		this.$logger.trace("Publish result:", publishResult);
 
 		if (publishResult.code || publishResult.errors) {
@@ -116,7 +116,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		this.$logger.info("Publishing finished successfully.");
 	}
 
-	protected getServerResults(codesignResult: IServerResult): IServerItem[] {
+	protected getServerResults(codesignResult: IBuildServerResult): IServerItem[] {
 		return [];
 	}
 

@@ -39,7 +39,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		}
 	}
 
-	protected getServerResults(codesignResult: IServerResult): IServerItem[] {
+	protected getServerResults(codesignResult: IBuildServerResult): IServerItem[] {
 		const result = _.filter(codesignResult.buildItems, b => b.disposition === constants.DISPOSITIONS.CERTIFICATE
 			|| b.disposition === constants.DISPOSITIONS.PROVISION);
 
@@ -83,7 +83,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 			this.$logger.trace("Codesign generation failed with err: ", ex);
 		}
 
-		const codesignResult = await this.getObjectFromS3File<IServerResult>(codesignResponse.resultUrl);
+		const codesignResult = await this.getObjectFromS3File<IBuildServerResult>(codesignResponse.resultUrl);
 		this.$logger.trace("Codesign result:");
 		this.$logger.trace(codesignResult);
 

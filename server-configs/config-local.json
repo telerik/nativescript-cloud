@@ -19,6 +19,9 @@
 		},
 		"accounts-service": {
 			"fullHostName": "localhost:8005"
+		},
+		"project-service": {
+			"fullHostName": "localhost:8006"
 		}
 	}
 }

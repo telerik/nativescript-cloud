@@ -10,8 +10,6 @@ import { CloudService } from "./cloud-service";
 const plist = require("simple-plist");
 
 export class CloudBuildService extends CloudService implements ICloudBuildService {
-	private static DEFAULT_VERSION = "3.0.0";
-
 	protected get failedError() {
 		return "Build failed.";
 	}
@@ -33,6 +31,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $nsCloudItmsServicesPlistHelper: IItmsServicesPlistHelper,
 		private $nsCloudUploadService: IUploadService,
 		private $nsCloudUserService: IUserService,
+		private $nsCloudVersionService: IVersionService,
 		private $platformService: IPlatformService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
@@ -139,7 +138,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
 		await this.waitForServerOperationToFinish(buildId, buildResponse);
-		const buildResult: IServerResult = await this.getObjectFromS3File<IServerResult>(buildResponse.resultUrl);
+		const buildResult: IBuildServerResult = await this.getObjectFromS3File<IBuildServerResult>(buildResponse.resultUrl);
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.END);
 
 		this.$logger.trace("Build result:");
@@ -381,11 +380,9 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		this.emitStepChanged(settings.buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.END);
-		// HACK just for this version. After that we'll have UI for getting runtime version.
-		// Until then, use the coreModulesVersion.
-		const coreModulesVersion = this.$fs.readJson(path.join(settings.projectSettings.projectDir, "package.json")).dependencies["tns-core-modules"];
-		const runtimeVersion = await this.getRuntimeVersion(settings.platform, settings.projectSettings.nativescriptData, coreModulesVersion);
-		const cliVersion = await this.getCliVersion(runtimeVersion);
+		const coreModulesVersion = this.$nsCloudVersionService.getCoreModulesVersion(settings.projectSettings.projectDir);
+		const runtimeVersion = await this.$nsCloudVersionService.getRuntimeVersion(settings.platform, settings.projectSettings.nativescriptData, coreModulesVersion);
+		const cliVersion = await this.$nsCloudVersionService.getCliVersion(runtimeVersion);
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(settings.projectSettings.projectName);
 
 		/** Although the nativescript-cloud is an extension that is used only with nativescript projects,
@@ -504,12 +501,12 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return result;
 	}
 
-	private getBuildResultUrl(buildResult: IServerResult): string {
+	private getBuildResultUrl(buildResult: IBuildServerResult): string {
 		// We expect only one buildResult - .ipa, .apk ...
 		return this.getServerResults(buildResult)[0].fullPath;
 	}
 
-	protected getServerResults(buildResult: IServerResult): IServerItem[] {
+	protected getServerResults(buildResult: IBuildServerResult): IServerItem[] {
 		const result = _.find(buildResult.buildItems, b => b.disposition === constants.DISPOSITIONS.BUILD_RESULT);
 
 		if (!result) {
@@ -537,7 +534,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 	}
 
-	private async downloadServerResult(buildId: string, buildResult: IServerResult, buildOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string> {
+	private async downloadServerResult(buildId: string, buildResult: IBuildServerResult, buildOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string> {
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.START);
 		const targetFileNames = await super.downloadServerResults(buildResult, buildOutputOptions);
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.END);
@@ -581,56 +578,6 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		return fullPath.substring(projectDir.length);
-	}
-
-	private async getRuntimeVersion(platform: string, nativescriptData: any, coreModulesVersion: string): Promise<string> {
-		const runtimePackageName = `tns-${platform.toLowerCase()}`;
-		let runtimeVersion = nativescriptData && nativescriptData[runtimePackageName] && nativescriptData[runtimePackageName].version;
-		if (!runtimeVersion && coreModulesVersion) {
-			// no runtime added. Let's find out which one we need based on the tns-core-modules.
-			if (semver.valid(coreModulesVersion)) {
-				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, this.getVersionRangeWithTilde(coreModulesVersion));
-			} else if (semver.validRange(coreModulesVersion)) {
-				// In case tns-core-modules in package.json are referred as `~x.x.x` - this is not a valid version, but is valid range.
-				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, coreModulesVersion);
-			}
-		}
-
-		return runtimeVersion || CloudBuildService.DEFAULT_VERSION;
-	}
-
-	private async getCliVersion(runtimeVersion: string): Promise<string> {
-		try {
-			const latestMatchingVersion = process.env.TNS_CLI_CLOUD_VERSION || await this.getLatestMatchingVersion("nativescript", this.getVersionRangeWithTilde(runtimeVersion));
-			return latestMatchingVersion || CloudBuildService.DEFAULT_VERSION;
-		} catch (err) {
-			this.$logger.trace(`Unable to get information about CLI versions. Error is: ${err.message}`);
-			return `${semver.major(runtimeVersion)}.${semver.minor(runtimeVersion)}.0`;
-		}
-	}
-
-	private async getLatestMatchingVersion(packageName: string, range: string): Promise<string> {
-		const versions = await this.getVersionsFromNpm(packageName);
-		if (versions.length) {
-			return semver.maxSatisfying(versions, range);
-		}
-
-		return null;
-	}
-
-	private async getVersionsFromNpm(packageName: string): Promise<string[]> {
-		try {
-			const response = await this.$httpClient.httpRequest(`http://registry.npmjs.org/${packageName}`);
-			const versions = _.keys(JSON.parse(response.body).versions);
-			return versions;
-		} catch (err) {
-			this.$logger.trace(`Unable to get versions of ${packageName} from npm. Error is: ${err.message}.`);
-			return [];
-		}
-	}
-
-	private getVersionRangeWithTilde(versionString: string): string {
-		return `~${semver.major(versionString)}.${semver.minor(versionString)}.0`;
 	}
 
 	private getCertificateInfo(certificatePath: string, certificatePassword: string): ICertificateInfo {

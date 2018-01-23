@@ -19,6 +19,7 @@ $injector.requirePublicClass("nsCloudBuildService", path.join(__dirname, "servic
 $injector.requirePublicClass("nsCloudCodesignService", path.join(__dirname, "services", "cloud-codesign-service"));
 $injector.requirePublicClass("nsCloudEmulatorLauncher", path.join(__dirname, "services", "cloud-emulator-emulator-launcher"));
 $injector.requirePublicClass("nsCloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
+$injector.requirePublicClass("nsCloudProjectService", path.join(__dirname, "services", "cloud-project-service"));
 $injector.requirePublicClass("nsCloudUserService", path.join(__dirname, "services", "user-service"));
 $injector.requirePublicClass("nsCloudAccountsService", path.join(__dirname, "services", "accounts-service"));
 $injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "services", "eula-service"));
@@ -31,10 +32,12 @@ $injector.require("nsCloudServerRequestService", path.join(__dirname, "services"
 $injector.require("nsCloudServerEmulatorsService", path.join(__dirname, "services", "server", "server-emulators-service"));
 $injector.require("nsCloudServerCodeCommitService", path.join(__dirname, "services", "server", "server-code-commit-service"));
 $injector.require("nsCloudServerAccountsService", path.join(__dirname, "services", "server", "server-accounts-service"));
+$injector.require("nsCloudServerProjectService", path.join(__dirname, "services", "server", "server-project-service"));
 $injector.require("nsCloudPackageInfoService", path.join(__dirname, "services", "package-info-service"));
 $injector.require("nsCloudUploadService", path.join(__dirname, "services", "upload-service"));
-$injector.require("nsCloudGitService", path.join(__dirname, "services", "git-service"));
 $injector.require("nsCloudDateTimeService", path.join(__dirname, "services", "date-time-service"));
+$injector.require("nsCloudGitService", path.join(__dirname, "services", "git-service"));
+$injector.require("nsCloudVersionService", path.join(__dirname, "services", "version-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
@@ -57,4 +60,7 @@ $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "
 
 $injector.requireCommand("account|*list", path.join(__dirname, "commands", "account", "account-list"));
 $injector.requireCommand("account|usage", path.join(__dirname, "commands", "account", "usage"));
+
 $injector.requireCommand("accept|eula", path.join(__dirname, "commands", "accept-eula-command"));
+
+$injector.requireCommand("clean|cloud|workspace", path.join(__dirname, "commands", "clean", "clean-cloud-workspace"));

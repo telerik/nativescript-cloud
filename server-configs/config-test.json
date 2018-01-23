@@ -18,6 +18,9 @@
 		},
 		"accounts-service": {
 			"subdomain": "test-accounts"
+		},
+		"project-service": {
+			"subdomain": "test-project"
 		}
 	}
 }
