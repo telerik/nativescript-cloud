@@ -57,9 +57,13 @@ export class ServerServicesProxy implements IServerServicesProxy {
 
 		this.$logger.debug("%s (%s %s) returned %d", finalUrlPath, options.method, options.urlPath, response.response.statusCode);
 
-		const resultValue: T = options.accept === CONTENT_TYPES.APPLICATION_JSON ? JSON.parse(response.body) : response.body;
-
-		return resultValue;
+		try {
+			const resultValue: T = options.accept === CONTENT_TYPES.APPLICATION_JSON ? JSON.parse(response.body) : response.body;
+			return resultValue;
+		} catch (err) {
+			this.$logger.trace("Error while trying to parse body: ", err);
+			throw new Error(`Server returned unexpected response: ${response.body}`);
+		}
 	}
 
 	public getServiceAddress(serviceName: string): string {
