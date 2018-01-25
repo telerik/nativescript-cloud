@@ -1123,15 +1123,15 @@ tns.nsCloudEulaService.acceptEula()
 The `nsCloudProjectService` allows to manage cloud projects. You can call the following methods:
 
 #### cleanupProject method
-`cleanupProject` method cleans all cloud build data which is used for optimizations. The method will clean all Code Commit and build machine artefacts if they exist. </br>
+`cleanupProject` method cleans all cloud build data which is used for optimizations. The method will clean all AWS CodeCommit and build machine artefacts if they exist. </br>
 Definition:
 
 ```TypeScript
 /**
- * Cleans all Code Commit data and build machines artefacts if they exist.
+ * Cleans all AWS CodeCommit data and build machines artefacts if they exist.
  * @param {string} appIdentifier the application identifier.
  * @param {string} projectName the project name.
- * @returns {Promise<ICleanupProjectResult>} Information about the cleanup. It includes Code Commit result and the result from the cleanup on each build machine.
+ * @returns {Promise<ICleanupProjectResult>} Information about the cleanup. It includes AWS CodeCommit result and the result from the cleanup on each build machine.
  * If the promise is rejected the error will contain cleanupTaskId property.
  */
 cleanupProject(appIdentifier: string, projectName: string): Promise<ICleanupProjectResult>;

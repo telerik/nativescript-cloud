@@ -4,11 +4,11 @@ import { EOL } from "os";
 import { CloudService } from "./cloud-service";
 
 export class CloudProjectService extends CloudService implements ICloudProjectService {
-	protected get failedError() {
+	protected get failedError(): string {
 		return "Cloud cleanup failed.";
 	}
 
-	protected get failedToStartError() {
+	protected get failedToStartError(): string {
 		return "Failed to start cloud cleanup.";
 	}
 
@@ -56,11 +56,11 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 			this.$logger.error(_.map(cleanupResponse.warnings, w => w.message).join(EOL));
 		}
 
-		this.$logger.info(`### Code Commit cleanup${EOL}`);
+		this.$logger.info(`### AWS CodeCommit cleanup${EOL}`);
 		if (cleanupResponse.codeCommitResponse) {
 			this.$logger.info(`Cleaned repository: ${cleanupResponse.codeCommitResponse.repositoryId}.`);
 		} else {
-			this.$logger.info("No Code Commit data to clean.");
+			this.$logger.info("No AWS CodeCommit data to clean.");
 		}
 
 		const tasksResults: IDictionary<IServerResult> = {};
@@ -71,11 +71,11 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 			try {
 				await this.waitForServerOperationToFinish(taskId, task);
 				const taskResult = await this.getObjectFromS3File<IServerResult>(task.resultUrl);
-				if (taskResult.stdout && taskResult.stdout.trim().length) {
+				if (this.hasContent(taskResult.stdout)) {
 					this.$logger.info(taskResult.stdout);
 				}
 
-				if (taskResult.stderr) {
+				if (this.hasContent(taskResult.stderr)) {
 					this.$logger.error(taskResult.stderr);
 				}
 
@@ -87,10 +87,10 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		}
 
 		const result: ICleanupProjectResult = {
-			cleanupTaskId: cleanupTaskId,
+			cleanupTaskId,
 			warnings: cleanupResponse.warnings,
 			codeCommitResponse: cleanupResponse.codeCommitResponse,
-			cloudTasks: tasksResults
+			cloudTasksResults: tasksResults
 		};
 
 		return result;
@@ -101,6 +101,10 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 	}
 
 	protected async getServerLogs(logsUrl: string, cloudTaskId: string): Promise<void> { /* no need for implementation */ }
+
+	private hasContent(input: string): boolean {
+		return input && input.trim().length > 0;
+	}
 }
 
 $injector.register("nsCloudProjectService", CloudProjectService);
