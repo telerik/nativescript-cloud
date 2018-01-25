@@ -1129,8 +1129,8 @@ Definition:
 ```TypeScript
 /**
  * Cleans all AWS CodeCommit data and build machines artefacts if they exist.
- * @param {string} appIdentifier the application identifier.
- * @param {string} projectName the project name.
+ * @param {string} appIdentifier The application identifier.
+ * @param {string} projectName The project name.
  * @returns {Promise<ICleanupProjectResult>} Information about the cleanup. It includes AWS CodeCommit result and the result from the cleanup on each build machine.
  * If the promise is rejected the error will contain cleanupTaskId property.
  */

@@ -24,25 +24,17 @@ export class CleanCloudWorkspace implements ICommand {
 				projectName = this.$projectData.projectName;
 			} catch (err) {
 				// We are not in project and the app id and project name parameters are not provided.
-				if (!isInteractive()) {
-					this.$errors.failWithoutHelp(CleanCloudWorkspace.COMMAND_REQUIREMENTS_ERROR_MESSAGE);
-				}
-
-				appId = await this.$prompter.getString("App Id:", { allowEmpty: false });
+				appId = await this.promptForAppId();
 				projectName = await this.promptForProjectName();
 			}
 		} else if (args.length === 1) {
 			// Only app id is provided. We need to ask for project name if we can.
-			if (!isInteractive()) {
-				this.$errors.failWithoutHelp(CleanCloudWorkspace.COMMAND_REQUIREMENTS_ERROR_MESSAGE);
-			}
-
-			appId = args[0];
+			appId = await this.getParameterValue(args[0], () => this.promptForAppId());
 			projectName = await this.promptForProjectName();
 		} else {
 			// Both app id and project name are provided as parameters.
-			appId = args[0];
-			projectName = args[1];
+			appId = await this.getParameterValue(args[0], () => this.promptForAppId());
+			projectName = await this.getParameterValue(args[1], () => this.promptForProjectName());
 		}
 
 		await this.$nsCloudProjectService.cleanupProject(appId, projectName);
@@ -58,8 +50,28 @@ export class CleanCloudWorkspace implements ICommand {
 	}
 
 	private async promptForProjectName(): Promise<string> {
+		if (!isInteractive()) {
+			this.$errors.failWithoutHelp(CleanCloudWorkspace.COMMAND_REQUIREMENTS_ERROR_MESSAGE);
+		}
+
 		return this.$prompter.getString("Project name:", { allowEmpty: false });
+	}
+
+	private async promptForAppId(): Promise<string> {
+		if (!isInteractive()) {
+			this.$errors.failWithoutHelp(CleanCloudWorkspace.COMMAND_REQUIREMENTS_ERROR_MESSAGE);
+		}
+
+		return this.$prompter.getString("App Id:", { allowEmpty: false });
+	}
+
+	private async getParameterValue(param: string, action: () => Promise<string>): Promise<string> {
+		if (param.trim().length > 0) {
+			return param;
+		}
+
+		return action();
 	}
 }
 
-$injector.registerCommand(["clean|cloud|workspace"], CleanCloudWorkspace);
+$injector.registerCommand(["cloud|clean|workspace"], CleanCloudWorkspace);
