@@ -51,6 +51,8 @@ const tns = require("nativescript");
   * [getEulaData](#geteuladata)
   * [getEulaDataWithCache](#geteuladatawithcache)
   * [acceptEula](#acceptEula)
+* [nsCloudProjectService](#nscloudprojectservice)
+  * [cleanupProject](#cleanupproject-method)
 
 ### nsCloudBuildService
 The `nsCloudBuildService` allows build of applications in the cloud. You can call the following methods:
@@ -1115,6 +1117,35 @@ const tns = require("nativescript");
 tns.nsCloudEulaService.acceptEula()
 	.then(() => console.log(`Successfully accepted EULA.`))
 	.catch(err => console.error("Unable to accept EULA. Error is: ", err));
+```
+
+### nsCloudProjectService
+The `nsCloudProjectService` allows to manage cloud projects. You can call the following methods:
+
+#### cleanupProject method
+`cleanupProject` method cleans all cloud build data which is used for optimizations. The method will clean all AWS CodeCommit and build machine artefacts if they exist. </br>
+Definition:
+
+```TypeScript
+/**
+ * Cleans all AWS CodeCommit data and build machines artefacts if they exist.
+ * @param {string} appIdentifier The application identifier.
+ * @param {string} projectName The project name.
+ * @returns {Promise<ICleanupProjectResult>} Information about the cleanup. It includes AWS CodeCommit result and the result from the cleanup on each build machine.
+ * If the promise is rejected the error will contain cleanupTaskId property.
+ */
+cleanupProject(appIdentifier: string, projectName: string): Promise<ICleanupProjectResult>;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/cloud-project-service.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudProjectService.cleanupProject("org.nativescript.test", "test")
+	.then((result) => console.log(`Cleanup result: ${result}`))
+	.catch(err => console.error("Unable to clean cloud project. Error is: ", err));
 ```
 
 ## Development

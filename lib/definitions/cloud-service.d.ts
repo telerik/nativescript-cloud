@@ -44,13 +44,19 @@ interface ICloudServerOutputDirectoryOptions extends IPlatform {
 }
 
 /**
- * Describes the result from the server operation.
+ * Describes the result from server operation.
  */
 interface IServerResult {
 	errors: string;
 	code: number;
 	stdout: string;
 	stderr: string;
+}
+
+/**
+ * Describes the result from build server operation.
+ */
+interface IBuildServerResult extends IServerResult {
 	/**
 	 * Items produced after execution of server command. Could be empty.
 	 * Naming is due to initial implementation that is related to other repos.

@@ -10,7 +10,7 @@ export abstract class CloudService extends EventEmitter {
 	protected outputCursorPosition: number;
 	protected abstract failedToStartError: string;
 	protected abstract failedError: string;
-	protected abstract getServerResults(serverResult: IServerResult): IServerItem[];
+	protected abstract getServerResults(serverResult: IBuildServerResult): IServerItem[];
 	protected abstract getServerLogs(logsUrl: string, buildId: string): Promise<void>;
 
 	public abstract getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string;
@@ -29,7 +29,7 @@ export abstract class CloudService extends EventEmitter {
 		return (await this.$httpClient.httpRequest(pathToFile)).body;
 	}
 
-	protected waitForServerOperationToFinish(buildId: string, serverInformation: IServerResponse): Promise<void> {
+	protected waitForServerOperationToFinish(operationId: string, serverInformation: IServerResponse): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			this.outputCursorPosition = 0;
 			let hasCheckedForServerStatus = false;
@@ -55,26 +55,26 @@ export abstract class CloudService extends EventEmitter {
 
 				if (serverStatus.status === CloudService.OPERATION_COMPLETE_STATUS) {
 					clearInterval(serverIntervalId);
-					await this.getServerLogs(serverInformation.outputUrl, buildId);
+					await this.getServerLogs(serverInformation.outputUrl, operationId);
 
 					return resolve();
 				}
 
 				if (serverStatus.status === CloudService.OPERATION_FAILED_STATUS) {
 					clearInterval(serverIntervalId);
-					await this.getServerLogs(serverInformation.outputUrl, buildId);
+					await this.getServerLogs(serverInformation.outputUrl, operationId);
 
 					return reject(new Error(this.failedError));
 				}
 
 				if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
-					await this.getServerLogs(serverInformation.outputUrl, buildId);
+					await this.getServerLogs(serverInformation.outputUrl, operationId);
 				}
 			}, CloudService.OPERATION_STATUS_CHECK_INTERVAL);
 		});
 	}
 
-	protected async downloadServerResults(serverResult: IServerResult, serverOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string[]> {
+	protected async downloadServerResults(serverResult: IBuildServerResult, serverOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string[]> {
 		const destinationDir = this.getServerOperationOutputDirectory(serverOutputOptions);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
