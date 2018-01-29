@@ -37,7 +37,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 	}
 
 	private async executeCleanupProject(cleanupTaskId: string, appIdentifier: string, projectName: string): Promise<ICleanupProjectResult> {
-		const cleanupInfoMessage = `Application Id: ${appIdentifier}, Cleanup Task Id: ${cleanupTaskId}`;
+		const cleanupInfoMessage = `Application Id: ${appIdentifier}, Project Name: ${projectName}, Cleanup Task Id: ${cleanupTaskId}`;
 		this.$logger.info(`Starting cloud cleanup: ${cleanupInfoMessage}.`);
 
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectName);
