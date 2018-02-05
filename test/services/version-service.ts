@@ -1,7 +1,6 @@
 import { VersionService } from "../../lib/services/version-service";
 import { Yok } from "mobile-cli-lib/yok";
 import { assert } from "chai";
-import { join } from "path";
 
 const TNS_CLI_CLOUD_VERSION_ORIGINAL = process.env.TNS_CLI_CLOUD_VERSION;
 describe("versionService", () => {
@@ -10,7 +9,6 @@ describe("versionService", () => {
 		testInjector.register("logger", {
 			trace: (formatStr?: any, ...args: any[]): void => (undefined)
 		});
-		testInjector.register("fs", {});
 		testInjector.register("httpClient", {});
 		testInjector.register("projectDataService", {});
 		return testInjector;
@@ -53,14 +51,6 @@ describe("versionService", () => {
 			{
 				runtimeVersion: "5.1.5",
 				expectedCliVersion: "5.1.0"
-			},
-			{
-				runtimeVersion: "4.1.0",
-				expectedCliVersion: "4.1.0"
-			},
-			{
-				runtimeVersion: "4.1.8",
-				expectedCliVersion: "4.1.0"
 			}
 		];
 
@@ -112,52 +102,34 @@ describe("versionService", () => {
 			mockHttpRequest(testInjector, body);
 
 			const versionService = testInjector.resolve<IVersionService>(VersionService);
-			await assert.isRejected(versionService.getCliVersion("some invalid version"), "Unable to determine CLI version for cloud build.");
+			const invalidRuntimeVersion = "some invalid version";
+			await assert.isRejected(versionService.getCliVersion(invalidRuntimeVersion), `Unable to determine CLI version for cloud build based on project's runtime version: ${invalidRuntimeVersion}. Error is: Invalid Version: ${invalidRuntimeVersion}`);
 			assert.isFalse(isHttpRequestCalled, "An http request to registry.npmjs.org should have NOT been made.");
 		});
 
-		it("returns version based on runtime when http requests fail", async () => {
+		it("fails when http request to get CLI versions fails", async () => {
 			const testInjector = createTestInjector();
-			mockHttpRequest(testInjector, null, new Error("Http request fails."));
+			const err = new Error("Http request fails.");
+			mockHttpRequest(testInjector, null, err);
 
 			const versionService = testInjector.resolve<IVersionService>(VersionService);
-			assert.deepEqual(await versionService.getCliVersion("1.2.3"), "1.2.0");
+			const runtimeVersion = "1.2.3";
+			await assert.isRejected(versionService.getCliVersion(runtimeVersion), `Unable to determine CLI version for cloud build based on project's runtime version: ${runtimeVersion}. Error is: Cannot find CLI versions.`);
+
 			assert.isTrue(isHttpRequestCalled, "An http request to registry.npmjs.org should have been made in order to get data for CLI.");
 		});
 	});
 
-	describe("getCoreModulesVersion", () => {
-		it("returns the version from package.json", async () => {
-			const testInjector = createTestInjector();
-			const fs = testInjector.resolve<IFileSystem>("fs");
-			const projectDir = "projectDir";
-			let isReadJsonCalled = false;
-			const tnsCoreModulesVersion = "3.0.0";
-			fs.readJson = (filename: string, encoding?: string): any => {
-				isReadJsonCalled = true;
-				assert.equal(join(projectDir, "package.json"), filename, "fs.readJson must be called with path to package.json");
-				return {
-					dependencies: {
-						"tns-core-modules": "3.0.0"
-					}
-				};
-			};
-
-			const versionService = testInjector.resolve<IVersionService>(VersionService);
-			const actualTnsCoreModulesVersion = await versionService.getCoreModulesVersion(projectDir);
-			assert.equal(actualTnsCoreModulesVersion, tnsCoreModulesVersion);
-			assert.isTrue(isReadJsonCalled, "fs.readJson should have been called.");
-		});
-	});
-
 	describe("getProjectRuntimeVersion", () => {
-		it("returns the version from package.json", async () => {
-			const testInjector = createTestInjector();
+		let isGetNSValueCalled = false;
+
+		beforeEach(() => {
+			isGetNSValueCalled = false;
+		});
+
+		const mockGetNSValue = (testInjector: IInjector, runtimeVersion: string, projectDir: string, platform: string): void => {
 			const projectDataService = testInjector.resolve<IProjectDataService>("projectDataService");
-			const projectDir = "project dir";
-			const platform = "platform";
-			const runtimeVersion = "3.0.0";
-			let isGetNSValueCalled = false;
+
 			projectDataService.getNSValue = (projDir: string, propertyName: string): any => {
 				isGetNSValueCalled = true;
 				assert.equal(projDir, projectDir, "getNSValue should be called with the projectDir passed to getProjectRuntimeVersion");
@@ -165,6 +137,14 @@ describe("versionService", () => {
 
 				return runtimeVersion;
 			};
+		};
+		it("returns the version from package.json", async () => {
+			const testInjector = createTestInjector();
+			const projectDir = "project dir";
+			const platform = "platform";
+			const runtimeVersion = "3.0.0";
+
+			mockGetNSValue(testInjector, runtimeVersion, projectDir, platform);
 
 			const versionService = testInjector.resolve<IVersionService>(VersionService);
 			const actualRuntimeVersion = await versionService.getProjectRuntimeVersion(projectDir, platform);
@@ -174,17 +154,10 @@ describe("versionService", () => {
 
 		it("fails when runtime is not added to package.json", async () => {
 			const testInjector = createTestInjector();
-			const projectDataService = testInjector.resolve<IProjectDataService>("projectDataService");
 			const projectDir = "project dir";
 			const platform = "platform";
-			let isGetNSValueCalled = false;
-			projectDataService.getNSValue = (projDir: string, propertyName: string): any => {
-				isGetNSValueCalled = true;
-				assert.equal(projDir, projectDir, "getNSValue should be called with the projectDir passed to getProjectRuntimeVersion");
-				assert.equal(propertyName, `tns-${platform}.version`);
 
-				return null;
-			};
+			mockGetNSValue(testInjector, null, projectDir, platform);
 
 			const versionService = testInjector.resolve<IVersionService>(VersionService);
 			await assert.isRejected(versionService.getProjectRuntimeVersion(projectDir, platform), `Unable to find runtime version for package tns-${platform}.`);

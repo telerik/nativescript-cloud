@@ -16,11 +16,4 @@ interface IVersionService {
 	 * @returns {Promise<string>} The version of the runtime.
 	 */
 	getProjectRuntimeVersion(projectDir: string, platform: string): Promise<string>;
-
-	/**
-	 * Gives information for the version of the tns-core-modules package used in the project.
-	 * @param {string} projectDir The directory of the project.
-	 * @returns {string} The version of the tns-core-modules package used in the dependencies section of the project.
-	 */
-	getCoreModulesVersion(projectDir: string): string;
 }

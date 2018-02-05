@@ -1,9 +1,7 @@
-import { join } from "path";
 import * as semver from "semver";
 
 export class VersionService implements IVersionService {
-	constructor(private $fs: IFileSystem,
-		private $httpClient: Server.IHttpClient,
+	constructor(private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
 		private $projectDataService: IProjectDataService) { }
 
@@ -11,18 +9,12 @@ export class VersionService implements IVersionService {
 		try {
 			const latestMatchingVersion = process.env.TNS_CLI_CLOUD_VERSION || await this.getLatestMatchingVersion("nativescript", this.getVersionRangeWithTilde(runtimeVersion));
 			if (!latestMatchingVersion) {
-				throw new Error(`Cannot find matching CLI version based on runtime version ${runtimeVersion}`);
+				throw new Error("Cannot find CLI versions.");
 			}
 
 			return latestMatchingVersion;
 		} catch (err) {
-			this.$logger.trace(`Unable to get information about CLI versions. Error is: ${err.message}`);
-			if (!semver.valid(runtimeVersion)) {
-				// In case the runtime version is not a valid semver version, we cannot determine CLI version.
-				throw new Error("Unable to determine CLI version for cloud build.");
-			}
-
-			return `${semver.major(runtimeVersion)}.${semver.minor(runtimeVersion)}.0`;
+			throw new Error(`Unable to determine CLI version for cloud build based on project's runtime version: ${runtimeVersion}. Error is: ${err.message}`);
 		}
 	}
 
@@ -35,10 +27,6 @@ export class VersionService implements IVersionService {
 		}
 
 		return runtimeVersion;
-	}
-
-	public getCoreModulesVersion(projectDir: string): string {
-		return this.$fs.readJson(join(projectDir, "package.json")).dependencies["tns-core-modules"];
 	}
 
 	private async getLatestMatchingVersion(packageName: string, range: string): Promise<string> {
