@@ -8,9 +8,20 @@ interface ICleanupProjectResponse {
 	warnings: Error[];
 }
 
-interface ICleanupProjectData {
+/**
+ * Describes data used for project cleaning passed from client.
+ */
+interface ICleanupProjectDataBase extends IProjectNameComposition {
+	/**
+	 * Application's identifier
+	 */
 	appIdentifier: string;
-	projectName: string;
+}
+
+/**
+ * Describes data used for project cleaning passed to server.
+ */
+interface ICleanupProjectData extends ICleanupProjectDataBase {
 	templateAppName: string;
 	projectCleanupId: string;
 }

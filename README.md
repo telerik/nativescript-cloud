@@ -1129,12 +1129,11 @@ Definition:
 ```TypeScript
 /**
  * Cleans all AWS CodeCommit data and build machines artefacts if they exist.
- * @param {string} appIdentifier The application identifier.
- * @param {string} projectName The project name.
+* @param {ICleanupProjectDataBase} cleanupProjectData Data needed for project cleaning.
  * @returns {Promise<ICleanupProjectResult>} Information about the cleanup. It includes AWS CodeCommit result and the result from the cleanup on each build machine.
  * If the promise is rejected the error will contain cleanupTaskId property.
  */
-cleanupProject(appIdentifier: string, projectName: string): Promise<ICleanupProjectResult>;
+cleanupProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupProjectResult>;
 ```
 Detailed description of each parameter can be found [here](./lib/definitions/cloud-project-service.d.ts).
 </br>
@@ -1143,7 +1142,7 @@ Usage:
 ```JavaScript
 const tns = require("nativescript");
 
-tns.nsCloudProjectService.cleanupProject("org.nativescript.test", "test")
+tns.nsCloudProjectService.cleanupProject({ appIdentifier: "org.nativescript.test", projectName: "test" })
 	.then((result) => console.log(`Cleanup result: ${result}`))
 	.catch(err => console.error("Unable to clean cloud project. Error is: ", err));
 ```

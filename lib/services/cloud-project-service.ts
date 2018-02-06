@@ -24,10 +24,10 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		return path.join(options.projectDir, "cleanup-results");
 	}
 
-	public async cleanupProject(appIdentifier: string, projectName: string): Promise<ICleanupProjectResult> {
+	public async cleanupProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupProjectResult> {
 		const cleanupTaskId = uuid.v4();
 		try {
-			const result = await this.executeCleanupProject(cleanupTaskId, appIdentifier, projectName);
+			const result = await this.executeCleanupProject(cleanupTaskId, cleanupProjectData);
 			this.$logger.trace(`Cleanup [${cleanupTaskId}] result: `, result);
 			return result;
 		} catch (err) {
@@ -36,7 +36,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		}
 	}
 
-	private async executeCleanupProject(cleanupTaskId: string, appIdentifier: string, projectName: string): Promise<ICleanupProjectResult> {
+	private async executeCleanupProject(cleanupTaskId: string, { appIdentifier, projectName }: ICleanupProjectDataBase): Promise<ICleanupProjectResult> {
 		const cleanupInfoMessage = `Application Id: ${appIdentifier}, Project Name: ${projectName}, Cleanup Task Id: ${cleanupTaskId}`;
 		this.$logger.info(`Starting cloud cleanup: ${cleanupInfoMessage}.`);
 

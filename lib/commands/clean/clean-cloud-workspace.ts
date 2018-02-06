@@ -2,7 +2,7 @@ import { isInteractive } from "../../helpers";
 
 export class CleanCloudWorkspace implements ICommand {
 	private static COMMAND_REQUIREMENTS_ERROR_MESSAGE: string =
-		"The command should be executed inside project or the app id and project name parameters must be provided.";
+	"The command should be executed inside project or the app id and project name parameters must be provided.";
 
 	public allowedParameters: ICommandParameter[] = [];
 
@@ -13,31 +13,31 @@ export class CleanCloudWorkspace implements ICommand {
 		private $prompter: IPrompter) { }
 
 	public async execute(args: string[]): Promise<void> {
-		let appId: string;
+		let appIdentifier: string;
 		let projectName: string;
 
 		if (args.length === 0) {
 			try {
 				// We want to use the project data only when no parameters are provided.
 				this.$projectData.initializeProjectData();
-				appId = this.$projectData.projectId;
+				appIdentifier = this.$projectData.projectId;
 				projectName = this.$projectData.projectName;
 			} catch (err) {
 				// We are not in project and the app id and project name parameters are not provided.
-				appId = await this.promptForAppId();
+				appIdentifier = await this.promptForAppId();
 				projectName = await this.promptForProjectName();
 			}
 		} else if (args.length === 1) {
 			// Only app id is provided. We need to ask for project name if we can.
-			appId = await this.getParameterValue(args[0], () => this.promptForAppId());
+			appIdentifier = await this.getParameterValue(args[0], () => this.promptForAppId());
 			projectName = await this.promptForProjectName();
 		} else {
 			// Both app id and project name are provided as parameters.
-			appId = await this.getParameterValue(args[0], () => this.promptForAppId());
+			appIdentifier = await this.getParameterValue(args[0], () => this.promptForAppId());
 			projectName = await this.getParameterValue(args[1], () => this.promptForProjectName());
 		}
 
-		await this.$nsCloudProjectService.cleanupProject(appId, projectName);
+		await this.$nsCloudProjectService.cleanupProject({ appIdentifier, projectName });
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
