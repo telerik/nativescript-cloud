@@ -394,6 +394,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			properties: {
 				buildId: settings.buildId,
 				buildConfiguration: settings.buildConfiguration,
+				sharedCloud: settings.projectSettings.sharedCloud,
 				platform: settings.platform,
 				appIdentifier: settings.projectSettings.projectId,
 				frameworkVersion: cliVersion,

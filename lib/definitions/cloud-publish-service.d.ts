@@ -11,7 +11,7 @@ interface IPackagePaths {
 /**
  * Helper interface combining common properties of all platforms.
  */
-interface IPublishDataCore extends IPackagePaths, IProjectDir { }
+interface IPublishDataCore extends IPackagePaths, IProjectDir, ISharedCloud { }
 
 /**
  * Describes an optional property passing iOS team identifier.

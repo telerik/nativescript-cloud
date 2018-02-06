@@ -7,6 +7,7 @@ export class CloudOptionsProvider implements ICloudOptionsProvider {
 			apiVersion: { type: OptionType.String },
 			local: { type: OptionType.Boolean },
 			serverProto: { type: OptionType.String },
+			sharedCloud: { type: OptionType.Boolean },
 			track: { type: OptionType.String, default: DEFAULT_ANDROID_PUBLISH_TRACK },
 		};
 	}
