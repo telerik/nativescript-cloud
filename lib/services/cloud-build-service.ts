@@ -380,8 +380,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		this.emitStepChanged(settings.buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.END);
-		const coreModulesVersion = this.$nsCloudVersionService.getCoreModulesVersion(settings.projectSettings.projectDir);
-		const runtimeVersion = await this.$nsCloudVersionService.getRuntimeVersion(settings.platform, settings.projectSettings.nativescriptData, coreModulesVersion);
+		const runtimeVersion = await this.$nsCloudVersionService.getProjectRuntimeVersion(settings.projectSettings.projectDir, settings.platform);
 		const cliVersion = await this.$nsCloudVersionService.getCliVersion(runtimeVersion);
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(settings.projectSettings.projectName);
 

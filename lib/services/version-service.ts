@@ -1,43 +1,32 @@
-import { join } from "path";
 import * as semver from "semver";
 
 export class VersionService implements IVersionService {
-	private static DEFAULT_CLI_VERSION = "3.0.0";
-
-	constructor(private $fs: IFileSystem,
-		private $httpClient: Server.IHttpClient,
-		private $logger: ILogger) { }
+	constructor(private $httpClient: Server.IHttpClient,
+		private $logger: ILogger,
+		private $projectDataService: IProjectDataService) { }
 
 	public async getCliVersion(runtimeVersion: string): Promise<string> {
 		try {
 			const latestMatchingVersion = process.env.TNS_CLI_CLOUD_VERSION || await this.getLatestMatchingVersion("nativescript", this.getVersionRangeWithTilde(runtimeVersion));
-			return latestMatchingVersion || VersionService.DEFAULT_CLI_VERSION;
-		} catch (err) {
-			this.$logger.trace(`Unable to get information about CLI versions. Error is: ${err.message}`);
-			return `${semver.major(runtimeVersion)}.${semver.minor(runtimeVersion)}.0`;
-		}
-	}
-
-	public async getRuntimeVersion(platform: string, nativescriptData: any, coreModulesVersion: string): Promise<string> {
-		const runtimePackageName = `tns-${platform.toLowerCase()}`;
-		let runtimeVersion = nativescriptData && nativescriptData[runtimePackageName] && nativescriptData[runtimePackageName].version;
-		if (!runtimeVersion && coreModulesVersion) {
-			// no runtime added. Let's find out which one we need based on the tns-core-modules.
-			if (semver.valid(coreModulesVersion)) {
-				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, this.getVersionRangeWithTilde(coreModulesVersion));
-			} else if (semver.validRange(coreModulesVersion)) {
-				// In case tns-core-modules in package.json are referred as `~x.x.x` - this is not a valid version, but is valid range.
-				runtimeVersion = await this.getLatestMatchingVersion(runtimePackageName, coreModulesVersion);
+			if (!latestMatchingVersion) {
+				throw new Error("Cannot find CLI versions.");
 			}
-		}
 
-		return runtimeVersion || VersionService.DEFAULT_CLI_VERSION;
+			return latestMatchingVersion;
+		} catch (err) {
+			throw new Error(`Unable to determine CLI version for cloud build based on project's runtime version: ${runtimeVersion}. Error is: ${err.message}`);
+		}
 	}
 
-	public getCoreModulesVersion(projectDir: string): string {
-		// HACK just for this version. After that we'll have UI for getting runtime version.
-		// Until then, use the coreModulesVersion.
-		return this.$fs.readJson(join(projectDir, "package.json")).dependencies["tns-core-modules"];
+	public async getProjectRuntimeVersion(projectDir: string, platform: string, ): Promise<string> {
+		const runtimePackageName = `tns-${platform.toLowerCase()}`;
+		const runtimeVersion = this.$projectDataService.getNSValue(projectDir, `${runtimePackageName}.version`);
+
+		if (!runtimeVersion) {
+			throw new Error(`Unable to find runtime version for package ${runtimePackageName}.`);
+		}
+
+		return runtimeVersion;
 	}
 
 	private async getLatestMatchingVersion(packageName: string, range: string): Promise<string> {
@@ -51,13 +40,17 @@ export class VersionService implements IVersionService {
 
 	private async getVersionsFromNpm(packageName: string): Promise<string[]> {
 		try {
-			const response = await this.$httpClient.httpRequest(`http://registry.npmjs.org/${packageName}`);
-			const versions = _.keys(JSON.parse(response.body).versions);
-			return versions;
+			const packageData = await this.getPackageDataFromNpm(packageName);
+			return _.keys(packageData.versions);
 		} catch (err) {
 			this.$logger.trace(`Unable to get versions of ${packageName} from npm. Error is: ${err.message}.`);
 			return [];
 		}
+	}
+
+	private async getPackageDataFromNpm(packageName: string): Promise<IDictionary<any>> {
+		const response = await this.$httpClient.httpRequest(`http://registry.npmjs.org/${packageName}`);
+		return JSON.parse(response.body);
 	}
 
 	private getVersionRangeWithTilde(versionString: string): string {
