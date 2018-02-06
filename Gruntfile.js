@@ -247,6 +247,6 @@ module.exports = function (grunt) {
 	]);
 	grunt.registerTask("lint", ["tslint:build"]);
 	grunt.registerTask("all", ["clean", "test", "tslint:build"]);
-	grunt.registerTask("rebuild", ["clean", "ts:devlib"]);
 	grunt.registerTask("default", ["generate_references", "ts:devlib"]);
+	grunt.registerTask("rebuild", ["clean", "default"]);
 };
