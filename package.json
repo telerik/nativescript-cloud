@@ -45,6 +45,7 @@
     "typescript": "2.4.1"
   },
   "dependencies": {
+    "@types/promise-retry": "1.1.1",
     "aws4": "1.6.0",
     "cli-table": "https://github.com/telerik/cli-table/tarball/v0.3.1.2",
     "cloud-device-emulator": "0.5.0",
@@ -54,6 +55,7 @@
     "nativescript-doctor": "0.5.0",
     "node-forge": "0.7.0",
     "osenv": "0.1.4",
+    "promise-retry": "1.1.1",
     "querystring": "0.2.0",
     "semver": "5.3.0",
     "simple-plist": "0.2.1",
