@@ -177,9 +177,20 @@ interface IPrepareBuildRequestInfo {
 }
 
 /**
+ * Describes information about the project's name.
+ */
+interface IProjectNameComposition {
+
+	/**
+	 * The project's name
+	 */
+	projectName: string;
+}
+
+/**
  * Options that can be used to construct itms-services plist.
  */
-interface IItmsPlistOptions {
+interface IItmsPlistOptions extends IProjectNameComposition {
 	/**
 	 * The path to the mobileprovision file on the file system.
 	 */
@@ -194,17 +205,12 @@ interface IItmsPlistOptions {
 	 * The aforementioned .ipa file's application identifier
 	 */
 	projectId: string;
-
-	/**
-	 * The aforementioned .ipa file's application's display name
-	 */
-	projectName: string;
 }
 
 /**
  * Describes the project settings required for different operations.
  */
-interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud {
+interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud, IProjectNameComposition {
 	/**
 	 * The directory where the project is located. This should be the path to the directory where application's package.json is located.
 	 */
@@ -214,11 +220,6 @@ interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud {
 	 * Application identifier.
 	 */
 	projectId: string;
-
-	/**
-	 * Name that will be visible to the users when application is installed on device.
-	 */
-	projectName: string;
 
 	/**
 	 * The value of `nativescript` key from project's package.json.
