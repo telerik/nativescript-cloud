@@ -23,6 +23,7 @@
     "@types/chai-as-promised": "0.0.31",
     "@types/node": "6.0.61",
     "@types/node-forge": "0.6.7",
+    "@types/promise-retry": "1.1.1",
     "@types/semver": "5.3.30",
     "@types/source-map": "0.5.0",
     "@types/uuid": "2.0.29",
@@ -45,7 +46,6 @@
     "typescript": "2.4.1"
   },
   "dependencies": {
-    "@types/promise-retry": "1.1.1",
     "aws4": "1.6.0",
     "cli-table": "https://github.com/telerik/cli-table/tarball/v0.3.1.2",
     "cloud-device-emulator": "0.5.0",
