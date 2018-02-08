@@ -383,6 +383,10 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const runtimeVersion = await this.$nsCloudVersionService.getProjectRuntimeVersion(settings.projectSettings.projectDir, settings.platform);
 		const cliVersion = await this.$nsCloudVersionService.getCliVersion(runtimeVersion);
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(settings.projectSettings.projectName);
+		const workflow: IWorkflowRequestData = settings.projectSettings.workflowName && settings.projectSettings.workflowUrl && {
+			workflowName: settings.projectSettings.workflowName,
+			workflowUrl: settings.projectSettings.workflowUrl
+		};
 
 		/** Although the nativescript-cloud is an extension that is used only with nativescript projects,
 		 * current implementation of the builder daemon will not add default framework. This breaks tooling when incremental build is
@@ -403,10 +407,12 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				templateAppName: sanitizedProjectName,
 				projectName: sanitizedProjectName,
 				framework: "tns",
+				flavorId: settings.projectSettings.flavorId,
 				additionalCliFlags: settings.additionalCliFlags,
 				useIncrementalBuild: !settings.projectSettings.clean,
 				userEmail: this.$nsCloudUserService.getUser().email
 			},
+			workflow,
 			targets: [],
 			buildFiles
 		};

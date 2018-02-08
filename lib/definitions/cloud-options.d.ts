@@ -7,6 +7,23 @@ interface ICloudOptions extends IOptions, ISharedCloud {
 	local: boolean;
 	serverProto: string;
 	track: string;
+	workflow: IWorkflowPropertyOptions;
+	vmTemplateName: string;
+}
+
+/**
+ * Describes options that can be passed via the workflow flag.
+ */
+interface IWorkflowPropertyOptions {
+	/**
+	 * Used to specify the url where the actual workflow can be found.
+	 */
+	url?: string;
+
+	/**
+	 * Used to specify the workflow's name.
+	 */
+	name?: string;
 }
 
 /**

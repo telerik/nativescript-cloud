@@ -17,6 +17,21 @@ interface IBuildFile {
 	sourceUri: string;
 }
 
+/**
+ * Describes data that can be passed to a server request in order to manipulate the workflow on the remote machines.
+ */
+interface IWorkflowRequestData {
+	/**
+	 * The url where the actual workflow can be found.
+	 */
+	workflowUrl: string;
+
+	/**
+	 * The name of the workflow.
+	 */
+	workflowName: string;
+}
+
 interface ICodeSignRequestData extends IBuildId, IAppId, IClean, ICredentials, ISharedCloud {
 	appName: string;
 	devices: Mobile.IDeviceInfo[];
@@ -29,6 +44,7 @@ interface IAccountId {
 interface IBuildRequestData extends IAccountId, IServerRequestData {
 	targets: string[];
 	buildFiles: IBuildFile[];
+	workflow?: IWorkflowRequestData;
 }
 
 interface IAppId {

@@ -8,6 +8,8 @@ export class CloudOptionsProvider implements ICloudOptionsProvider {
 			local: { type: OptionType.Boolean },
 			serverProto: { type: OptionType.String },
 			sharedCloud: { type: OptionType.Boolean },
+			workflow: { type: OptionType.Object },
+			vmTemplateName: { type: OptionType.String },
 			track: { type: OptionType.String, default: DEFAULT_ANDROID_PUBLISH_TRACK },
 		};
 	}
