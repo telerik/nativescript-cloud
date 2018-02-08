@@ -2,6 +2,10 @@ import { isInteractive } from "../helpers";
 import { ERROR_MESSAGES } from "../constants";
 
 export class CloudCodesignCommand implements ICommand {
+	public get dashedOptions() {
+		return this.$nsCloudOptionsProvider.dashedOptions;
+	}
+
 	// Currently only iOS codesign generation is supported.
 	private readonly platform = this.$devicePlatformsConstants.iOS;
 	private devices: Mobile.IDeviceInfo[];
@@ -12,6 +16,8 @@ export class CloudCodesignCommand implements ICommand {
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $devicesService: Mobile.IDevicesService,
 		private $errors: IErrors,
+		private $nsCloudOptionsProvider: ICloudOptionsProvider,
+		private $options: ICloudOptions,
 		private $projectData: IProjectData,
 		private $prompter: IPrompter,
 		private $nsCloudCodesignService: ICloudCodesignService) {
@@ -32,9 +38,10 @@ export class CloudCodesignCommand implements ICommand {
 
 		this.$logger.info("Generating codesign files in the cloud");
 
-		const codesignData = {
+		const codesignData: ICodesignData = {
 			username, password,
 			clean: true,
+			sharedCloud: this.$options.sharedCloud,
 			platform: this.platform,
 			attachedDevices: this.devices
 		};

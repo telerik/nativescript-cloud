@@ -84,6 +84,16 @@ interface IBuildData {
 }
 
 /**
+ * Describes options used for controlling cloud build infrastructure.
+ */
+interface ISharedCloud {
+	/**
+	 * If true will perform cloud operation on the shared cloud instead of the private one.
+	 */
+	sharedCloud: boolean;
+}
+
+/**
  * Defines operations for building a project in the cloud.
  */
 interface ICloudBuildService extends ICloudOperationService {
@@ -194,7 +204,7 @@ interface IItmsPlistOptions {
 /**
  * Describes the project settings required for different operations.
  */
-interface INSCloudProjectSettings extends IEnvOptions, IBundle {
+interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud {
 	/**
 	 * The directory where the project is located. This should be the path to the directory where application's package.json is located.
 	 */

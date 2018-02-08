@@ -49,6 +49,7 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 			track,
 			pathToAuthJson,
 			packagePaths: [packagePath],
+			sharedCloud: this.$options.sharedCloud,
 			projectDir: this.$projectData.projectDir,
 		});
 	}
@@ -85,6 +86,7 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 		const itunesPublishdata: IItunesConnectPublishData = {
 			credentials,
 			packagePaths: [packagePath],
+			sharedCloud: this.$options.sharedCloud,
 			projectDir: this.$projectData.projectDir
 		};
 

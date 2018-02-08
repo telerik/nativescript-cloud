@@ -17,7 +17,7 @@ interface IBuildFile {
 	sourceUri: string;
 }
 
-interface ICodeSignRequestData extends IBuildId, IAppId, IClean, ICredentials {
+interface ICodeSignRequestData extends IBuildId, IAppId, IClean, ICredentials, ISharedCloud {
 	appName: string;
 	devices: Mobile.IDeviceInfo[];
 }
@@ -62,6 +62,7 @@ interface IPublishCredentials {
 interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroidTrack, IOptionalTeamIdentifier {
 	credentials: IPublishCredentials;
 	appIdentifier?: string;
+	sharedCloud?: boolean;
 }
 
 interface IServerRequestData {

@@ -91,6 +91,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 
 	private async publishCore(publishRequestData: IPublishRequestData, publishDataCore: IPublishDataCore, getError: (publishResult: IBuildServerResult, publishRequestData: IPublishRequestData) => any): Promise<void> {
 		publishRequestData.packagePaths = await this.getPreparePackagePaths(publishDataCore);
+		publishRequestData.sharedCloud = publishDataCore.sharedCloud;
 
 		this.$logger.info("Starting publishing.");
 		const response = await this.$nsCloudServerBuildService.publish(publishRequestData);

@@ -1,7 +1,7 @@
 /**
  * Describes additional -- flags that can be passed to cloud commands.
  */
-interface ICloudOptions extends IOptions {
+interface ICloudOptions extends IOptions, ISharedCloud {
 	accountId: string;
 	apiVersion: string;
 	local: boolean;

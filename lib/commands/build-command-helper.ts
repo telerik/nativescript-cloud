@@ -38,6 +38,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			projectId: this.$projectData.projectId,
 			projectName: this.$projectData.projectName,
 			bundle: !!this.$options.bundle,
+			sharedCloud: this.$options.sharedCloud,
 			clean: this.$options.clean,
 			env: this.$options.env
 		};

@@ -139,6 +139,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 			clean: codesignData.clean,
 			username: codesignData.username,
 			password: codesignData.password,
+			sharedCloud: codesignData.sharedCloud,
 			devices: codesignData.attachedDevices
 		};
 	}
