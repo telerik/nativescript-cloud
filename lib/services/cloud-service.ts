@@ -1,8 +1,10 @@
 import * as path from "path";
 import { EventEmitter } from "events";
+import promiseRetry = require("promise-retry");
 
 export abstract class CloudService extends EventEmitter {
 	private static OPERATION_STATUS_CHECK_INTERVAL = 1500;
+	private static OPERATION_STATUS_CHECK_RETRY_COUNT = 8;
 	private static OPERATION_COMPLETE_STATUS = "Success";
 	private static OPERATION_FAILED_STATUS = "Failed";
 	private static OPERATION_IN_PROGRESS_STATUS = "Building";
@@ -30,10 +32,9 @@ export abstract class CloudService extends EventEmitter {
 	}
 
 	protected waitForServerOperationToFinish(operationId: string, serverInformation: IServerResponse): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			this.outputCursorPosition = 0;
-			let hasCheckedForServerStatus = false;
-			const serverIntervalId = setInterval(async () => {
+		this.outputCursorPosition = 0;
+		return promiseRetry((retry, attempt) => {
+			return new Promise<void>(async (resolve, reject) => {
 				let serverStatus: IServerStatus;
 				try {
 					serverStatus = await this.getObjectFromS3File<IServerStatus>(serverInformation.statusUrl);
@@ -41,11 +42,8 @@ export abstract class CloudService extends EventEmitter {
 					this.$logger.trace(err);
 				}
 
-				if (!hasCheckedForServerStatus) {
-					hasCheckedForServerStatus = true;
-				} else if (!serverStatus) {
+				if (!serverStatus) {
 					// We will get here if there is no server status twice in a row.
-					clearInterval(serverIntervalId);
 					return reject(new Error(this.failedToStartError));
 				}
 
@@ -54,14 +52,12 @@ export abstract class CloudService extends EventEmitter {
 				}
 
 				if (serverStatus.status === CloudService.OPERATION_COMPLETE_STATUS) {
-					clearInterval(serverIntervalId);
 					await this.getServerLogs(serverInformation.outputUrl, operationId);
 
 					return resolve();
 				}
 
 				if (serverStatus.status === CloudService.OPERATION_FAILED_STATUS) {
-					clearInterval(serverIntervalId);
 					await this.getServerLogs(serverInformation.outputUrl, operationId);
 
 					return reject(new Error(this.failedError));
@@ -70,8 +66,11 @@ export abstract class CloudService extends EventEmitter {
 				if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
 					await this.getServerLogs(serverInformation.outputUrl, operationId);
 				}
-			}, CloudService.OPERATION_STATUS_CHECK_INTERVAL);
-		});
+			}).catch(retry);
+		}, {
+				retries: CloudService.OPERATION_STATUS_CHECK_RETRY_COUNT,
+				minTimeout: CloudService.OPERATION_STATUS_CHECK_INTERVAL
+			});
 	}
 
 	protected async downloadServerResults(serverResult: IBuildServerResult, serverOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string[]> {
