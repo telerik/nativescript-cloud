@@ -31,45 +31,45 @@ export abstract class CloudService extends EventEmitter {
 		return (await this.$httpClient.httpRequest(pathToFile)).body;
 	}
 
-	protected waitForServerOperationToFinish(operationId: string, serverInformation: IServerResponse): Promise<void> {
-		this.outputCursorPosition = 0;
+	protected async waitForServerOperationToFinish(operationId: string, serverInformation: IServerResponse): Promise<void> {
+		const promiseRetryOptions = {
+			retries: CloudService.OPERATION_STATUS_CHECK_RETRY_COUNT,
+			minTimeout: CloudService.OPERATION_STATUS_CHECK_INTERVAL
+		};
 		return promiseRetry((retry, attempt) => {
-			return new Promise<void>(async (resolve, reject) => {
-				let serverStatus: IServerStatus;
+			return new Promise<IServerStatus>(async (resolve, reject) => {
 				try {
-					serverStatus = await this.getObjectFromS3File<IServerStatus>(serverInformation.statusUrl);
+					resolve(await this.getObjectFromS3File<IServerStatus>(serverInformation.statusUrl));
 				} catch (err) {
 					this.$logger.trace(err);
+					reject(new Error(this.failedToStartError));
 				}
 
-				if (!serverStatus) {
-					// We will get here if there is no server status twice in a row.
-					return reject(new Error(this.failedToStartError));
-				}
-
-				if (!serverStatus) {
-					return;
-				}
-
-				if (serverStatus.status === CloudService.OPERATION_COMPLETE_STATUS) {
-					await this.getServerLogs(serverInformation.outputUrl, operationId);
-
-					return resolve();
-				}
-
-				if (serverStatus.status === CloudService.OPERATION_FAILED_STATUS) {
-					await this.getServerLogs(serverInformation.outputUrl, operationId);
-
-					return reject(new Error(this.failedError));
-				}
-
-				if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
-					await this.getServerLogs(serverInformation.outputUrl, operationId);
-				}
 			}).catch(retry);
-		}, {
-				retries: CloudService.OPERATION_STATUS_CHECK_RETRY_COUNT,
-				minTimeout: CloudService.OPERATION_STATUS_CHECK_INTERVAL
+		}, promiseRetryOptions)
+			.then((serverStatus: IServerStatus) => {
+				return new Promise<void>((resolve, reject) => {
+					this.outputCursorPosition = 0;
+					const serverIntervalId = setInterval(async () => {
+						if (serverStatus.status === CloudService.OPERATION_COMPLETE_STATUS) {
+							await this.getServerLogs(serverInformation.outputUrl, operationId);
+							clearInterval(serverIntervalId);
+							return resolve();
+						}
+
+						if (serverStatus.status === CloudService.OPERATION_FAILED_STATUS) {
+							await this.getServerLogs(serverInformation.outputUrl, operationId);
+							clearInterval(serverIntervalId);
+							return reject(new Error(this.failedError));
+						}
+
+						if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
+							await this.getServerLogs(serverInformation.outputUrl, operationId);
+						}
+
+						serverStatus = await this.getObjectFromS3File<IServerStatus>(serverInformation.statusUrl);
+					}, CloudService.OPERATION_STATUS_CHECK_INTERVAL);
+				});
 			});
 	}
 
