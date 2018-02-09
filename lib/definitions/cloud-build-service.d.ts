@@ -210,7 +210,7 @@ interface IItmsPlistOptions extends IProjectNameComposition {
 /**
  * Describes the project settings required for different operations.
  */
-interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud, IProjectNameComposition {
+interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud, IProjectNameComposition, IWorkflowRequestData {
 	/**
 	 * The directory where the project is located. This should be the path to the directory where application's package.json is located.
 	 */
@@ -230,6 +230,11 @@ interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud, IP
 	 *  Whether to clean & build. By default incremental build without clean is performed.
 	 */
 	clean: boolean;
+
+	/**
+	 * The name of the template that is to be used when creating a new virtual machine in the private cloud.
+	 */
+	flavorId?: string;
 }
 
 /**

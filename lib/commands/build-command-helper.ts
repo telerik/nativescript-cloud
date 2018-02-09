@@ -39,6 +39,9 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			projectName: this.$projectData.projectName,
 			bundle: !!this.$options.bundle,
 			sharedCloud: this.$options.sharedCloud,
+			flavorId: this.$options.vmTemplateName,
+			workflowName: this.$options.workflow && this.$options.workflow.name,
+			workflowUrl: this.$options.workflow && this.$options.workflow.url,
 			clean: this.$options.clean,
 			env: this.$options.env
 		};
