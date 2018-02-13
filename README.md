@@ -986,7 +986,7 @@ Definition:
  */
 getMyAccounts(): Promise<IAccount[]>
 ```
-Detailed description of each parameter can be found [here](./lib/definitions/accounts-service.d.ts).
+Detailed description of each parameter can be found [here](./lib/definitions/server/server-accounts-service.d.ts).
 </br>
 
 Usage:
@@ -1010,7 +1010,7 @@ Definition:
  */
 getUsageInfo(accountId: string): Promise<IUsageInfo[]>;
 ```
-Detailed description of each parameter can be found [here](./lib/definitions/accounts-service.d.ts).
+Detailed description of each parameter can be found [here](./lib/definitions/server/server-accounts-service.d.ts).
 </br>
 
 Usage:
