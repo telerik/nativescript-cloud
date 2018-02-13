@@ -35,7 +35,9 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 					remaining: u.unlimited ? u.allowedUsage : u.allowedUsage - u.usage,
 					unlimited: !!u.unlimited,
 					editionType: u.editionType,
-					licenseExpiration: u.licenseExpiration,
+					licenseExpiration: u.licenseExpiration, // This is here only for backwards compatibility.
+					licenseExpirationDate: u.licenseExpirationDate,
+					resetDate: u.resetDate,
 					licenseType: u.licenseType
 				};
 
@@ -48,7 +50,7 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 			output = stringifyWithIndentation(groupedUsage);
 		} else {
 			const tables = _.map(groupedUsage, (g, feature) => {
-				return createTable([`${feature} performed`, `${feature} remaining`, "License Expiration", "License Type", "Edition Type"], g.map(u => {
+				return createTable([`${feature} performed`, `${feature} remaining`, "Reset Date", "License Expiration", "License Type", "Edition Type"], g.map(u => {
 					const result = [u.performed.toString()];
 					if (u.unlimited) {
 						result.push(UNLIMITED);
@@ -57,7 +59,7 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 						result.push(remainingUsage.toString());
 					}
 
-					return result.concat(new Date(u.licenseExpiration).toDateString(), u.licenseType, u.editionType);
+					return result.concat(this.toPrettyDate(u.resetDate), this.toPrettyDate(u.licenseExpirationDate), u.licenseType, u.editionType);
 				}));
 			});
 
@@ -65,6 +67,10 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 		}
 
 		this.$logger.out(output);
+	}
+
+	private toPrettyDate(date: string): string {
+		return new Date(date).toDateString();
 	}
 }
 

@@ -46,9 +46,21 @@ interface IUsageInfoBase {
 	unlimited: boolean;
 
 	/**
-	 * When the license expires.
+	 * When the monthly usage will be reset. This property is here for backwards compatibility.
 	 */
 	licenseExpiration: string;
+
+	/**
+	 * When the license of the user expires. This is not necessary to be one month. We have complimentary
+	 * licenses with custom license expiration. Also our users can buy N monthly licenses and the
+	 * license expiration date will be N * 1 month.
+	 */
+	licenseExpirationDate: string;
+
+	/**
+	 * When the monthly usage will be reset.
+	 */
+	resetDate: string;
 
 	/**
 	 * The type of the license.
