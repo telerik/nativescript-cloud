@@ -1,7 +1,7 @@
-import { CONTENT_TYPES, HTTP_HEADERS } from "../../constants";
+import { CONTENT_TYPES, HTTP_HEADERS, BEARER_AUTH_SCHEME } from "../../constants";
 
 export class ServerServicesProxy implements IServerServicesProxy {
-	private serverConfig: IServerConfig;
+	protected serverConfig: IServerConfig;
 
 	constructor(private $errors: IErrors,
 		private $httpClient: Server.IHttpClient,
@@ -16,9 +16,9 @@ export class ServerServicesProxy implements IServerServicesProxy {
 		const finalUrlPath = this.getUrlPath(options.serviceName, options.urlPath);
 
 		const headers = options.headers || Object.create(null);
-
+		const authScheme = this.getAuthScheme(options.serviceName);
 		if (!_.has(headers, HTTP_HEADERS.AUTHORIZATION) && this.$nsCloudUserService.hasUser()) {
-			headers[HTTP_HEADERS.AUTHORIZATION] = `Bearer ${this.$nsCloudUserService.getUserData().accessToken}`;
+			headers[HTTP_HEADERS.AUTHORIZATION] = `${authScheme} ${this.$nsCloudUserService.getUserData().accessToken}`;
 		}
 
 		if (options.accept) {
@@ -94,6 +94,10 @@ export class ServerServicesProxy implements IServerServicesProxy {
 		}
 
 		return result.startsWith("/") ? result : `/${result}`;
+	}
+
+	protected getAuthScheme(serviceName: string): string {
+		return BEARER_AUTH_SCHEME;
 	}
 
 	private getServiceValueOrDefault(serviceName: string, valueName: string): string {

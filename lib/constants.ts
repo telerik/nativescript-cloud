@@ -117,3 +117,7 @@ export class EulaConstants {
 	public static acceptedEulaHashKey = "acceptedEulaHash";
 	public static timeout = 60000;
 }
+
+export const KINVEY_SERVICE_NAME = "kinvey";
+
+export const BEARER_AUTH_SCHEME = "Bearer";

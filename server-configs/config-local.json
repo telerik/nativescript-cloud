@@ -23,5 +23,12 @@
 		"project-service": {
 			"fullHostName": "localhost:8006"
 		}
+	},
+	"mBaaS": {
+		"kinvey": {
+			"fullHostName": "manage.kinvey.com",
+			"apiVersion": "",
+			"authScheme": "Kinvey"
+		}
 	}
 }

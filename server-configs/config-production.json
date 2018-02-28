@@ -22,5 +22,12 @@
 		"project-service": {
 			"subdomain": "project"
 		}
+	},
+	"mBaaS": {
+		"kinvey": {
+			"fullHostName": "manage.kinvey.com",
+			"apiVersion": "",
+			"authScheme": "Kinvey"
+		}
 	}
 }

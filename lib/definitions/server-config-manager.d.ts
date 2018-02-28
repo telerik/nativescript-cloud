@@ -29,13 +29,20 @@ interface IServerConfig extends IServerConfigBase {
 	domainName: string;
 	stage?: string;
 	cloudServices: IDictionary<ICloudServiceConfig>;
-	[index: string]: string | IDictionary<ICloudServiceConfig>;
+	mBaaS: IDictionary<IMBaaSConfig>;
+	[index: string]: string | IDictionary<ICloudServiceConfig> | IDictionary<IMBaaSConfig>;
 }
 
 interface ICloudServiceConfig extends IServerConfigBase {
 	fullHostName?: string;
 	subdomain?: string;
 	[index: string]: string;
+}
+
+interface IMBaaSConfig {
+	fullHostName: string;
+	apiVersion: string;
+	authScheme?: string;
 }
 
 /**
