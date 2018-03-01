@@ -2,7 +2,6 @@ export class KinveyService implements IKinveyService {
 	constructor(private $nsCloudKinveyRequestService: IKinveyRequestService) { }
 
 	public getApps(): Promise<IKinveyApplication[]> {
-		debugger;
 		return this.$nsCloudKinveyRequestService.getApps();
 	}
 
@@ -69,7 +68,7 @@ export class KinveyService implements IKinveyService {
 	public async getDefaultAuthService(input: IGetDefaultKinveyAuthService): Promise<IKinveyAuthService> {
 		const env = await this.$nsCloudKinveyRequestService.getEnvironment(input.environmentId);
 		if (!env.defaultAuthServiceId) {
-			return null
+			return null;
 		}
 
 		return this.$nsCloudKinveyRequestService.getAuthService(env.defaultAuthServiceId);

@@ -65,4 +65,3 @@ export class KinveyRequestService extends ServerServiceBase implements IKinveyRe
 }
 
 $injector.register("nsCloudKinveyRequestService", KinveyRequestService);
-
