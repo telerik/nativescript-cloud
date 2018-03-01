@@ -17,6 +17,10 @@ export class ServerAccountsService extends ServerServiceBase implements IServerA
 		return this.sendRequest<IUsageInfo[]>(HTTP_METHODS.GET, `api/usage?accountId=${accountId}`, null);
 	}
 
+	public getAccountFeatures(accountId: string): Promise<IFeatureInfo[]> {
+		return this.sendRequest<IFeatureInfo[]>(HTTP_METHODS.GET, `api/features?accountId=${accountId}`, null);
+	}
+
 	public getUserInfo(): Promise<IUserInfo> {
 		return this.sendRequest<IUserInfo>(HTTP_METHODS.GET, "api/user-info", null);
 	}

@@ -30,6 +30,11 @@ export class AccountsService implements IAccountsService {
 			return selectedAccount;
 		}
 	}
+
+	public async getAccountFeatures(accountIdOption: string): Promise<IFeatureInfo[]> {
+		const account = await this.getAccountFromOption(accountIdOption);
+		return this.$nsCloudServerAccountsService.getAccountFeatures(account.id);
+	}
 }
 
 $injector.register("nsCloudAccountsService", AccountsService);

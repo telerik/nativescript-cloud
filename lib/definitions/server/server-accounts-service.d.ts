@@ -10,6 +10,7 @@ interface IGetUsageInfo {
 interface IServerAccountsService extends IGetUsageInfo {
 	getAccounts(): Promise<IAccount[]>
 	getUserInfo(): Promise<IUserInfo>;
+	getAccountFeatures(accountId: string): Promise<IFeatureInfo[]>;
 }
 
 interface IAccount {
@@ -29,12 +30,14 @@ interface IAccount {
 	type: string;
 }
 
-interface IUsageInfoBase {
+interface IFeatureInfoBase {
 	/**
 	 * The name of the feature (e.g. Cloud Builds).
 	 */
 	feature: string;
+}
 
+interface IUsageInfoBase extends IFeatureInfoBase {
 	/**
 	 * The maximum allowed usage ammount.
 	 */
@@ -88,4 +91,15 @@ interface IUsageInfo extends IUsageInfoBase {
 	 * The usage ammount after which a notification should be sent to the user.
 	 */
 	softUsageLimit: number;
+}
+
+interface IFeatureInfo extends IFeatureInfoBase {
+	/**
+	 * The type of the feature (e.g. CloudBuilds).
+	 */
+	type: string;
+	/**
+	 * If this property is set to true the feature is enabled for the account.
+	 */
+	enabled: boolean;
 }
