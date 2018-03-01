@@ -175,7 +175,6 @@ export abstract class EulaServiceBase implements IEulaService {
 		return this.$userSettingsService.saveSetting<string>(propertyName, hash);
 	}
 
-
 	private getPathToEula(): string {
 		return path.join(this.$settingsService.getProfileDir(), this.getEulaFileName());
 	}
