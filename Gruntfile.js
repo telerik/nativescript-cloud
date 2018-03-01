@@ -224,7 +224,7 @@ module.exports = function (grunt) {
 			if (stat.isDirectory() && path.basename(d) !== "node_modules") {
 				// recursively check all dirs for .d.ts files.
 				pathsToDtsFiles = pathsToDtsFiles.concat(getReferencesFromDir(d));
-			} else if (stat.isFile() && d.endsWith(".d.ts") && path.basename(d) !== ".d.ts") {
+			} else if (stat.isFile() && d.endsWith(".d.ts") && path.basename(d) !== ".d.ts" && path.basename(d) !== "doctor.d.ts") {
 				pathsToDtsFiles.push(d);
 			}
 		});
