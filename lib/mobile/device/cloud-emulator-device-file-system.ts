@@ -5,7 +5,7 @@ export class CloudEmulatorDeviceFileSystem implements Mobile.IDeviceFileSystem {
 
 	public async putFile(localFilePath: string, deviceFilePath: string, appIdentifier: string): Promise<void> { /* currently empty */ }
 
-	public async transferFiles(deviceAppData: Mobile.IDeviceAppData, localToDevicePaths: Mobile.ILocalToDevicePathData[]): Promise<void> { /* currently empty */ }
+	public async transferFiles(deviceAppData: Mobile.IDeviceAppData, localToDevicePaths: Mobile.ILocalToDevicePathData[]): Promise<Mobile.ILocalToDevicePathData[]> { return []; }
 
 	public async transferDirectory(deviceAppData: Mobile.IDeviceAppData, localToDevicePaths: Mobile.ILocalToDevicePathData[], projectFilesPath: string): Promise<Mobile.ILocalToDevicePathData[]> { return []; }
 
