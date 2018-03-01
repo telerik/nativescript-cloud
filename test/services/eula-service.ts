@@ -56,8 +56,8 @@ describe("eulaService", () => {
 			copyFile: (sourceFileName: string, destinationFileName: string): void => undefined
 		});
 
-		testInjector.register("options", {
-			profileDir: ""
+		testInjector.register("settingsService", {
+			getProfileDir: () => ""
 		});
 
 		testInjector.register("nsCloudDateTimeService", {

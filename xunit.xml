@@ -1,0 +1,40 @@
+<testsuite name="Mocha Tests" tests="38" failures="0" errors="0" skipped="0" timestamp="Thu, 01 Mar 2018 13:50:35 GMT" time="0.19">
+<testcase classname="cloud lib version command" name="returns the real version of the package" time="0.005"/>
+<testcase classname="eulaCommandHelper acceptEula" name="prints message containing the URL of the EULA" time="0.001"/>
+<testcase classname="eulaCommandHelper acceptEula" name="calls nsCloudEulaService.acceptEula" time="0"/>
+<testcase classname="eulaCommandHelper ensureEulaIsAccepted" name="does nothing when EULA is already accepted" time="0.002"/>
+<testcase classname="eulaCommandHelper ensureEulaIsAccepted" name="fails when terminal is not interactive and EULA should be accepted" time="0.001"/>
+<testcase classname="eulaCommandHelper ensureEulaIsAccepted" name="fails when terminal is interactive, EULA should be accepted, but user does not accept it" time="0.001"/>
+<testcase classname="eulaCommandHelper ensureEulaIsAccepted" name="calls nsCloudEulaService.acceptEula when terminal is interactive, EULA should be accept it and user accepts it" time="0.001"/>
+<testcase classname="cloud emulator device discovery startLookingForDevices" name="should attach deviceFound/deviceLost" time="0.001"/>
+<testcase classname="cloud emulator device discovery startLookingForDevices" name="should not attach deviceFound/deviceLost multiple times upon multiple calls" time="0.001"/>
+<testcase classname="cloud emulator device discovery startLookingForDevices" name="should detect already running devices" time="0.004"/>
+<testcase classname="cloud emulator device discovery startLookingForDevices" name="should detect devices on deviceFound" time="0.001"/>
+<testcase classname="cloud emulator device discovery startLookingForDevices" name="should lose devices on deviceLost" time="0"/>
+<testcase classname="notices.txt" name="validates file version is compatible with cloud version" time="0.002"/>
+<testcase classname="cloud emulator service deployApp" name="should upload to S3 in case a local file is passed" time="0.011"/>
+<testcase classname="cloud emulator service deployApp" name="should call create if emulator credentials not present" time="0.001"/>
+<testcase classname="cloud emulator service deployApp" name="should call update if emulator credentials present" time="0.001"/>
+<testcase classname="eulaService getEulaData" name="returns EULA should be accepted when it has never been accepted" time="0.009"/>
+<testcase classname="eulaService getEulaData" name="returns EULA should be accepted when it has been accepted, but new EULA is downloaded" time="0.002"/>
+<testcase classname="eulaService getEulaData" name="returns EULA should NOT be accepted when it has been accepted, and new EULA is the same as the accepted one" time="0.001"/>
+<testcase classname="eulaService getEulaData" name="returns EULA should NOT be accepted when it has been accepted, and new EULA cannot be downloaded" time="0.002"/>
+<testcase classname="eulaService getEulaDataWithCache" name="returns EULA should be accepted when it has never been accepted" time="0.004"/>
+<testcase classname="eulaService getEulaDataWithCache" name="returns EULA should be accepted when it has been accepted, but new EULA is downloaded" time="0.003"/>
+<testcase classname="eulaService getEulaDataWithCache" name="returns EULA should NOT be accepted when it has been accepted, and new EULA is the same as the accepted one" time="0.001"/>
+<testcase classname="eulaService getEulaDataWithCache" name="returns EULA should NOT be accepted when it has been accepted, and new EULA cannot be downloaded" time="0.001"/>
+<testcase classname="eulaService getEulaDataWithCache" name="should download EULA when it has not been downloaded for more than 24 hours" time="0.007"/>
+<testcase classname="eulaService getEulaDataWithCache" name="should NOT download EULA when it has not been downloaded for exactly 24 hours" time="0"/>
+<testcase classname="eulaService getEulaDataWithCache" name="should NOT download EULA when it has not been downloaded for less than 24 hours" time="0.001"/>
+<testcase classname="eulaService acceptEula" name="should throw error in case unable to download EULA" time="0.002"/>
+<testcase classname="eulaService acceptEula" name="should save in user settings the hash of the downloaded EULA" time="0.002"/>
+<testcase classname="versionService getCliVersion" name="returns process.env.TNS_CLI_CLOUD_VERSION when it is set" time="0.002"/>
+<testcase classname="versionService getCliVersion" name="returns correct CLI version, based on runtime version, input: 5.0.0, expectedOutput: 5.0.2" time="0.006"/>
+<testcase classname="versionService getCliVersion" name="returns correct CLI version, based on runtime version, input: 5.0.2, expectedOutput: 5.0.2" time="0.006"/>
+<testcase classname="versionService getCliVersion" name="returns correct CLI version, based on runtime version, input: 5.0.5, expectedOutput: 5.0.2" time="0.001"/>
+<testcase classname="versionService getCliVersion" name="returns correct CLI version, based on runtime version, input: 5.1.5, expectedOutput: 5.1.0" time="0.011"/>
+<testcase classname="versionService getCliVersion" name="fails when unable to determine CLI version as runtime version is not valid semver version" time="0.001"/>
+<testcase classname="versionService getCliVersion" name="fails when http request to get CLI versions fails" time="0"/>
+<testcase classname="versionService getProjectRuntimeVersion" name="returns the version from package.json" time="0.001"/>
+<testcase classname="versionService getProjectRuntimeVersion" name="fails when runtime is not added to package.json" time="0.001"/>
+</testsuite>

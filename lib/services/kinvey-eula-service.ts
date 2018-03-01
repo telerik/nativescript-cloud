@@ -1,7 +1,7 @@
 import { EulaConstants } from "../constants";
 import { EulaServiceBase } from "./eula-service-base";
 
-export class EulaService extends EulaServiceBase implements IEulaService {
+export class KinveyEulaService extends EulaServiceBase implements IEulaService {
 	constructor($httpClient: Server.IHttpClient,
 		$userSettingsService: IUserSettingsService,
 		$logger: ILogger,
@@ -13,16 +13,16 @@ export class EulaService extends EulaServiceBase implements IEulaService {
 	}
 
 	protected getAcceptedEulaHashPropertyName(): string {
-		return EulaConstants.acceptedEulaHashKey;
+		return EulaConstants.acceptedKinveyEulaHashKey;
 	}
 
 	protected getEulaFileName(): string {
-		return "EULA.pdf";
+		return "Kinvey-EULA.pdf";
 	}
 
 	protected getEulaUrl(): string {
-		return EulaConstants.eulaUrl;
+		return EulaConstants.kinveyEulaUrl;
 	}
 }
 
-$injector.register("nsCloudEulaService", EulaService);
+$injector.register("nsCloudKinveyEulaService", KinveyEulaService);

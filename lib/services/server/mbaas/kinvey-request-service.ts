@@ -7,7 +7,8 @@ export class KinveyRequestService extends ServerServiceBase implements IKinveyRe
 	}
 
 	constructor($injector: IInjector,
-		$nsCloudMBaasRequestService: IServerRequestService) {
+		$nsCloudMBaasRequestService: IServerRequestService,
+		private $nsCloudKinveyEulaService: IEulaService) {
 		super($nsCloudMBaasRequestService, $injector);
 	}
 
@@ -61,6 +62,15 @@ export class KinveyRequestService extends ServerServiceBase implements IKinveyRe
 
 	public updateEnvironment(input: IKinveyAppEnvironment): Promise<IKinveyAppEnvironment> {
 		return this.sendRequest<IKinveyAppEnvironment>(HTTP_METHODS.PUT, `environments/${input.id}`, input);
+	}
+
+	protected async ensureEulaIsAccepted(): Promise<void> {
+		const eulaData = await this.$nsCloudKinveyEulaService.getEulaData();
+		if (eulaData.shouldAcceptEula) {
+			this.$errors.failWithoutHelp("Kinvey EULA not accepted, cannot use Kinvey services.");
+		}
+
+		return super.ensureEulaIsAccepted();
 	}
 }
 

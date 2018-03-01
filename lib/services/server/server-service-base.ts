@@ -3,22 +3,19 @@ import { CONTENT_TYPES } from "../../constants";
 export abstract class ServerServiceBase {
 	protected abstract serviceName: string;
 
-	private get $nsCloudEulaService(): IEulaService {
-		return this.$injector.resolve<IEulaService>("nsCloudEulaService");
+	protected get $errors(): IErrors {
+		return this.$injector.resolve<IErrors>("errors");
 	}
 
-	private get $errors(): IErrors {
-		return this.$injector.resolve<IErrors>("errors");
+	private get $nsCloudEulaService(): IEulaService {
+		return this.$injector.resolve<IEulaService>("nsCloudEulaService");
 	}
 
 	constructor(protected requestService: IServerRequestService,
 		private $injector: IInjector) { }
 
 	protected async sendRequest<T>(method: string, urlPath: string, body: any, headers?: any, resultStream?: NodeJS.WritableStream): Promise<T> {
-		const eulaData = await this.$nsCloudEulaService.getEulaDataWithCache();
-		if (eulaData.shouldAcceptEula) {
-			this.$errors.failWithoutHelp(`EULA is not accepted, cannot use cloud services.`);
-		}
+		await this.ensureEulaIsAccepted();
 
 		const requestOptions: ICloudRequestOptions = {
 			serviceName: this.serviceName,
@@ -31,6 +28,13 @@ export abstract class ServerServiceBase {
 		};
 
 		return this.requestService.call<T>(requestOptions);
+	}
+
+	protected async ensureEulaIsAccepted(): Promise<void> {
+		const eulaData = await this.$nsCloudEulaService.getEulaDataWithCache();
+		if (eulaData.shouldAcceptEula) {
+			this.$errors.failWithoutHelp(`EULA is not accepted, cannot use cloud services.`);
+		}
 	}
 
 	private createJsonBody(body: any): IRequestBodyElement[] {
