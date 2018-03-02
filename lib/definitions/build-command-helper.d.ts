@@ -1,7 +1,7 @@
 /**
  * Describes helper that can be used for building.
  */
-interface IBuildCommandHelper {
+interface IBuildCommandHelper extends IBuildPlatformAction {
 	/**
 	 * Retrieves data needed to perform a cloud build.
 	 * @param {string} platformArg The mobile platform for which the application should be built: Android or iOS.

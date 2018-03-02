@@ -40,7 +40,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		super($fs, $httpClient, $logger);
 	}
 
-	public getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string {
+	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
 		let result = path.join(options.projectDir, constants.CLOUD_TEMP_DIR_NAME, options.platform.toLowerCase());
 		if (this.$mobileHelper.isiOSPlatform(options.platform)) {
 			result = path.join(result, options.emulator ? constants.CLOUD_BUILD_DIRECTORY_NAMES.EMULATOR : constants.CLOUD_BUILD_DIRECTORY_NAMES.DEVICE);
@@ -50,7 +50,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	}
 
 	/**
-	 * Here only for backwards compatibility.
+	 * Here only for backwards compatibility. Deleting this will require a major version change as it is used in NativeScript Sidekick.
 	 */
 	public getBuildOutputDirectory(options: ICloudBuildOutputDirectoryOptions): string {
 		return this.getServerOperationOutputDirectory(options);
@@ -540,7 +540,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 	}
 
-	private async downloadServerResult(buildId: string, buildResult: IBuildServerResult, buildOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string> {
+	private async downloadServerResult(buildId: string, buildResult: IBuildServerResult, buildOutputOptions: IOutputDirectoryOptions): Promise<string> {
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.START);
 		const targetFileNames = await super.downloadServerResults(buildResult, buildOutputOptions);
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.END);

@@ -29,21 +29,6 @@ interface IServerStatus {
 }
 
 /**
- * Describes options that can be passed in order to specify the exact location of the built package.
- */
-interface ICloudServerOutputDirectoryOptions extends IPlatform {
-	/**
-	 * Directory where the project is located.
-	 */
-	projectDir: string;
-
-	/**
-	 * Whether the build is for emulator or not.
-	 */
-	emulator?: boolean;
-}
-
-/**
  * Describes the result from server operation.
  */
 interface IServerResult {
@@ -79,8 +64,8 @@ interface IServerItem extends IServerItemBase, IPlatform {
 interface ICloudOperationService {
 	/**
 	 * Returns the path to the directory where the server request output may be found.
-	 * @param {ICloudServerOutputDirectoryOptions} options Options that are used to determine the build output directory.
+	 * @param {IOutputDirectoryOptions} options Options that are used to determine the build output directory.
 	 * @returns {string} The build output directory.
 	 */
-	getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string;
+	getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;
 }

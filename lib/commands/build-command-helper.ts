@@ -18,6 +18,17 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		this.$projectData.initializeProjectData();
 	}
 
+	public async buildPlatform(platform: string, buildConfig: IBuildConfig, projectData: IProjectData): Promise<string> {
+		const buildData = this.getCloudBuildData(platform);
+		buildData.iOSBuildData.buildForDevice = buildConfig.buildForDevice;
+		const buildResultData = await this.$nsCloudBuildService.build(buildData.projectSettings,
+			buildData.platform, buildData.buildConfiguration,
+			this.$options.accountId,
+			buildData.androidBuildData,
+			buildData.iOSBuildData);
+		return buildResultData.outputFilePath;
+	}
+
 	public getCloudBuildData(platformArg: string): IBuildData {
 		const platform = this.$mobileHelper.validatePlatformName(platformArg);
 		this.$logger.info(`Executing cloud build with platform: ${platform}.`);

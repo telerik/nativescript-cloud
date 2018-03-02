@@ -28,7 +28,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		super($fs, $httpClient, $logger);
 	}
 
-	public getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string {
+	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
 		return "";
 	}
 

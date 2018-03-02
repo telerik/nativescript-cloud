@@ -280,7 +280,7 @@ interface IIOSBuildData extends IBuildForDevice {
 }
 
 /**
- * Here only for backwards compatibility.
+ * Here only for backwards compatibility. Deleting this will require a major version change as it is used in NativeScript Sidekick.
  */
-interface ICloudBuildOutputDirectoryOptions extends ICloudServerOutputDirectoryOptions {
+interface ICloudBuildOutputDirectoryOptions extends IOutputDirectoryOptions {
 }

@@ -57,6 +57,10 @@ $injector.requireCommand("logout", path.join(__dirname, "commands", "logout"));
 $injector.requireCommand("user", path.join(__dirname, "commands", "user"));
 $injector.requireCommand("kill-server", path.join(__dirname, "commands", "kill-server"));
 
+$injector.requireCommand(["deploy|cloud", "cloud|deploy"], path.join(__dirname, "commands", "cloud-deploy"));
+$injector.requireCommand(["run|cloud|*all", "cloud|run|*all"], path.join(__dirname, "commands", "cloud-run"));
+$injector.requireCommand(["run|cloud|ios", "cloud|run|ios"], path.join(__dirname, "commands", "cloud-run"));
+$injector.requireCommand(["run|cloud|android", "cloud|run|android"], path.join(__dirname, "commands", "cloud-run"));
 $injector.requireCommand(["cloud|build", "build|cloud"], path.join(__dirname, "commands", "cloud-build"));
 $injector.requireCommand(["cloud|codesign", "codesign|cloud"], path.join(__dirname, "commands", "cloud-codesign"));
 $injector.requireCommand("cloud|publish|android", path.join(__dirname, "commands", "cloud-publish"));

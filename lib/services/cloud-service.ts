@@ -15,7 +15,7 @@ export abstract class CloudService extends EventEmitter {
 	protected abstract getServerResults(serverResult: IBuildServerResult): IServerItem[];
 	protected abstract getServerLogs(logsUrl: string, buildId: string): Promise<void>;
 
-	public abstract getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string;
+	public abstract getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;
 
 	constructor(protected $fs: IFileSystem,
 		protected $httpClient: Server.IHttpClient,
@@ -73,7 +73,7 @@ export abstract class CloudService extends EventEmitter {
 			});
 	}
 
-	protected async downloadServerResults(serverResult: IBuildServerResult, serverOutputOptions: ICloudServerOutputDirectoryOptions): Promise<string[]> {
+	protected async downloadServerResults(serverResult: IBuildServerResult, serverOutputOptions: IOutputDirectoryOptions): Promise<string[]> {
 		const destinationDir = this.getServerOperationOutputDirectory(serverOutputOptions);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
