@@ -23,6 +23,8 @@ $injector.requirePublicClass("nsCloudProjectService", path.join(__dirname, "serv
 $injector.requirePublicClass("nsCloudUserService", path.join(__dirname, "services", "user-service"));
 $injector.requirePublicClass("nsCloudAccountsService", path.join(__dirname, "services", "accounts-service"));
 $injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "services", "eula-service"));
+$injector.requirePublicClass("nsCloudKinveyEulaService", path.join(__dirname, "services", "kinvey-eula-service"));
+$injector.requirePublicClass("nsCloudKinveyService", path.join(__dirname, "services", "kinvey-service"));
 
 // Services.
 $injector.require("nsCloudServerAuthService", path.join(__dirname, "services", "server", "server-auth-service"));
@@ -33,6 +35,9 @@ $injector.require("nsCloudServerEmulatorsService", path.join(__dirname, "service
 $injector.require("nsCloudServerCodeCommitService", path.join(__dirname, "services", "server", "server-code-commit-service"));
 $injector.require("nsCloudServerAccountsService", path.join(__dirname, "services", "server", "server-accounts-service"));
 $injector.require("nsCloudServerProjectService", path.join(__dirname, "services", "server", "server-project-service"));
+$injector.require("nsCloudKinveyRequestService", path.join(__dirname, "services", "server", "mbaas", "kinvey-request-service"));
+$injector.require("nsCloudMBaasProxy", path.join(__dirname, "services", "server", "mbaas", "mbaas-proxy"));
+$injector.require("nsCloudMBaasRequestService", path.join(__dirname, "services", "server", "mbaas", "mbaas-request-service"));
 $injector.require("nsCloudPackageInfoService", path.join(__dirname, "services", "package-info-service"));
 $injector.require("nsCloudUploadService", path.join(__dirname, "services", "upload-service"));
 $injector.require("nsCloudDateTimeService", path.join(__dirname, "services", "date-time-service"));

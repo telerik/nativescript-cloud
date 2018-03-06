@@ -114,6 +114,17 @@ export const ERROR_MESSAGES = {
 
 export class EulaConstants {
 	public static eulaUrl = "https://www.nativescript.org/nativescript-sidekick/eula";
+	public static kinveyEulaUrl = "https://www.nativescript.org/nativescript-sidekick/eula";
 	public static acceptedEulaHashKey = "acceptedEulaHash";
+	public static acceptedKinveyEulaHashKey = "acceptedKinveyEulaHash";
 	public static timeout = 60000;
+}
+
+export const KINVEY_SERVICE_NAME = "kinvey";
+
+export const BEARER_AUTH_SCHEME = "Bearer";
+
+export class Authentication {
+	public static OAuth2 = "OAuth2";
+	public static OIDC = "OIDC";
 }
