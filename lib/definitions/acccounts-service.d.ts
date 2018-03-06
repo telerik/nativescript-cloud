@@ -16,6 +16,12 @@ interface IAccountsService extends IGetUsageInfo {
 	 * @returns {Promise<IAccount>}
 	 */
 	getAccountFromOption(accountIdOption: string): Promise<IAccount>;
+
+	/**
+	 * Returns information about all subscription features of the provided account.
+	 * @param accountIdOption Account id which will be parsed and used to find account.
+	 */
+	getAccountFeatures(accountIdOption: string): Promise<IDictionary<IFeatureInfo>>;
 }
 
 interface IFeatureUsage extends IUsageInfoBase {

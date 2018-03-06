@@ -65,6 +65,7 @@ $injector.requireCommand("cloud|lib|version", path.join(__dirname, "commands", "
 
 $injector.requireCommand("account|*list", path.join(__dirname, "commands", "account", "account-list"));
 $injector.requireCommand("account|usage", path.join(__dirname, "commands", "account", "usage"));
+$injector.requireCommand("account|features", path.join(__dirname, "commands", "account", "features"));
 
 $injector.requireCommand("accept|eula", path.join(__dirname, "commands", "accept-eula-command"));
 
