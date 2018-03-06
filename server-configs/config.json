@@ -30,7 +30,7 @@
 		"kinvey": {
 			"fullHostName": "manage.kinvey.com",
 			"apiVersion": "",
-			"authScheme": "Kinvey"
+			"authScheme": "Telerik"
 		}
 	}
 }
