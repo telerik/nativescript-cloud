@@ -10,7 +10,7 @@ interface IGetUsageInfo {
 interface IServerAccountsService extends IGetUsageInfo {
 	getAccounts(): Promise<IAccount[]>
 	getUserInfo(): Promise<IUserInfo>;
-	getAccountFeatures(accountId: string): Promise<IFeatureInfo[]>;
+	getAccountFeatures(accountId: string): Promise<IDictionary<IFeatureInfo>>;
 }
 
 interface IAccount {

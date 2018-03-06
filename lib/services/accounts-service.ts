@@ -31,7 +31,7 @@ export class AccountsService implements IAccountsService {
 		}
 	}
 
-	public async getAccountFeatures(accountIdOption: string): Promise<IFeatureInfo[]> {
+	public async getAccountFeatures(accountIdOption: string): Promise<IDictionary<IFeatureInfo>> {
 		const account = await this.getAccountFromOption(accountIdOption);
 		return this.$nsCloudServerAccountsService.getAccountFeatures(account.id);
 	}
