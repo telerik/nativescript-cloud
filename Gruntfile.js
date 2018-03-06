@@ -138,7 +138,7 @@ module.exports = function (grunt) {
 
 			_.each(dependenciesToInstall, name => {
 				try {
-					childProcess.execSync(`npm i --ignore-scripts ${name}`, { cwd: pathToModule, stdio: "ignore" });
+					childProcess.execSync(`npm i --ignore-scripts --production ${name}`, { cwd: pathToModule, stdio: "ignore" });
 				} catch (err) {
 				}
 			})

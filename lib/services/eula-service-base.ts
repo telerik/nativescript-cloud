@@ -43,7 +43,7 @@ export abstract class EulaServiceBase implements IEulaService {
 	private async getEulaDataCore(): Promise<IEulaData> {
 		const shouldAcceptEula = await this.getShouldAcceptLocalEula();
 
-		this.$logger.trace(`Checked EULA state - shouldAcceptEula is ${shouldAcceptEula}.`);
+		this.$logger.trace(`Checked ${this.getEulaFileName()} state - shouldAcceptEula is ${shouldAcceptEula}.`);
 
 		return {
 			url: EulaConstants.eulaUrl,
@@ -54,7 +54,7 @@ export abstract class EulaServiceBase implements IEulaService {
 	private async getShouldAcceptLocalEula(): Promise<boolean> {
 		const acceptedEulaHash = await this.getAcceptedEulaHash();
 		if (!acceptedEulaHash) {
-			this.$logger.trace("Checking EULA state: no EULA has been accepted so far.");
+			this.$logger.trace(`Checking ${this.getPathToEula()} state: no EULA has been accepted so far.`);
 			return true;
 		}
 
@@ -62,11 +62,11 @@ export abstract class EulaServiceBase implements IEulaService {
 		// If it does not exist - we were unable to download it.
 		const currentEulaHash = await this.getLocalEulaHash();
 		if (!currentEulaHash) {
-			this.$logger.trace("Checking EULA state: no local copy of EULA found - as user had already accepted previous version of the EULA, consider it as the current one, so no need to accept new.");
+			this.$logger.trace(`Checking ${this.getPathToEula()} state: no local copy of EULA found - as user had already accepted previous version of the EULA, consider it as the current one, so no need to accept new.`);
 			return false;
 		}
 
-		this.$logger.trace(`Checking EULA state: acceptedEulaHash is ${acceptedEulaHash}, currentEulaHash is ${currentEulaHash}.`);
+		this.$logger.trace(`Checking ${this.getPathToEula()} state: acceptedEulaHash is ${acceptedEulaHash}, currentEulaHash is ${currentEulaHash}.`);
 		return acceptedEulaHash !== currentEulaHash;
 	}
 
@@ -136,7 +136,7 @@ export abstract class EulaServiceBase implements IEulaService {
 		await this.downloadLatestEula({ shouldThrowError: true });
 
 		const localEulaHash = await this.getLocalEulaHash();
-		this.$logger.trace(`Downloaded latest EULA, its hash is: ${localEulaHash}.`);
+		this.$logger.trace(`Downloaded latest ${this.getPathToEula()}, its hash is: ${localEulaHash}.`);
 
 		return localEulaHash;
 	}

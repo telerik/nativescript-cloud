@@ -1,3 +1,5 @@
+import { Authentication } from "../constants";
+
 export class KinveyService implements IKinveyService {
 	constructor(private $nsCloudKinveyRequestService: IKinveyRequestService) { }
 
@@ -13,7 +15,7 @@ export class KinveyService implements IKinveyService {
 		input.identityStoreOptions = input.identityStoreOptions || Object.create(null);
 
 		const app = await this.$nsCloudKinveyRequestService.getApp(input.appId);
-		const createIsInput: ICreateKinveyIdentityStoreInput = {
+		const createIdentityStoreInput: ICreateKinveyIdentityStoreInput = {
 			name: input.identityStoreOptions.name || this.getIdentityStoreName(app.name, input.authServiceOptions.provider.type, input.environmentId),
 			access: input.identityStoreOptions.access || {
 				writers: {
@@ -22,7 +24,7 @@ export class KinveyService implements IKinveyService {
 			}
 		};
 
-		const identityStore = await this.$nsCloudKinveyRequestService.createIdentityStore(createIsInput);
+		const identityStore = await this.$nsCloudKinveyRequestService.createIdentityStore(createIdentityStoreInput);
 
 		const createAuthServiceInput = this.getCreateAuthServiceInput(app.name, identityStore.id, input.redirectUri, input.authServiceOptions);
 		const authService = await this.$nsCloudKinveyRequestService.createAuthService(createAuthServiceInput);
@@ -117,7 +119,7 @@ export class KinveyService implements IKinveyService {
 	}
 
 	private getAuthProviderOptions(providerType: string, options: IKinveyAuthProviderOptions): IKinveyAuthProviderOptions {
-		if (providerType === "OAuth2") {
+		if (providerType === Authentication.OAuth2) {
 			const res: IKinveyOAuth2Options = <IKinveyOAuth2Options>options;
 			res.grantType = res.grantType || "authorization-code";
 			res.includeClientIdInTokenRequest = _.has(res, "includeClientIdInTokenRequest") ? res.includeClientIdInTokenRequest : false;
@@ -125,7 +127,7 @@ export class KinveyService implements IKinveyService {
 			return res;
 		}
 
-		if (providerType === "OIDC") {
+		if (providerType === Authentication.OIDC) {
 			const res: IKinveyOIDCOptions = <IKinveyOIDCOptions>options;
 			res.grantType = res.grantType || "authorization-code";
 			return res;
