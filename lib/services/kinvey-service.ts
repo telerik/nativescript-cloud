@@ -127,12 +127,6 @@ export class KinveyService implements IKinveyService {
 			return res;
 		}
 
-		if (providerType === Authentication.OIDC) {
-			const res: IKinveyOIDCOptions = <IKinveyOIDCOptions>options;
-			res.grantType = res.grantType || "authorization-code";
-			return res;
-		}
-
 		return options;
 	}
 
