@@ -47,6 +47,7 @@ const tns = require("nativescript");
 * [nsCloudAccountsService](#nscloudaccountsservice)
   * [getMyAccounts](#getmyaccounts)
   * [getUsageInfo](#getusageinfo)
+  * [getAccountFeatures](#getaccountfeatures)
 * [nsCloudEulaService](#nscloudeulaservice)
   * [getEulaData](#geteuladata)
   * [getEulaDataWithCache](#geteuladatawithcache)
@@ -1028,6 +1029,29 @@ const tns = require("nativescript");
 
 tns.nsCloudAccountsService.getUsageInfo("d0ce3ac0-36c2-427f-8d27-955915ffe189")
 	.then(usageInfo => console.log(usageInfo));
+```
+
+#### getAccountFeatures
+`getAccountFeatures` method returns information about all subscription features of the provided account. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns information about all subscription features of the provided account.
+ * @param accountIdOption Account id which will be parsed and used to find account.
+ */
+getAccountFeatures(accountIdOption: string): Promise<IDictionary<IFeatureInfo>>;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/server/server-accounts-service.d.ts).
+</br>
+
+Usage:
+
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudAccountsService.getAccountFeatures("d0ce3ac0-36c2-427f-8d27-955915ffe189")
+	.then(featuresInfo => console.log(featuresInfo));
 ```
 
 ### nsCloudEulaService
