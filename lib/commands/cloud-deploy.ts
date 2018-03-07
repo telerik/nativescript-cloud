@@ -1,6 +1,6 @@
 import { BundleValidatorBaseCommand } from "./bundle-validator-base-command";
 
-export class CloudBuildCommand extends BundleValidatorBaseCommand implements ICommand {
+export class CloudDeploy extends BundleValidatorBaseCommand implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
 	public get dashedOptions() {
@@ -9,8 +9,10 @@ export class CloudBuildCommand extends BundleValidatorBaseCommand implements ICo
 
 	constructor($injector: IInjector,
 		$logger: ILogger,
+		private $platformService: IPlatformService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $errors: IErrors,
+		private $deployCommandHelper: IDeployCommandHelper,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudBuildService: ICloudBuildService,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
@@ -20,13 +22,20 @@ export class CloudBuildCommand extends BundleValidatorBaseCommand implements ICo
 		this.$projectData.initializeProjectData();
 	}
 
-	public async execute(args: string[]): Promise<void> {
+	public execute(args: string[]): Promise<void> {
 		const buildData = this.$nsCloudBuildCommandHelper.getCloudBuildData(args[0]);
-		await this.$nsCloudBuildService.build(buildData.projectSettings,
-			buildData.platform, buildData.buildConfiguration,
-			this.$options.accountId,
-			buildData.androidBuildData,
-			buildData.iOSBuildData);
+		const outputDirectoryPath = this.$nsCloudBuildService.getServerOperationOutputDirectory({
+			platform: buildData.platform,
+			projectDir: this.$projectData.projectDir,
+			emulator: this.$options.emulator
+		});
+
+		const deployPlatformInfo = this.$deployCommandHelper.getDeployPlatformInfo(args[0]);
+		deployPlatformInfo.buildPlatform = this.$nsCloudBuildCommandHelper.buildPlatform.bind(this.$nsCloudBuildCommandHelper);
+		deployPlatformInfo.outputPath = outputDirectoryPath;
+		deployPlatformInfo.nativePrepare = { skipNativePrepare: true };
+
+		return this.$platformService.deployPlatform(deployPlatformInfo);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -45,4 +54,4 @@ export class CloudBuildCommand extends BundleValidatorBaseCommand implements ICo
 	}
 }
 
-$injector.registerCommand(["build|cloud", "cloud|build"], CloudBuildCommand);
+$injector.registerCommand(["deploy|cloud", "cloud|deploy"], CloudDeploy);

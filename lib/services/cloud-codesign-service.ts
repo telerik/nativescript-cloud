@@ -51,7 +51,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		return result;
 	}
 
-	public getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string {
+	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
 		return path.join(options.projectDir, constants.CODESIGN_FILES_DIR_NAME, options.platform.toLowerCase());
 	}
 

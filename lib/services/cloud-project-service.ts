@@ -20,7 +20,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		super($fs, $httpClient, $logger);
 	}
 
-	public getServerOperationOutputDirectory(options: ICloudServerOutputDirectoryOptions): string {
+	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
 		return path.join(options.projectDir, "cleanup-results");
 	}
 
