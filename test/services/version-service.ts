@@ -41,6 +41,14 @@ describe("versionService", () => {
 				expectedCliVersion: "5.0.2"
 			},
 			{
+				runtimeVersion: "5.0.2-1",
+				expectedCliVersion: "5.0.2"
+			},
+			{
+				runtimeVersion: "5.0.3-1",
+				expectedCliVersion: "5.0.2"
+			},
+			{
 				runtimeVersion: "5.0.2",
 				expectedCliVersion: "5.0.2"
 			},
@@ -51,6 +59,22 @@ describe("versionService", () => {
 			{
 				runtimeVersion: "5.1.5",
 				expectedCliVersion: "5.1.0"
+			},
+			{
+				runtimeVersion: "7.0.0-0",
+				expectedCliVersion: "7.0.0-2"
+			},
+			{
+				runtimeVersion: "7.0.1-1",
+				expectedCliVersion: "7.0.1-2"
+			},
+			{
+				runtimeVersion: "7.0.1-5",
+				expectedCliVersion: "7.0.1-2"
+			},
+			{
+				runtimeVersion: "7.0.2-5",
+				expectedCliVersion: "7.0.0-2"
 			}
 		];
 
@@ -78,8 +102,13 @@ describe("versionService", () => {
 						"5.0.0": {},
 						"5.0.1": {},
 						"5.0.2": {},
+						"5.0.2-1": {},
 						"5.1.0": {},
 						"6.0.0": {},
+						"7.0.0-1": {},
+						"7.0.0-2": {},
+						"7.0.1-1": {},
+						"7.0.1-2": {},
 					}
 				};
 

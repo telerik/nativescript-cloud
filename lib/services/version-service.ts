@@ -7,7 +7,7 @@ export class VersionService implements IVersionService {
 
 	public async getCliVersion(runtimeVersion: string): Promise<string> {
 		try {
-			const latestMatchingVersion = process.env.TNS_CLI_CLOUD_VERSION || await this.getLatestMatchingVersion("nativescript", this.getVersionRangeWithTilde(runtimeVersion));
+			const latestMatchingVersion = process.env.TNS_CLI_CLOUD_VERSION || await this.getLatestMatchingVersion("nativescript", runtimeVersion);
 			if (!latestMatchingVersion) {
 				throw new Error("Cannot find CLI versions.");
 			}
@@ -29,10 +29,18 @@ export class VersionService implements IVersionService {
 		return runtimeVersion;
 	}
 
-	private async getLatestMatchingVersion(packageName: string, range: string): Promise<string> {
+	private async getLatestMatchingVersion(packageName: string, dependentPackageName: string): Promise<string> {
+		const patchRange = this.getVersionRangeWithTilde({
+			versionString: dependentPackageName,
+			shouldRespectPatchVersion: true
+		});
+
+		const generalRange = this.getVersionRangeWithTilde({
+			versionString: dependentPackageName
+		});
 		const versions = await this.getVersionsFromNpm(packageName);
 		if (versions.length) {
-			return semver.maxSatisfying(versions, range);
+			return semver.maxSatisfying(versions, patchRange) || semver.maxSatisfying(versions, generalRange);
 		}
 
 		return null;
@@ -53,8 +61,14 @@ export class VersionService implements IVersionService {
 		return JSON.parse(response.body);
 	}
 
-	private getVersionRangeWithTilde(versionString: string): string {
-		return `~${semver.major(versionString)}.${semver.minor(versionString)}.0`;
+	private getVersionRangeWithTilde(versionRangeOptions: IVersionRangeOptions): string {
+		const prerelease = semver.prerelease(versionRangeOptions.versionString);
+		// Append -0 if dealing with a prerelease in order to get the latest prerelease available
+		const prereleaseString = prerelease ? "-0" : "";
+		const major = semver.major(versionRangeOptions.versionString);
+		const minor = semver.minor(versionRangeOptions.versionString);
+		const patch = versionRangeOptions.shouldRespectPatchVersion ? semver.patch(versionRangeOptions.versionString) : "0";
+		return `~${major}.${minor}.${patch}${prereleaseString}`;
 	}
 }
 

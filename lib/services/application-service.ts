@@ -16,7 +16,7 @@ export class ApplicationService implements IApplicationService {
 	public async shouldInstall(config: IApplicationInstallConfig): Promise<boolean> {
 		const projectData = this.$projectDataService.getProjectData(config.projectDir);
 		const device = await this.$devicesService.getDevice(config.deviceIdentifier);
-		return this.$platformService.shouldInstall(device, projectData, config.outputPath);
+		return this.$platformService.shouldInstall(device, projectData, config, config.outputPath);
 	}
 }
 
