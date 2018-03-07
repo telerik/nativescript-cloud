@@ -1263,7 +1263,9 @@ const createOAuth2Options = {
 		options: {
 			grantEndpoint: "https://test.com/authorize",
 			clientId: "<cleint-id>",
-			clientSecret: "<client-secret>"
+			clientSecret: "<client-secret>",
+			userIdEndpoint: "https://test.com/userinfo",
+			scope: "<scope (e.g. openid)>"
 		}
 	}
 };
@@ -1286,9 +1288,11 @@ const createOIDCOptions = {
 		type: "OIDC",
 		remoteService: "https://test.com/oauth/token",
 		options: {
+			grantEndpoint: "https://test.com/authorize",
 			clientId: "<client-id>",
 			clientSecret: "<client-secret>",
-			issuerId: "https://test.com"
+			issuerId: "https://test.com",
+			scope: "<scope (e.g. profile)>"
 		}
 	}
 };

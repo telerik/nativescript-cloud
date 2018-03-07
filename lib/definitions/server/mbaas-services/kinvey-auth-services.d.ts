@@ -56,23 +56,22 @@ interface IKinveySamlRedirectOptions {
 }
 
 interface IKinveyOAuthOptionsBase {
+	grantEndpoint: string;
 	clientId: string;
 	clientSecret: string;
 	userIdAttribute?: string;
 	userIdEndpoint?: string;
-	scope?: string;
+	scope: string;
 	grantType?: string;
 }
 
 interface IKinveyOAuth2Options extends IKinveyOAuthOptionsBase {
-	grantEndpoint: string;
 	includeClientIdInTokenRequest?: boolean;
 	includeClientSecretInTokenRequest?: boolean;
 }
 
 interface IKinveyOIDCOptions extends IKinveyOAuthOptionsBase {
 	issuerId: string;
-	grantEndpoint?: string;
 }
 
 interface ICreateKinveyAuthService {
