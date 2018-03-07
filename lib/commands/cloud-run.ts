@@ -27,7 +27,7 @@ export class CloudRunCommand implements ICommand {
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
 		if (args.length) {
-			this.$errors.fail("This input is not valid for the run command");
+			this.$errors.fail("This input is not valid for the cloud run command");
 		}
 
 		this.$liveSyncCommandHelper.validatePlatform(this.platform);

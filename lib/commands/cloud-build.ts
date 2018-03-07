@@ -1,18 +1,22 @@
-export class CloudBuildCommand implements ICommand {
+import { BundleValidatorBaseCommand } from "./bundle-validator-base-command";
+
+export class CloudBuildCommand extends BundleValidatorBaseCommand implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
 	public get dashedOptions() {
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
-	constructor(private $nsCloudEulaCommandHelper: IEulaCommandHelper,
+	constructor($injector: IInjector,
+		$logger: ILogger,
+		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $errors: IErrors,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudBuildService: ICloudBuildService,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
-		private $projectData: IProjectData,
-		private $bundleValidatorHelper: IBundleValidatorHelper) {
+		private $projectData: IProjectData) {
+		super($injector, $logger);
 		this.$projectData.initializeProjectData();
 	}
 
