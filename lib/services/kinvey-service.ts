@@ -90,7 +90,7 @@ export class KinveyService implements IKinveyService {
 		const result: IKinveyAuthServiceRequestInput = {
 			name: createAuthServiceOptions.name || this.getAuthServiceName(appName, createAuthServiceOptions.provider.type, isId),
 			identityStoreId: createAuthServiceOptions.identityStoreId || isId,
-			redirectUri: createAuthServiceOptions.redirectUri || redirectUri,
+			redirectUri: createAuthServiceOptions.redirectUri || redirectUri || ["http://example.com"],
 			grantTtl: createAuthServiceOptions.grantTtl || 30,
 			tokenTtl: createAuthServiceOptions.tokenTtl || 3600,
 			refresh: _.has(createAuthServiceOptions, "refresh") ? createAuthServiceOptions.refresh : true,
