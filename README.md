@@ -1440,7 +1440,7 @@ const tns = require("nativescript");
 tns.nsCloudKinveyService.getAuthServices({ environmentId: "<env-id>" })
 	.then(authServices => {
 		const identityStoreId = Object.keys(authServices)[0];
-		const authServiceId = authServices[identityStoreId].id;
+		const authServiceId = authServices[identityStoreId][0].id;
 
 		const changeDefaultAuthServiceInput = {
 			environmentId: "<env-id>",
