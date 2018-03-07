@@ -1,13 +1,13 @@
 interface IKinveyAuthServiceRequestInput {
 	name: string;
 	customizedLogin?: IKinveyCustomizedLogin;
-	redirectUri: string[];
+	redirectUri?: string[];
 	grantTtl?: number;
 	tokenTtl?: number;
 	refresh?: boolean;
 	refreshTtl?: number;
 	provider: IKinveyAuthProvider;
-	access: IKinveyAuthServiceAccess;
+	access?: IKinveyAuthServiceAccess;
 	description?: string;
 	identityStoreId: string;
 }
@@ -47,7 +47,7 @@ interface IKinveySamlRedirectOptions {
 	wrapScope?: string;
 	baseDn?: string;
 	logoutUri?: string;
-	idpCertificate?: string;
+	idpCertificate: string;
 	proxy?: boolean;
 	nameIdFormat?: string;
 	key?: string;
@@ -56,28 +56,29 @@ interface IKinveySamlRedirectOptions {
 }
 
 interface IKinveyOAuthOptionsBase {
-	grantEndpoint: string;
 	clientId: string;
 	clientSecret: string;
-	userIdAttribute: string;
-	userIdEndpoint: string;
-	scope: string;
-	grantType: string;
+	userIdAttribute?: string;
+	userIdEndpoint?: string;
+	scope?: string;
+	grantType?: string;
 }
 
 interface IKinveyOAuth2Options extends IKinveyOAuthOptionsBase {
-	includeClientIdInTokenRequest: boolean;
-	includeClientSecretInTokenRequest: boolean;
+	grantEndpoint: string;
+	includeClientIdInTokenRequest?: boolean;
+	includeClientSecretInTokenRequest?: boolean;
 }
 
 interface IKinveyOIDCOptions extends IKinveyOAuthOptionsBase {
 	issuerId: string;
+	grantEndpoint?: string;
 }
 
 interface ICreateKinveyAuthService {
 	appId: string;
 	environmentId: string;
-	redirectUri: string[];
+	redirectUri?: string[];
 	authServiceOptions: IKinveyAuthServiceRequestInput;
 	identityStoreOptions?: ICreateKinveyIdentityStoreInput;
 }
