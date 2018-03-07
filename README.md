@@ -53,6 +53,14 @@ const tns = require("nativescript");
   * [acceptEula](#acceptEula)
 * [nsCloudProjectService](#nscloudprojectservice)
   * [cleanupProject](#cleanupproject-method)
+* [nsCloudKinveyService](#nscloudkinveyservice)
+  * [getApps](#getapps-method)
+  * [createApp](#createapp-method)
+  * [createAuthService](#createauthservice-method)
+  * [updateAuthService](#updateauthservice-method)
+  * [getAuthServices](#getauthservices-method)
+  * [getDefaultAuthService](#getdefaultauthservice-method)
+  * [changeDefaultAuthService](#changedefaultauthservice-method)
 
 ### nsCloudBuildService
 The `nsCloudBuildService` allows build of applications in the cloud. You can call the following methods:
@@ -1129,7 +1137,7 @@ Definition:
 ```TypeScript
 /**
  * Cleans all AWS CodeCommit data and build machines artefacts if they exist.
-* @param {ICleanupProjectDataBase} cleanupProjectData Data needed for project cleaning.
+ * @param {ICleanupProjectDataBase} cleanupProjectData Data needed for project cleaning.
  * @returns {Promise<ICleanupProjectResult>} Information about the cleanup. It includes AWS CodeCommit result and the result from the cleanup on each build machine.
  * If the promise is rejected the error will contain cleanupTaskId property.
  */
@@ -1145,6 +1153,282 @@ const tns = require("nativescript");
 tns.nsCloudProjectService.cleanupProject({ appIdentifier: "org.nativescript.test", projectName: "test" })
 	.then((result) => console.log(`Cleanup result: ${result}`))
 	.catch(err => console.error("Unable to clean cloud project. Error is: ", err));
+```
+
+### nsCloudKinveyService
+The `nsCloudKinveyService` allows working with Kinvey mBaaS. You can call the following methods:
+
+#### getApps method
+`getApps` method returns information for all applications of the current user. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns information for all applications of the current user.
+ * @returns {Promise<IKinveyApplication[]>}
+ */
+getApps(): Promise<IKinveyApplication[]>;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/kinvey-apps-service.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudKinveyService.getApps()
+	.then(result => console.log(`Apps: ${result}`))
+	.catch(err => console.error("Unable to get apps. Error is: ", err));
+```
+
+#### createApp method
+`createApp` method creates application in the account of the current user. </br>
+Definition:
+
+```TypeScript
+/**
+ * Creates application in the account of the current user.
+ * @param input Input required to create application.
+ * @returns {Promise<IKinveyApplication>}
+ */
+createApp(input: ICreateKinveyAppInput): Promise<IKinveyApplication>;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/server/mbaas-services/kinvey-apps-service.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+const createAppInput = {
+	name: "ns-cloud"
+};
+
+tns.nsCloudKinveyService.createApp(createAppInput)
+	.then(result => console.log(`Created app: ${result}`))
+	.catch(err => console.error("Unable to create app. Error is: ", err));
+```
+
+#### createAuthService method
+`createAuthService` method creates identity store. Then it creates authentication service in this identity store. Then it sets the default authentication service in the provided environment. Then it sets the default authentication service in the provided environment to the newly created service. Currently the supported providers are _OAuth2_, _OIDC_ and _SAML-Redirect_.</br>
+Definition:
+
+```TypeScript
+/**
+ * First this method creates identity store. Then it creates authentication service
+ * in this identity store. Then it sets the default authentication service in the provided environment
+ * to the newly created service.
+ * @param input Input required to create authentication service.
+ * @returns {Promise<IKinveyAuthService>}
+ */
+createAuthService(input: ICreateKinveyAuthService): Promise<IKinveyAuthService>;
+```
+Description of each parameter can be found [here](./lib/definitions/server/mbaas-services/kinvey-auth-services.d.ts).
+Detailed description of each parameter can be found [here](https://kinvey.api-docs.io/2/auth-services/auth-service).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+// Create OAuth2 aithentication service.
+const createOAuth2Options = {
+	name: "my-oauth2-service",
+	provider: {
+		type: "OAuth2",
+		remoteService: "https://test.com/oauth/token",
+		options: {
+			grantEndpoint: "https://test.com/authorize",
+			clientId: "<cleint-id>",
+			clientSecret: "<client-secret>"
+		}
+	}
+};
+
+const oauth2Input = {
+	appId: "<app-id>",
+	environmentId: "<env-id>",
+	redirectUri: ["https://auth.kinvey.com/oauth2/redirect", "http://example.com"],
+	authServiceOptions: createOAuth2Options
+};
+
+tns.nsCloudKinveyService.createAuthService(oauth2Input)
+	.then(result => console.log(`Created OAuth2 auth service: ${result}`))
+	.catch(err => console.error("Unable to create OAuth2 auth service. Error is: ", err));
+
+// Create OIDC authentication service.
+const createOIDCOptions = {
+	name: "my-oidc-service",
+	provider: {
+		type: "OIDC",
+		remoteService: "https://test.com/oauth/token",
+		options: {
+			clientId: "<client-id>",
+			clientSecret: "<client-secret>",
+			issuerId: "https://test.com"
+		}
+	}
+};
+
+const oidcInput = {
+	appId: "<app-id>",
+	environmentId: "<env-id>",
+	redirectUri: ["http://example.com"],
+	authServiceOptions: createOIDCOptions
+};
+
+tns.nsCloudKinveyService.createAuthService(oidcInput)
+	.then(result => console.log(`Created OIDC auth service: ${result}`))
+	.catch(err => console.error("Unable to create OIDC auth service. Error is: ", err));
+
+// Create SAML-Redirect authentication service.
+const createSAMLRedirectOptions = {
+	name: "my-auth-service",
+	provider: {
+		type: "SAML-Redirect",
+		remoteService: "https://test.com/samlp/<some-id>",
+		options: {
+			idpCertificate: "<certificate>"
+		}
+	}
+};
+
+const samlRedirectInput = {
+	appId: "<app-id>",
+	environmentId: "<env-id>",
+	redirectUri: ["http://example.com"],
+	authServiceOptions: createSAMLRedirectOptions
+};
+
+tns.nsCloudKinveyService.createAuthService(samlRedirectInput)
+	.then(result => console.log(`Created SAML-Redirect auth service: ${result}`))
+	.catch(err => console.error("Unable to create SAML-Redirect auth service. Error is: ", err));
+```
+
+#### updateAuthService method
+`updateAuthService` method updates the provided authentication service. </br>
+Definition:
+
+```TypeScript
+/**
+ * Updates the provided authentication service.
+ * @param input The id of the authentication service and full authentication service object.
+ * @returns {Promise<IKinveyAuthService>}
+ */
+updateAuthService(input: IUpdateKinveyAuthService): Promise<IKinveyAuthService>;
+```
+Description of each parameter can be found [here](./lib/definitions/server/mbaas-services/kinvey-auth-services.d.ts).
+Detailed description of each parameter can be found [here](https://kinvey.api-docs.io/2/auth-services/auth-service).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudKinveyService.getDefaultAuthService({ environmentId: "<env-id>" })
+	.then(authService => {
+		const id = authService.id;
+		// The update auth service input can't contain the id parameter.
+		delete authService.id;
+		authService.name = "new-name";
+
+		const updateAuthServiceInput = {
+			authServiceId: id,
+			authService
+		};
+
+		return tns.nsCloudKinveyService.updateAuthService(updateAuthServiceInput);
+	})
+	.then(result => console.log(`Updated auth service: ${result}`))
+	.catch(err => console.error("Unable to update auth service. Error is: ", err));
+```
+
+#### getAuthServices method
+`getAuthServices` method returns all authentication services which allow access to the provided environment. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns all authentication services which allow access to the provided environment.
+ * The result is grouped by the identity store id.
+ * @param input The environment id.
+ * @returns {Promise<IDictionary<IKinveyAuthService[]>>}
+ */
+getAuthServices(input: IGetKinveyAuthServices): Promise<IDictionary<IKinveyAuthService[]>>;
+```
+Description of each parameter can be found [here](./lib/definitions/server/mbaas-services/kinvey-auth-services.d.ts).
+Detailed description of each parameter can be found [here](https://kinvey.api-docs.io/2/auth-services/auth-service).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudKinveyService.getAuthServices({ environmentId: "<env-id>" })
+	.then(result => console.log(`Auth services: ${result}`))
+	.catch(err => console.error("Unable to get auth services. Error is: ", err));
+```
+
+#### getDefaultAuthService method
+`getDefaultAuthService` method returns the default authentication service for the provided environment. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns the default authentication service for the provided environment.
+ * @param input The environment id.
+ * @returns {Promise<IKinveyAuthService>}
+ */
+getDefaultAuthService(input: IGetDefaultKinveyAuthService): Promise<IKinveyAuthService>;
+```
+Description of each parameter can be found [here](./lib/definitions/server/mbaas-services/kinvey-auth-services.d.ts).
+Detailed description of each parameter can be found [here](https://kinvey.api-docs.io/2/auth-services/auth-service).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudKinveyService.getDefaultAuthService({ environmentId: "<env-id>" })
+	.then(result => console.log(`Default auth service: ${result}`))
+	.catch(err => console.error("Unable to get dafault auth service. Error is: ", err));
+```
+
+#### changeDefaultAuthService method
+`changeDefaultAuthService` method changes the default authentication service in the provided environment. </br>
+Definition:
+
+```TypeScript
+/**
+ * Changes the default authentication service in the provided environment.
+ * @param input Input required to change the default authentication service.
+ * @returns {Promise<IKinveyAuthService>}
+ */
+changeDefaultAuthService(input: IChangeDefaultKinveyAuthService): Promise<IKinveyAuthService>;
+```
+Description of each parameter can be found [here](./lib/definitions/server/mbaas-services/kinvey-auth-services.d.ts).
+Detailed description of each parameter can be found [here](https://kinvey.api-docs.io/2/auth-services/auth-service).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudKinveyService.getAuthServices({ environmentId: "<env-id>" })
+	.then(authServices => {
+		const identityStoreId = Object.keys(authServices)[0];
+		const authServiceId = authServices[identityStoreId].id;
+
+		const changeDefaultAuthServiceInput = {
+			environmentId: "<env-id>",
+			authServiceId,
+			identityStoreId
+		};
+
+		return tns.nsCloudKinveyService.changeDefaultAuthService(changeDefaultAuthServiceInput);
+	})
+	.then(result => console.log(`New default auth service: ${result}`))
+	.catch(err => console.error("Unable to change dafault auth service. Error is: ", err));
+
 ```
 
 ## Development
