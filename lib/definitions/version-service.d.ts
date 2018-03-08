@@ -17,3 +17,18 @@ interface IVersionService {
 	 */
 	getProjectRuntimeVersion(projectDir: string, platform: string): Promise<string>;
 }
+
+/**
+ * Describes options that can be passed to getVersionRangeWithTilde method.
+ */
+interface IVersionRangeOptions {
+	/**
+	 * The version string - should be a valid semver string.
+	 */
+	versionString: string;
+
+	/**
+	 * Wether to respect the patch value of the versionString or just return 0 (e.g. latest patch).
+	 */
+	shouldRespectPatchVersion?: boolean;
+}

@@ -6,7 +6,7 @@ interface IApplicationBuildConfig extends IBuildConfig, IOptionalOutputPath, IPr
 /**
  * Describes settings that can be passed to shouldInstall method
  */
-interface IApplicationInstallConfig extends Mobile.IDeviceIdentifier, IProjectDir, IOptionalOutputPath { }
+interface IApplicationInstallConfig extends Mobile.IDeviceIdentifier, IProjectDir, IOptionalOutputPath, IRelease { }
 
 /**
  * Describes service which manages applications
