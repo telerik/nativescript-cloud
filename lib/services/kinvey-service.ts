@@ -90,7 +90,7 @@ export class KinveyService implements IKinveyService {
 		const result: IKinveyAuthServiceRequestInput = {
 			name: createAuthServiceOptions.name || this.getAuthServiceName(appName, createAuthServiceOptions.provider.type, isId),
 			identityStoreId: createAuthServiceOptions.identityStoreId || isId,
-			redirectUri: createAuthServiceOptions.redirectUri || redirectUri,
+			redirectUri: createAuthServiceOptions.redirectUri || redirectUri || ["http://example.com"],
 			grantTtl: createAuthServiceOptions.grantTtl || 30,
 			tokenTtl: createAuthServiceOptions.tokenTtl || 3600,
 			refresh: _.has(createAuthServiceOptions, "refresh") ? createAuthServiceOptions.refresh : true,
@@ -124,12 +124,6 @@ export class KinveyService implements IKinveyService {
 			res.grantType = res.grantType || "authorization-code";
 			res.includeClientIdInTokenRequest = _.has(res, "includeClientIdInTokenRequest") ? res.includeClientIdInTokenRequest : false;
 			res.includeClientSecretInTokenRequest = _.has(res, "includeClientSecretInTokenRequest") ? res.includeClientSecretInTokenRequest : false;
-			return res;
-		}
-
-		if (providerType === Authentication.OIDC) {
-			const res: IKinveyOIDCOptions = <IKinveyOIDCOptions>options;
-			res.grantType = res.grantType || "authorization-code";
 			return res;
 		}
 
