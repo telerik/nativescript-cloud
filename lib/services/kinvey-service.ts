@@ -73,7 +73,18 @@ export class KinveyService implements IKinveyService {
 			return null;
 		}
 
-		return this.$nsCloudKinveyRequestService.getAuthService(env.defaultAuthServiceId);
+		try {
+			const result = await this.$nsCloudKinveyRequestService.getAuthService(env.defaultAuthServiceId);
+			return result;
+		} catch (err) {
+			// Currently there is bug in the Kinvey backend - after the default auth service for an environment is
+			// deleted, the defaultAuthServiceId property is not changed. That's why we need to handle the error and return null.
+			if (err && err.response && err.response.statusCode === 404) {
+				return null;
+			}
+
+			throw err;
+		}
 	}
 
 	public async changeDefaultAuthService(input: IChangeDefaultKinveyAuthService): Promise<IKinveyAuthService> {
