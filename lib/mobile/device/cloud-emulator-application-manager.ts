@@ -22,9 +22,9 @@ export class CloudEmulatorApplicationManager extends EventEmitter implements Mob
 
 	public async uninstallApplication(appIdentifier: string): Promise<void> { /* currently empty */ }
 
-	public async startApplication(appIdentifier: string): Promise<void> { /* currently empty */ }
+	public async startApplication(appData: Mobile.IApplicationData): Promise<void> { /* currently empty */ }
 
-	public async stopApplication(appIdentifier: string): Promise<void> { /* currently empty */ }
+	public async stopApplication(appData: Mobile.IApplicationData): Promise<void> { /* currently empty */ }
 
 	public async getApplicationInfo(applicationIdentifier: string): Promise<Mobile.IApplicationInfo> {
 		return null;
@@ -50,9 +50,9 @@ export class CloudEmulatorApplicationManager extends EventEmitter implements Mob
 		return this.installApplication(packageFilePath);
 	}
 
-	public async restartApplication(appIdentifier: string, appName?: string): Promise<void> { /* currently empty */ }
+	public async restartApplication(appData: Mobile.IApplicationData): Promise<void> { /* currently empty */ }
 
 	public async checkForApplicationUpdates(): Promise<void> { /* currently empty */ }
 
-	public async tryStartApplication(appIdentifier: string): Promise<void> { /* currently empty */ }
+	public async tryStartApplication(appData: Mobile.IApplicationData): Promise<void> { /* currently empty */ }
 }

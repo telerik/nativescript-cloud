@@ -35,7 +35,7 @@ export class KinveyService implements IKinveyService {
 
 		await this.$nsCloudKinveyRequestService.updateEnvironment(env);
 
-		await this.changeDefaultAuthService({ envronmentId: input.environmentId, authServiceId: authService.id, identityStoreId: identityStore.id });
+		await this.changeDefaultAuthService({ environmentId: input.environmentId, authServiceId: authService.id, identityStoreId: identityStore.id });
 
 		return authService;
 	}
@@ -55,7 +55,7 @@ export class KinveyService implements IKinveyService {
 		return this.$nsCloudKinveyRequestService.updateAuthService(input.authServiceId, input.authService);
 	}
 
-	public async getAuthServices(input: IGetKinveyAuthServices): Promise<IDictionary<IKinveyAuthService[]>> {
+	public async getAuthServices(input: IEnvironmentId): Promise<IDictionary<IKinveyAuthService[]>> {
 		const identityStores = await this.$nsCloudKinveyRequestService.getIdentityStores();
 		const identityStoresForEnvironment = _.filter(identityStores, i => i.access.writers.environments.indexOf(input.environmentId) >= 0);
 
@@ -67,7 +67,7 @@ export class KinveyService implements IKinveyService {
 		return result;
 	}
 
-	public async getDefaultAuthService(input: IGetDefaultKinveyAuthService): Promise<IKinveyAuthService> {
+	public async getDefaultAuthService(input: IEnvironmentId): Promise<IKinveyAuthService> {
 		const env = await this.$nsCloudKinveyRequestService.getEnvironment(input.environmentId);
 		if (!env.defaultAuthServiceId) {
 			return null;
@@ -77,13 +77,13 @@ export class KinveyService implements IKinveyService {
 	}
 
 	public async changeDefaultAuthService(input: IChangeDefaultKinveyAuthService): Promise<IKinveyAuthService> {
-		const env = await this.$nsCloudKinveyRequestService.getEnvironment(input.envronmentId);
+		const env = await this.$nsCloudKinveyRequestService.getEnvironment(input.environmentId);
 		env.identityStoreId = input.identityStoreId;
 		env.defaultAuthServiceId = input.authServiceId;
 
 		await this.$nsCloudKinveyRequestService.updateEnvironment(env);
 
-		return this.getDefaultAuthService({ environmentId: input.envronmentId });
+		return this.getDefaultAuthService({ environmentId: input.environmentId });
 	}
 
 	private getCreateAuthServiceInput(appName: string, isId: string, redirectUri: string[], createAuthServiceOptions: IKinveyAuthServiceRequestInput): IKinveyAuthServiceRequestInput {
