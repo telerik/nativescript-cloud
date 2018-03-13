@@ -37,14 +37,14 @@ interface IKinveyService {
 	 * @param input The environment id.
 	 * @returns {Promise<IDictionary<IKinveyAuthService[]>>}
 	 */
-	getAuthServices(input: IGetKinveyAuthServices): Promise<IDictionary<IKinveyAuthService[]>>;
+	getAuthServices(input: IEnvironmentId): Promise<IDictionary<IKinveyAuthService[]>>;
 
 	/**
 	 * Returns the default authentication service for the provided environment.
 	 * @param input The environment id.
 	 * @returns {Promise<IKinveyAuthService>}
 	 */
-	getDefaultAuthService(input: IGetDefaultKinveyAuthService): Promise<IKinveyAuthService>;
+	getDefaultAuthService(input: IEnvironmentId): Promise<IKinveyAuthService>;
 
 	/**
 	 * Changes the default authentication service in the provided environment.

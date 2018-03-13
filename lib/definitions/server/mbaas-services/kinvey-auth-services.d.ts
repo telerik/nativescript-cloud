@@ -74,9 +74,12 @@ interface IKinveyOIDCOptions extends IKinveyOAuthOptionsBase {
 	issuerId: string;
 }
 
-interface ICreateKinveyAuthService {
-	appId: string;
+interface IEnvironmentId {
 	environmentId: string;
+}
+
+interface ICreateKinveyAuthService extends IEnvironmentId {
+	appId: string;
 	redirectUri?: string[];
 	authServiceOptions: IKinveyAuthServiceRequestInput;
 	identityStoreOptions?: ICreateKinveyIdentityStoreInput;
@@ -87,16 +90,7 @@ interface IUpdateKinveyAuthService {
 	authService: IKinveyAuthServiceRequestInput;
 }
 
-interface IGetKinveyAuthServices {
-	environmentId: string;
-}
-
-interface IGetDefaultKinveyAuthService {
-	environmentId: string;
-}
-
-interface IChangeDefaultKinveyAuthService {
-	envronmentId: string;
+interface IChangeDefaultKinveyAuthService extends IEnvironmentId {
 	authServiceId: string;
 	identityStoreId: string;
 }
