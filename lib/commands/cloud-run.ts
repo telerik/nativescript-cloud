@@ -19,7 +19,8 @@ export class CloudRunCommand implements ICommand {
 	public async execute(args: string[]): Promise<void> {
 		return this.$liveSyncCommandHelper.executeCommandLiveSync(this.platform, {
 			getOutputDirectory: this.$nsCloudBuildService.getServerOperationOutputDirectory.bind(this.$nsCloudBuildService),
-			buildPlatform: this.$nsCloudBuildCommandHelper.buildPlatform.bind(this.$nsCloudBuildCommandHelper)
+			buildPlatform: this.$nsCloudBuildCommandHelper.buildPlatform.bind(this.$nsCloudBuildCommandHelper),
+			skipNativePrepare: true
 		});
 	}
 
