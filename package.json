@@ -62,5 +62,44 @@
     "temp": "0.8.3",
     "uuid": "3.0.1",
     "xml-escape": "1.1.0"
+  },
+  "keywords": [
+    "nativescript",
+    "nativescript:extension",
+    "nativescript-cloud",
+    "cloud",
+    "build"
+  ],
+  "nativescript": {
+    "commands": [
+      "accept|eula",
+      "account",
+      "account|features",
+      "account|usage",
+      "build|cloud",
+      "cloud|build",
+      "cloud|clean|workspace",
+      "cloud|codesign",
+      "cloud|deploy",
+      "cloud|lib|version",
+      "cloud|publish|android",
+      "cloud|publish|ios",
+      "cloud|run",
+      "cloud|run|android",
+      "cloud|run|ios",
+      "codesign|cloud",
+      "config",
+      "config|apply",
+      "config|reset",
+      "config|set",
+      "deploy|cloud",
+      "dev-login",
+      "login",
+      "logout",
+      "run|cloud",
+      "run|cloud|android",
+      "run|cloud|ios",
+      "user"
+    ]
   }
 }
