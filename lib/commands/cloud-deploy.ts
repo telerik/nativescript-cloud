@@ -7,8 +7,7 @@ export class CloudDeploy extends BundleValidatorBaseCommand implements ICommand 
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
-	constructor($injector: IInjector,
-		$logger: ILogger,
+	constructor($nsCloudPolyfillService: IPolyfillService,
 		private $platformService: IPlatformService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $errors: IErrors,
@@ -18,7 +17,7 @@ export class CloudDeploy extends BundleValidatorBaseCommand implements ICommand 
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
 		private $projectData: IProjectData) {
-		super($injector, $logger);
+		super($nsCloudPolyfillService);
 		this.$projectData.initializeProjectData();
 	}
 
