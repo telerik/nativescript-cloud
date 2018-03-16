@@ -1,4 +1,5 @@
 import { VersionService } from "../../lib/services/version-service";
+import { PolyfillService } from "../../lib/services/polyfill-service";
 import { Yok } from "mobile-cli-lib/yok";
 import { assert } from "chai";
 
@@ -10,6 +11,7 @@ describe("versionService", () => {
 			trace: (formatStr?: any, ...args: any[]): void => (undefined)
 		});
 		testInjector.register("httpClient", {});
+		testInjector.register("nsCloudPolyfillService", PolyfillService);
 		testInjector.register("projectDataService", {});
 		return testInjector;
 	};

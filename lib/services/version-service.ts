@@ -1,8 +1,15 @@
 import * as semver from "semver";
 
 export class VersionService implements IVersionService {
+	private get $constants(): IDictionary<any> {
+		return this.$nsCloudPolyfillService.getPolyfillObject<IDictionary<any>>("constants", {
+			NATIVESCRIPT_PROPS_INTERNAL_DELIMITER: "."
+		});
+	}
+
 	constructor(private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
+		private $nsCloudPolyfillService: IPolyfillService,
 		private $projectDataService: IProjectDataService) { }
 
 	public async getCliVersion(runtimeVersion: string): Promise<string> {
@@ -20,7 +27,7 @@ export class VersionService implements IVersionService {
 
 	public async getProjectRuntimeVersion(projectDir: string, platform: string, ): Promise<string> {
 		const runtimePackageName = `tns-${platform.toLowerCase()}`;
-		const runtimeVersion = this.$projectDataService.getNSValue(projectDir, `${runtimePackageName}.version`);
+		const runtimeVersion = this.$projectDataService.getNSValue(projectDir, `${runtimePackageName}${this.$constants.NATIVESCRIPT_PROPS_INTERNAL_DELIMITER}version`);
 
 		if (!runtimeVersion) {
 			throw new Error(`Unable to find runtime version for package ${runtimePackageName}.`);
