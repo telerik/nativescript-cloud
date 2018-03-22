@@ -6,6 +6,7 @@ $injector.require("nsCloudServerConfigManager", path.join(__dirname, "server-con
 $injector.require("nsCloudBuildOutputFilter", path.join(__dirname, "cloud-build-output-filter"));
 $injector.require("nsCloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
 $injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
+$injector.require("nsCloudBuildHelper", path.join(__dirname, "cloud-build-helper"));
 $injector.require("nsCloudBuildCommandHelper", path.join(__dirname, "commands", "build-command-helper"));
 $injector.require("nsCloudEulaCommandHelper", path.join(__dirname, "commands", "eula-command-helper"));
 
@@ -44,6 +45,7 @@ $injector.require("nsCloudDateTimeService", path.join(__dirname, "services", "da
 $injector.require("nsCloudGitService", path.join(__dirname, "services", "git-service"));
 $injector.require("nsCloudVersionService", path.join(__dirname, "services", "version-service"));
 $injector.require("nsCloudPolyfillService", path.join(__dirname, "services", "polyfill-service"));
+$injector.require("nsCloudBuildPropertiesService", path.join(__dirname, "services", "cloud-build-properties-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
