@@ -8,6 +8,10 @@ export abstract class CloudService extends EventEmitter {
 	private static OPERATION_COMPLETE_STATUS = "Success";
 	private static OPERATION_FAILED_STATUS = "Failed";
 	private static OPERATION_IN_PROGRESS_STATUS = "Building";
+	private static GET_TRANSFORMED_RESULT_MAX_WAIT = 3 * 1000;
+	private static GET_TRANSFORMED_RESULT_REQUEST_INTERVAL = 500;
+	private static GET_TRANSFORMED_RESULT_RETRIES_COUNT =
+		Math.floor(CloudService.GET_TRANSFORMED_RESULT_MAX_WAIT / CloudService.GET_TRANSFORMED_RESULT_REQUEST_INTERVAL);
 
 	protected outputCursorPosition: number;
 	protected abstract failedToStartError: string;
@@ -95,4 +99,25 @@ export abstract class CloudService extends EventEmitter {
 		return targetFileNames;
 	}
 
+	protected async getTransformedServerResult(transformedBuildResultUrl: string): Promise<IBuildServerResult> {
+		return new Promise<IBuildServerResult>((resolve, reject) => {
+			let retriesCount = 1;
+			const intervalId = setInterval(async () => {
+				if (retriesCount > CloudService.GET_TRANSFORMED_RESULT_RETRIES_COUNT) {
+					clearInterval(intervalId);
+					return resolve(null);
+				}
+
+				retriesCount++;
+				try {
+					const result = await this.getObjectFromS3File<IBuildServerResult>(transformedBuildResultUrl);
+					clearInterval(intervalId);
+					return resolve(result);
+				} catch (err) {
+					this.$logger.trace("Error while getting results-transformed.json file:");
+					this.$logger.trace(err);
+				}
+			}, CloudService.GET_TRANSFORMED_RESULT_REQUEST_INTERVAL);
+		});
+	}
 }
