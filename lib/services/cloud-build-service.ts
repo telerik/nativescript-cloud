@@ -10,6 +10,10 @@ import { CloudService } from "./cloud-service";
 const plist = require("simple-plist");
 
 export class CloudBuildService extends CloudService implements ICloudBuildService {
+	private static readonly GetTransformedResultMaxWait = 3 * 1000;
+	private static readonly GetTransformedResultInterval = 500;
+	private static readonly GetTransformedResultRetriesCount = Math.floor(CloudBuildService.GetTransformedResultMaxWait / CloudBuildService.GetTransformedResultInterval);
+
 	protected get failedError() {
 		return "Build failed.";
 	}
@@ -177,7 +181,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			outputFilePath: localBuildResult,
 			qrData: {
 				originalUrl: buildResultUrl,
-				imageData: await this.getImageData(buildResultUrl, itmsOptions)
+				imageData: await this.getImageData(buildResultUrl, buildResponse.transformedResultUrl, itmsOptions)
 			}
 		};
 
@@ -610,7 +614,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		this.$errors.failWithoutHelp(`Could not read ${certificatePath}. Please make sure there is a certificate inside.`);
 	}
 
-	private async getImageData(buildResultUrl: string, options: IItmsPlistOptions): Promise<string> {
+	private async getImageData(buildResultUrl: string, transformedResultUrl: string, options: IItmsPlistOptions): Promise<string> {
 		if (options.pathToProvision) {
 			const provisionData = this.getMobileProvisionData(options.pathToProvision);
 			const provisionType = this.getProvisionType(provisionData);
@@ -621,6 +625,12 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			const preSignedUrlData = await this.$nsCloudServerBuildService.getPresignedUploadUrlObject(uuid.v4());
 			await this.$nsCloudUploadService.uploadToS3(this.$nsCloudItmsServicesPlistHelper.createPlistContent(options), preSignedUrlData.fileName, preSignedUrlData.uploadPreSignedUrl);
 			return this.$qr.generateDataUri(`itms-services://?action=download-manifest&amp;url=${escape(preSignedUrlData.publicDownloadUrl)}`);
+		} else {
+			// The transformed build result contains shorter download urls.
+			const res = await this.getTransformedServerResult(transformedResultUrl);
+			if (res) {
+				return this.$qr.generateDataUri(this.getBuildResultUrl(res));
+			}
 		}
 
 		return this.$qr.generateDataUri(buildResultUrl);
@@ -654,6 +664,28 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	private emitStepChanged(buildId: string, step: string, progress: number): void {
 		const buildStep: IBuildStep = { buildId, step, progress };
 		this.emit(constants.CLOUD_BUILD_EVENT_NAMES.STEP_CHANGED, buildStep);
+	}
+
+	private async getTransformedServerResult(transformedBuildResultUrl: string): Promise<IBuildServerResult> {
+		return new Promise<IBuildServerResult>((resolve, reject) => {
+			let retriesCount = 1;
+			const intervalId = setInterval(async () => {
+				if (retriesCount > CloudBuildService.GetTransformedResultRetriesCount) {
+					clearInterval(intervalId);
+					return resolve(null);
+				}
+
+				retriesCount++;
+				try {
+					const result = await this.getObjectFromS3File<IBuildServerResult>(transformedBuildResultUrl);
+					clearInterval(intervalId);
+					return resolve(result);
+				} catch (err) {
+					this.$logger.trace("Error while getting results-transformed.json file:");
+					this.$logger.trace(err);
+				}
+			}, CloudBuildService.GetTransformedResultInterval);
+		});
 	}
 }
 

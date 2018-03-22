@@ -9,6 +9,7 @@ interface IServerBuildService {
 interface IServerResponse {
 	statusUrl: string;
 	resultUrl: string;
+	transformedResultUrl: string;
 	outputUrl: string;
 }
 
