@@ -22,6 +22,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $errors: IErrors,
 		private $mobileHelper: Mobile.IMobileHelper,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
+		private $nsCloudConfigurationService: ICloudConfigurationService,
 		private $nsCloudAccountsService: IAccountsService,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $nsCloudOutputFilter: ICloudOutputFilter,
@@ -317,7 +318,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		 * performed. Passing the framework=tns here is more consistent that adding conditional
 		 * behavior in the tooling.
 		 */
-		return {
+		const result: IBuildRequestData = {
 			accountId: settings.accountId,
 			properties: {
 				buildId: settings.buildId,
@@ -340,6 +341,13 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			targets: [],
 			buildFiles
 		};
+
+		const cloudConfigData = this.$nsCloudConfigurationService.getCloudConfigurationData();
+		if (cloudConfigData && cloudConfigData.machineId) {
+			result.machineId = cloudConfigData.machineId;
+		}
+
+		return result;
 	}
 
 	private getBuildResultUrl(buildResult: IBuildServerResult): string {

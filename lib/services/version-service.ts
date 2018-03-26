@@ -10,11 +10,14 @@ export class VersionService implements IVersionService {
 	constructor(private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
 		private $nsCloudPolyfillService: IPolyfillService,
+		private $nsCloudConfigurationService: ICloudConfigurationService,
 		private $projectDataService: IProjectDataService) { }
 
 	public async getCliVersion(runtimeVersion: string): Promise<string> {
 		try {
-			const latestMatchingVersion = process.env.TNS_CLI_CLOUD_VERSION || await this.getLatestMatchingVersion("nativescript", runtimeVersion);
+			const cloudConfigData = this.$nsCloudConfigurationService.getCloudConfigurationData();
+			const cliCloudVersionOverride = cloudConfigData && cloudConfigData.tnsCliCloudVersion;
+			const latestMatchingVersion = cliCloudVersionOverride || await this.getLatestMatchingVersion("nativescript", runtimeVersion);
 			if (!latestMatchingVersion) {
 				throw new Error("Cannot find CLI versions.");
 			}
