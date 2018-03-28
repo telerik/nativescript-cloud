@@ -4,13 +4,13 @@
 ==  in this case for NativeScript Cloud v1*					  ==
 =========================================================================
 
-NativeScript Cloud v1* (the ìProductî)
+NativeScript Cloud v1* (the "Product")
 
 Copyright © 2015-2018 Telerik AD. All Rights Reserved.
 
 For license information see the LICENSE.md file which accompanies this NOTICE.txt file.
 
-Portions of the Product include certain non-proprietary open source and commercial third-party components listed below (ìThird-Party Componentsî). The authors of the Third-Party Components require Telerik AD (ìTelerikî) to include the following notices and additional licensing terms as a condition of Telerikís use of such Third-Party Components.  You acknowledge that the authors of the Third-Party Components have no obligation to provide support to you for the Third-Party Components or the Product.  You hereby undertake to comply with all licenses related to the applicable Third-Party Components.
+Portions of the Product include certain non-proprietary open source and commercial third-party components listed below ("Third-Party Components"). The authors of the Third-Party Components require Telerik AD ("Telerik") to include the following notices and additional licensing terms as a condition of Telerik’s use of such Third-Party Components.  You acknowledge that the authors of the Third-Party Components have no obligation to provide support to you for the Third-Party Components or the Product.  You hereby undertake to comply with all licenses related to the applicable Third-Party Components.
 
 1.	Special Notices Regarding Open Source Third-Party Components incorporated in the Product:
 
@@ -25,10 +25,10 @@ Contents of NOTICE text file for NativeScript Doctor v0.9*:
 ==  the Apache License, Version 2.0,                                   ==
 ==  in this case for NativeScript Doctor v0.9					  ==
 =========================================================================
-NativeScript Doctor v0.9 (the ìProductî)
+NativeScript Doctor v0.9 (the "Product")
 Copyright © 2016-2018 Telerik AD. All Rights Reserved.
 For license information see the LICENSE.md file which accompanies this NOTICE.txt file.
-Portions of the Product include certain non-proprietary open source and commercial third-party components listed below (ìThird-Party Componentsî). The authors of the Third-Party Components require Telerik AD (ìTelerikî) to include the following notices and additional licensing terms as a condition of Telerikís use of such Third-Party Components.  You acknowledge that the authors of the Third-Party Components have no obligation to provide support to you for the Third-Party Components or the Product.  You hereby undertake to comply with all licenses related to the applicable Third-Party Components.
+Portions of the Product include certain non-proprietary open source and commercial third-party components listed below ("Third-Party Components"). The authors of the Third-Party Components require Telerik AD ("Telerik") to include the following notices and additional licensing terms as a condition of Telerik’s use of such Third-Party Components.  You acknowledge that the authors of the Third-Party Components have no obligation to provide support to you for the Third-Party Components or the Product.  You hereby undertake to comply with all licenses related to the applicable Third-Party Components.
 1.	Special Notices Regarding Open Source Third-Party Components incorporated in the Product:  
 (1) BSD-Style License:
 (a) NativeScript Doctor v0.9 incorporates winreg v1.2.2.  Such technology is subject to the following terms and conditions:
