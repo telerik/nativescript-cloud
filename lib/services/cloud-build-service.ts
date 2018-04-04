@@ -287,9 +287,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
 		const appFilesUpdaterOptions: IAppFilesUpdaterOptions = {
-			// Set this option to false, so that the local prepare does not webpack in addition to the cloud one.
-			// TODO: Once we have a way to use webpack in livesync this value may need to change.
-			bundle: false,
+			bundle: projectSettings.bundle,
 			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase()
 		};
 
