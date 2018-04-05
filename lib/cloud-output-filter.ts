@@ -1,6 +1,6 @@
 import { EOL } from "os";
 
-export class CloudBuildOutputFilter implements ICloudBuildOutputFilter {
+export class CloudOutputFilter implements ICloudOutputFilter {
 	public filter(logs: string): string {
 		let result = logs.replace(new RegExp("(\\\\r\\\\n)|(\\\\n)", "gm"), EOL) // Unescape new lines.
 			.replace(/(\\\\t)/g, "\t") // Unescape tabs.
@@ -24,4 +24,4 @@ export class CloudBuildOutputFilter implements ICloudBuildOutputFilter {
 	}
 }
 
-$injector.register("nsCloudBuildOutputFilter", CloudBuildOutputFilter);
+$injector.register("nsCloudOutputFilter", CloudOutputFilter);

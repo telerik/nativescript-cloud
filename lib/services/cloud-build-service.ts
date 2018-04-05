@@ -24,7 +24,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $nsCloudAccountsService: IAccountsService,
 		private $nsCloudServerBuildService: IServerBuildService,
-		private $nsCloudBuildOutputFilter: ICloudBuildOutputFilter,
+		private $nsCloudOutputFilter: ICloudOutputFilter,
 		private $nsCloudGitService: IGitService,
 		private $nsCloudItmsServicesPlistHelper: IItmsServicesPlistHelper,
 		private $nsCloudUploadService: IUploadService,
@@ -296,7 +296,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			buildFiles = [
 				{
 					disposition,
-					sourceUri: preSignedUrlData.s3Url
+					sourceUri: preSignedUrlData.publicDownloadUrl
 				}
 			];
 		}
@@ -329,7 +329,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				appIdentifier: settings.projectSettings.projectId,
 				frameworkVersion: cliVersion,
 				runtimeVersion: runtimeVersion,
-				sessionKey: settings.buildCredentials.sessionKey,
+				sessionKey: settings.buildCredentials.sessionKey, // TODO: remove this parameter after we deploy our new server.
 				templateAppName: sanitizedProjectName,
 				projectName: sanitizedProjectName,
 				framework: "tns",
@@ -363,7 +363,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		try {
 			const logs = await this.getContentOfS3File(logsUrl);
 			// The logs variable will contain the full server log and we need to log only the logs that we don't have.
-			const contentToLog = this.$nsCloudBuildOutputFilter.filter(logs.substr(this.outputCursorPosition));
+			const contentToLog = this.$nsCloudOutputFilter.filter(logs.substr(this.outputCursorPosition));
 			if (contentToLog) {
 				const data: IBuildLog = { buildId, data: contentToLog, pipe: "stdout" };
 				this.emit(constants.CLOUD_BUILD_EVENT_NAMES.BUILD_OUTPUT, data);

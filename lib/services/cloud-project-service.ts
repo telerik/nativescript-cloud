@@ -15,6 +15,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
+		private $nsCloudOutputFilter: ICloudOutputFilter,
 		private $nsCloudServerProjectService: IServerProjectService,
 		private $projectHelper: IProjectHelper) {
 		super($fs, $httpClient, $logger);
@@ -71,12 +72,9 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 			try {
 				await this.waitForServerOperationToFinish(taskId, task);
 				const taskResult = await this.getObjectFromS3File<IServerResult>(task.resultUrl);
-				if (this.hasContent(taskResult.stdout)) {
-					this.$logger.info(taskResult.stdout);
-				}
-
-				if (this.hasContent(taskResult.stderr)) {
-					this.$logger.error(taskResult.stderr);
+				const output = this.$nsCloudOutputFilter.filter(await this.getContentOfS3File(task.outputUrl));
+				if (this.hasContent(output)) {
+					this.$logger.info(output);
 				}
 
 				tasksResults[taskId] = taskResult;

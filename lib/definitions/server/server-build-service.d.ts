@@ -66,7 +66,6 @@ interface IBuildCredentialResponse {
 interface IAmazonStorageEntry {
 	uploadPreSignedUrl: string;
 	publicDownloadUrl: string;
-	s3Url: string;
 	fileName: string;
 }
 

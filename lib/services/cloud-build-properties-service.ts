@@ -104,7 +104,7 @@ export class CloudBuildPropertiesService implements ICloudBuildPropertiesService
 
 			buildProps.buildFiles.push({
 				disposition: certificateData.disposition,
-				sourceUri: certificateData.s3Url
+				sourceUri: certificateData.publicDownloadUrl
 			});
 		}
 
@@ -123,11 +123,11 @@ export class CloudBuildPropertiesService implements ICloudBuildPropertiesService
 
 			buildProps.buildFiles.push(
 				{
-					sourceUri: certificateData.s3Url,
+					sourceUri: certificateData.publicDownloadUrl,
 					disposition: certificateData.disposition
 				},
 				{
-					sourceUri: provisonData.s3Url,
+					sourceUri: provisonData.publicDownloadUrl,
 					disposition: provisonData.disposition
 				}
 			);

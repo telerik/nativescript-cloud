@@ -3,7 +3,7 @@ import * as path from "path";
 $injector.require("nsCloudHttpServer", path.join(__dirname, "http-server"));
 $injector.require("nsCloudItmsServicesPlistHelper", path.join(__dirname, "itms-services-plist-helper"));
 $injector.require("nsCloudServerConfigManager", path.join(__dirname, "server-config-manager"));
-$injector.require("nsCloudBuildOutputFilter", path.join(__dirname, "cloud-build-output-filter"));
+$injector.require("nsCloudOutputFilter", path.join(__dirname, "cloud-output-filter"));
 $injector.require("nsCloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
 $injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
 $injector.require("nsCloudBuildHelper", path.join(__dirname, "cloud-build-helper"));
