@@ -46,8 +46,6 @@ interface ICloudEmulatorResponse extends IPlatform {
 interface IPresignURLResponse {
 	uploadPreSignedUrl: string;
 	publicDownloadUrl: string;
-	s3Url: string;
-	sessionKey: string;
 }
 
 interface ICloudEmulatorKeys {
