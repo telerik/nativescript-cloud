@@ -1,29 +1,29 @@
 {
-	"apiVersion": "v2",
+	"apiVersion": "pr140",
 	"domainName": "digitalfactory.rocks",
 	"serverProto": "https",
-	"stage": "production",
+	"stage": "test",
 	"cloudServices": {
 		"auth-service": {
-			"subdomain": "authentication"
+			"subdomain": "test-authentication"
 		},
 		"build-service": {
-			"subdomain": "build"
+			"subdomain": "test-build"
 		},
 		"emulators-service": {
-			"subdomain": "emulators"
+			"subdomain": "test-emulators"
 		},
 		"code-commit-service": {
-			"subdomain": "code-commit"
+			"subdomain": "test-code-commit"
 		},
 		"misc-service": {
-			"subdomain": "misc"
+			"subdomain": "test-misc"
 		},
 		"accounts-service": {
-			"subdomain": "accounts"
+			"subdomain": "test-accounts"
 		},
 		"project-service": {
-			"subdomain": "project"
+			"subdomain": "test-project"
 		}
 	},
 	"mBaaS": {

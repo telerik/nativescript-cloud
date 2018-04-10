@@ -94,5 +94,4 @@ export abstract class CloudService extends EventEmitter {
 
 		return targetFileNames;
 	}
-
 }

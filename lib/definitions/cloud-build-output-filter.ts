@@ -1,3 +1,3 @@
-interface ICloudBuildOutputFilter {
+interface ICloudOutputFilter {
 	filter(data: string): string;
 }
