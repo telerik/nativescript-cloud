@@ -7,7 +7,9 @@ export abstract class CloudService extends EventEmitter {
 	private static OPERATION_STATUS_CHECK_RETRY_COUNT = 8;
 	private static OPERATION_COMPLETE_STATUS = "Success";
 	private static OPERATION_FAILED_STATUS = "Failed";
-	private static OPERATION_IN_PROGRESS_STATUS = "Building";
+	// TODO: Remove after 10.05.2018
+	private static OPERATION_IN_PROGRESS_STATUS_OLD = "Building";
+	private static OPERATION_IN_PROGRESS_STATUS = "InProgress";
 
 	protected outputCursorPosition: number;
 	protected abstract failedToStartError: string;
@@ -63,7 +65,8 @@ export abstract class CloudService extends EventEmitter {
 							return reject(new Error(this.failedError));
 						}
 
-						if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
+						if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS_OLD ||
+							serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
 							await this.getServerLogs(serverInformation.outputUrl, operationId);
 						}
 
