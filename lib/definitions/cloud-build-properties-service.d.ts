@@ -6,12 +6,12 @@ declare interface ICloudBuildPropertiesService {
 		iOSBuildData?: IIOSBuildData): Promise<void>;
 
 	getAndroidBuildProperties(projectSettings: INSCloudProjectSettings,
-		buildProps: any,
+		buildProps: IBuildRequestData,
 		amazonStorageEntriesData: IAmazonStorageEntryData[],
 		androidBuildData?: IAndroidBuildData): Promise<any>;
 
 	getiOSBuildProperties(projectSettings: INSCloudProjectSettings,
-		buildProps: any,
+		buildProps: IBuildRequestData,
 		amazonStorageEntriesData: IAmazonStorageEntryData[],
 		iOSBuildData: IIOSBuildData): Promise<any>
 }
