@@ -31,8 +31,6 @@ export class CloudRunCommand implements ICommand {
 			this.$errors.fail("This input is not valid for the cloud run command");
 		}
 
-		this.$liveSyncCommandHelper.validatePlatform(this.platform);
-
 		return true;
 	}
 }
