@@ -5,13 +5,14 @@ import * as temp from "temp";
 export abstract class EulaServiceBase implements IEulaService {
 	private isEulaDownloadedInCurrentProcess = false;
 
-	constructor(private $httpClient: Server.IHttpClient,
-		private $userSettingsService: IUserSettingsService,
-		private $logger: ILogger,
-		private $fs: IFileSystem,
-		private $nsCloudDateTimeService: IDateTimeService,
+	constructor(private $fs: IFileSystem,
+		private $httpClient: Server.IHttpClient,
 		private $lockfile: ILockFile,
-		private $settingsService: ISettingsService) { }
+		private $logger: ILogger,
+		private $nsCloudDateTimeService: IDateTimeService,
+		private $nsCloudHashService: IHashService,
+		private $settingsService: ISettingsService,
+		private $userSettingsService: IUserSettingsService) { }
 
 	// Exposed for Sidekick
 	public async getEulaData(): Promise<IEulaData> {
@@ -60,7 +61,7 @@ export abstract class EulaServiceBase implements IEulaService {
 
 		// At this point we should have already downloaded the EULA, so just get the info for local file.
 		// If it does not exist - we were unable to download it.
-		const currentEulaHash = await this.getLocalEulaHash();
+		const currentEulaHash = await this.$nsCloudHashService.getLocalFileHash(this.getPathToEula());
 		if (!currentEulaHash) {
 			this.$logger.trace(`Checking ${this.getPathToEula()} state: no local copy of EULA found - as user had already accepted previous version of the EULA, consider it as the current one, so no need to accept new.`);
 			return false;
@@ -135,18 +136,10 @@ export abstract class EulaServiceBase implements IEulaService {
 	private async getCurrentEulaHash(): Promise<string> {
 		await this.downloadLatestEula({ shouldThrowError: true });
 
-		const localEulaHash = await this.getLocalEulaHash();
+		const localEulaHash = await this.$nsCloudHashService.getLocalFileHash(this.getPathToEula());
 		this.$logger.trace(`Downloaded latest ${this.getPathToEula()}, its hash is: ${localEulaHash}.`);
 
 		return localEulaHash;
-	}
-
-	private async getLocalEulaHash(): Promise<string> {
-		if (this.$fs.exists(this.getPathToEula())) {
-			return this.$fs.getFileShasum(this.getPathToEula(), { algorithm: "sha256", encoding: "hex" });
-		}
-
-		return null;
 	}
 
 	private getLockFileParams(): ILockFileOptions {

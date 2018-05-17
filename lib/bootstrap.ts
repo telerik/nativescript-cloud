@@ -26,6 +26,7 @@ $injector.requirePublicClass("nsCloudAccountsService", path.join(__dirname, "ser
 $injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "services", "eula-service"));
 $injector.requirePublicClass("nsCloudKinveyEulaService", path.join(__dirname, "services", "kinvey-eula-service"));
 $injector.requirePublicClass("nsCloudKinveyService", path.join(__dirname, "services", "kinvey-service"));
+$injector.requirePublicClass("nsCloudPolicyService", path.join(__dirname, "services", "policy-service"));
 
 // Services.
 $injector.require("nsCloudServerAuthService", path.join(__dirname, "services", "server", "server-auth-service"));
@@ -46,6 +47,7 @@ $injector.require("nsCloudGitService", path.join(__dirname, "services", "git-ser
 $injector.require("nsCloudVersionService", path.join(__dirname, "services", "version-service"));
 $injector.require("nsCloudPolyfillService", path.join(__dirname, "services", "polyfill-service"));
 $injector.require("nsCloudBuildPropertiesService", path.join(__dirname, "services", "cloud-build-properties-service"));
+$injector.require("nsCloudHashService", path.join(__dirname, "services", "hash-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
