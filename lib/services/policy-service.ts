@@ -1,9 +1,9 @@
 import { join } from "path";
 
 export class PolicyService implements IPolicyService {
-	private static readonly Policies: string = "policies";
-	private static readonly PrivacyPolicyName: string = "privacy-policy";
-	private static readonly PrivacyPolicyFileName: string = `${PolicyService.PrivacyPolicyName}.txt`;
+	public static readonly PRIVACY_POLICY_NAME: string = "privacy-policy";
+	private static readonly POLICIES: string = "policies";
+	private static readonly PRIVACY_POLICY_FILE_NAME: string = `${PolicyService.PRIVACY_POLICY_NAME}.txt`;
 
 	constructor(private $errors: IErrors,
 		private $fs: IFileSystem,
@@ -34,27 +34,27 @@ export class PolicyService implements IPolicyService {
 	}
 
 	public async acceptPrivacyPolicy(): Promise<void> {
-		return this.accept({ policyName: PolicyService.PrivacyPolicyName, pathToPolicyFile: this.getPathToPrivacyPolicy() });
+		return this.accept({ policyName: PolicyService.PRIVACY_POLICY_NAME, pathToPolicyFile: this.getPathToPrivacyPolicy() });
 	}
 
 	public async shouldAcceptPrivacyPolicy(): Promise<boolean> {
-		return this.shouldAcceptPolicy({ policyName: PolicyService.PrivacyPolicyName, pathToPolicyFile: this.getPathToPrivacyPolicy() });
+		return this.shouldAcceptPolicy({ policyName: PolicyService.PRIVACY_POLICY_NAME, pathToPolicyFile: this.getPathToPrivacyPolicy() });
 	}
 
 	private async getPolicyUserSetting(policy: string): Promise<string> {
-		const policiesKey = await this.$userSettingsService.getSettingValue<IDictionary<string>>(PolicyService.Policies) || {};
+		const policiesKey = await this.$userSettingsService.getSettingValue<IDictionary<string>>(PolicyService.POLICIES) || {};
 		return policiesKey ? policiesKey[policy] : null;
 	}
 
 	private async setPolicyUserSetting(policy: string, value: string): Promise<void> {
-		const policiesKey = await this.$userSettingsService.getSettingValue<IDictionary<string>>(PolicyService.Policies) || {};
+		const policiesKey = await this.$userSettingsService.getSettingValue<IDictionary<string>>(PolicyService.POLICIES) || {};
 
 		policiesKey[policy] = value;
-		await this.$userSettingsService.saveSetting(PolicyService.Policies, policiesKey);
+		await this.$userSettingsService.saveSetting(PolicyService.POLICIES, policiesKey);
 	}
 
 	private getPathToPrivacyPolicy(): string {
-		return join(__dirname, "..", "..", "resources", PolicyService.Policies, PolicyService.PrivacyPolicyFileName);
+		return join(__dirname, "..", "..", "resources", PolicyService.POLICIES, PolicyService.PRIVACY_POLICY_FILE_NAME);
 	}
 }
 

@@ -78,4 +78,6 @@ $injector.requireCommand("account|features", path.join(__dirname, "commands", "a
 
 $injector.requireCommand("accept|eula", path.join(__dirname, "commands", "accept-eula-command"));
 
+$injector.requireCommand("policy|accept", path.join(__dirname, "commands", "policy-accept-command"));
+
 $injector.requireCommand("cloud|clean|workspace", path.join(__dirname, "commands", "clean", "clean-cloud-workspace"));
