@@ -1,3 +1,5 @@
+import { Policy } from "../constants";
+
 export class LoginCommand implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
 
@@ -24,8 +26,8 @@ export class LoginCommand implements ICommand {
 			const promptMessage = "Input yes to agree".green + " or " + "leave empty to decline".red.bold + ":";
 			const res = await this.$prompter.getString(promptMessage, { allowEmpty: true });
 
-			if (res != "yes") {
-				this.$errors.failWithoutHelp("You must agree to the Progress Software Privacy Policy to continue.");
+			if (res !== "yes") {
+				this.$errors.failWithoutHelp(`You must agree to the ${Policy.PRIVACY_POLICY_NAME} to continue.`);
 			} else {
 				await this.$nsCloudPolicyService.acceptPrivacyPolicy();
 			}

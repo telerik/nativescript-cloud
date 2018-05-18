@@ -1,9 +1,10 @@
 import { join } from "path";
+import { Policy } from "../constants";
 
 export class PolicyService implements IPolicyService {
-	public static readonly PRIVACY_POLICY_NAME: string = "privacy-policy";
 	private static readonly POLICIES: string = "policies";
-	private static readonly PRIVACY_POLICY_FILE_NAME: string = `${PolicyService.PRIVACY_POLICY_NAME}.txt`;
+	private static readonly NS_CLOUD_POLICIES: string = "nsCloudPolicies";
+	private static readonly PRIVACY_POLICY_FILE_NAME: string = `${Policy.PRIVACY_POLICY_ALIAS}.txt`;
 
 	constructor(private $errors: IErrors,
 		private $fs: IFileSystem,
@@ -34,27 +35,32 @@ export class PolicyService implements IPolicyService {
 	}
 
 	public async acceptPrivacyPolicy(): Promise<void> {
-		return this.accept({ policyName: PolicyService.PRIVACY_POLICY_NAME, pathToPolicyFile: this.getPathToPrivacyPolicy() });
+		return this.accept({ policyName: Policy.PRIVACY_POLICY_ALIAS, pathToPolicyFile: this.getPathToPrivacyPolicy() });
 	}
 
 	public async shouldAcceptPrivacyPolicy(): Promise<boolean> {
-		return this.shouldAcceptPolicy({ policyName: PolicyService.PRIVACY_POLICY_NAME, pathToPolicyFile: this.getPathToPrivacyPolicy() });
+		return this.shouldAcceptPolicy({ policyName: Policy.PRIVACY_POLICY_ALIAS, pathToPolicyFile: this.getPathToPrivacyPolicy() });
 	}
 
 	private async getPolicyUserSetting(policy: string): Promise<string> {
-		const policiesKey = await this.$userSettingsService.getSettingValue<IDictionary<string>>(PolicyService.POLICIES) || {};
+		const policiesKey = await this.getNsCloudPoliciesSetting();
 		return policiesKey ? policiesKey[policy] : null;
 	}
 
 	private async setPolicyUserSetting(policy: string, value: string): Promise<void> {
-		const policiesKey = await this.$userSettingsService.getSettingValue<IDictionary<string>>(PolicyService.POLICIES) || {};
+		const policiesKey = await this.getNsCloudPoliciesSetting();
 
 		policiesKey[policy] = value;
-		await this.$userSettingsService.saveSetting(PolicyService.POLICIES, policiesKey);
+		await this.$userSettingsService.saveSetting(PolicyService.NS_CLOUD_POLICIES, policiesKey);
 	}
 
 	private getPathToPrivacyPolicy(): string {
 		return join(__dirname, "..", "..", "resources", PolicyService.POLICIES, PolicyService.PRIVACY_POLICY_FILE_NAME);
+	}
+
+	private async getNsCloudPoliciesSetting(): Promise<IDictionary<string>> {
+		const setting = await this.$userSettingsService.getSettingValue<IDictionary<string>>(PolicyService.NS_CLOUD_POLICIES) || {};
+		return setting;
 	}
 }
 

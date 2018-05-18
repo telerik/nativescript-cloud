@@ -1,4 +1,4 @@
-import { CONTENT_TYPES, HTTP_HEADERS, BEARER_AUTH_SCHEME } from "../../constants";
+import { CONTENT_TYPES, HTTP_HEADERS, BEARER_AUTH_SCHEME, Policy } from "../../constants";
 
 export class ServerServicesProxy implements IServerServicesProxy {
 	protected serverConfig: IServerConfig;
@@ -6,12 +6,17 @@ export class ServerServicesProxy implements IServerServicesProxy {
 	constructor(private $errors: IErrors,
 		private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
+		private $nsCloudPolicyService: IPolicyService,
 		private $nsCloudServerConfigManager: IServerConfigManager,
 		private $nsCloudUserService: IUserService) {
 		this.serverConfig = this.$nsCloudServerConfigManager.getCurrentConfigData();
 	}
 
 	public async call<T>(options: ICloudRequestOptions): Promise<T> {
+		if (await this.$nsCloudPolicyService.shouldAcceptPrivacyPolicy()) {
+			this.$errors.failWithoutHelp(`Please agree to ${Policy.PRIVACY_POLICY_NAME}.`);
+		}
+
 		const host = this.getServiceAddress(options.serviceName);
 		const finalUrlPath = this.getUrlPath(options.serviceName, options.urlPath);
 
