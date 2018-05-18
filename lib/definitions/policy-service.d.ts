@@ -9,25 +9,27 @@ interface IPolicyService {
 	shouldAcceptPolicy(data: IAcceptPolicyData): Promise<boolean>;
 
 	/**
+	 * Returns if the client should ask the user to accept the provided policy.
+	 * @param policy the name of the policy.
+	 */
+	shouldAskToAcceptPolicy(policy: string): Promise<boolean>;
+
+	/**
 	 * Marks the policy as accepted for the current OS user.
 	 * @param data Data required to set a policy as accepted.
 	 */
 	accept(data: IAcceptPolicyData): Promise<void>;
 
 	/**
-	 * Returns the Progress Software Privacy Policy message.
+	 * Returns the value stored on the local machine for the provided policy.
+	 * @param policy is the policy name.
 	 */
-	getPrivacyPolicyMessage(): Promise<string>;
+	getPolicyUserSetting(policy: string): Promise<string>;
 
 	/**
-	 * Marks the Progress Software Privacy Policy as accepted.
+	 * Returns the local user policies information.
 	 */
-	acceptPrivacyPolicy(): Promise<void>;
-
-	/**
-	 * Returns if the Progress Software Privacy Policy should be accepted.
-	 */
-	shouldAcceptPrivacyPolicy(): Promise<boolean>;
+	getNsCloudPoliciesSetting(): Promise<IDictionary<string>>;
 }
 
 /**
@@ -57,5 +59,10 @@ interface IAcceptPolicyData {
 	/**
 	 * Path to the policy file which will be used to calculate the policy hash.
 	 */
-	pathToPolicyFile: string;
+	pathToPolicyFile?: string;
+
+	/**
+	 * The content of the policy whuch will be stored in the cloud.
+	 */
+	content?: string;
 }

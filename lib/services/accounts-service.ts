@@ -1,6 +1,7 @@
 export class AccountsService implements IAccountsService {
-	constructor(private $nsCloudServerAccountsService: IServerAccountsService,
-		private $errors: IErrors) { }
+	constructor(private $errors: IErrors,
+		private $nsCloudPolicyService: IPolicyService,
+		private $nsCloudServerAccountsService: IServerAccountsService) { }
 
 	public getMyAccounts(): Promise<IAccount[]> {
 		return this.$nsCloudServerAccountsService.getAccounts();
@@ -34,6 +35,11 @@ export class AccountsService implements IAccountsService {
 	public async getAccountFeatures(accountIdOption: string): Promise<IDictionary<IFeatureInfo>> {
 		const account = await this.getAccountFromOption(accountIdOption);
 		return this.$nsCloudServerAccountsService.getAccountFeatures(account.id);
+	}
+
+	public async sendPoliciesToCloud(): Promise<void> {
+		const data = await this.$nsCloudPolicyService.getNsCloudPoliciesSetting();
+		return this.$nsCloudServerAccountsService.syncPolicies(data);
 	}
 }
 

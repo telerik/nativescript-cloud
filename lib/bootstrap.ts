@@ -27,6 +27,7 @@ $injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "service
 $injector.requirePublicClass("nsCloudKinveyEulaService", path.join(__dirname, "services", "kinvey-eula-service"));
 $injector.requirePublicClass("nsCloudKinveyService", path.join(__dirname, "services", "kinvey-service"));
 $injector.requirePublicClass("nsCloudPolicyService", path.join(__dirname, "services", "policy-service"));
+$injector.requirePublicClass("nsCloudServicesPolicyService", path.join(__dirname, "services", "cloud-services-policy-service"));
 
 // Services.
 $injector.require("nsCloudServerAuthService", path.join(__dirname, "services", "server", "server-auth-service"));

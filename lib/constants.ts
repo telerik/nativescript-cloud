@@ -129,7 +129,7 @@ export class Authentication {
 	public static OIDC = "OIDC";
 }
 
-export class Policy {
+export class Policies {
 	public static readonly PRIVACY_POLICY_NAME: string = "Progress Software Privacy Policy";
-	public static readonly PRIVACY_POLICY_ALIAS: string = "privacy-policy";
+	public static readonly CLOUD_SERVICES_POLICY_NAME: string = "cloud-services-policy";
 }

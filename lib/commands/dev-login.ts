@@ -4,9 +4,10 @@ export class DevLoginCommand implements ICommand {
 		this.$stringParameterBuilder.createMandatoryParameter("Missing user name or password.")
 	];
 
-	constructor(private $nsCloudAuthenticationService: IAuthenticationService,
-		private $errors: IErrors,
+	constructor(private $errors: IErrors,
 		private $logger: ILogger,
+		private $nsCloudAuthenticationService: IAuthenticationService,
+		private $nsCloudServicesPolicyService: ICloudServicesPolicyService,
 		private $stringParameterBuilder: IStringParameterBuilder) { }
 
 	public async execute(args: string[]): Promise<void> {
@@ -17,6 +18,14 @@ export class DevLoginCommand implements ICommand {
 		}
 
 		this.$logger.info("Successfully logged in.");
+	}
+
+	public async canExecute(args: string[]): Promise<boolean> {
+		if (await this.$nsCloudServicesPolicyService.shouldAcceptCloudServicesPolicy()) {
+			this.$errors.failWithoutHelp("You should agree to the {N} cloud services policy to continue.");
+		}
+
+		return true;
 	}
 }
 

@@ -1,50 +1,52 @@
-import { join } from "path";
-import { Policy } from "../constants";
-
 export class PolicyService implements IPolicyService {
-	private static readonly POLICIES: string = "policies";
 	private static readonly NS_CLOUD_POLICIES: string = "nsCloudPolicies";
-	private static readonly PRIVACY_POLICY_FILE_NAME: string = `${Policy.PRIVACY_POLICY_ALIAS}.txt`;
 
 	constructor(private $errors: IErrors,
-		private $fs: IFileSystem,
 		private $nsCloudHashService: IHashService,
 		private $userSettingsService: IUserSettingsService) { }
 
-	public async accept(data: IAcceptPolicyData): Promise<void> {
-		const policyHash = await this.$nsCloudHashService.getLocalFileHash(data.pathToPolicyFile);
-		if (!policyHash) {
-			this.$errors.failWithoutHelp("Invalid policy.");
-		}
-
-		await this.setPolicyUserSetting(data.policyName, policyHash);
-	}
-
 	public async shouldAcceptPolicy(data: IAcceptPolicyData): Promise<boolean> {
-		const currentHash = await this.getPolicyUserSetting(data.policyName);
-		if (!currentHash) {
+		const shouldAskToAccept = await this.shouldAskToAcceptPolicy(data.policyName);
+		if (shouldAskToAccept) {
 			return true;
 		}
 
-		const newHash = await this.$nsCloudHashService.getLocalFileHash(data.pathToPolicyFile);
-		return currentHash !== newHash;
+		const currentContent = await this.getPolicyUserSetting(data.policyName);
+		const acceptableContent = await this.getPolicyContentFromAcceptData(data);
+		return currentContent !== acceptableContent;
 	}
 
-	public async getPrivacyPolicyMessage(): Promise<string> {
-		return this.$fs.readText(this.getPathToPrivacyPolicy());
+	public async shouldAskToAcceptPolicy(policy: string): Promise<boolean> {
+		const currentContent = await this.getPolicyUserSetting(policy);
+		return !currentContent;
 	}
 
-	public async acceptPrivacyPolicy(): Promise<void> {
-		return this.accept({ policyName: Policy.PRIVACY_POLICY_ALIAS, pathToPolicyFile: this.getPathToPrivacyPolicy() });
+	public async accept(data: IAcceptPolicyData): Promise<void> {
+		let policyCloudContent = await this.getPolicyContentFromAcceptData(data);
+		if (!policyCloudContent) {
+			this.$errors.failWithoutHelp("Invalid policy.");
+		}
+
+		await this.setPolicyUserSetting(data.policyName, policyCloudContent);
 	}
 
-	public async shouldAcceptPrivacyPolicy(): Promise<boolean> {
-		return this.shouldAcceptPolicy({ policyName: Policy.PRIVACY_POLICY_ALIAS, pathToPolicyFile: this.getPathToPrivacyPolicy() });
+	public async acceptInTheCloud(data: IAcceptPolicyData): Promise<void> {
+		let policyCloudContent = await this.getPolicyContentFromAcceptData(data);
+		if (!policyCloudContent) {
+			this.$errors.failWithoutHelp("Invalid policy.");
+		}
+
+		await this.setPolicyUserSetting(data.policyName, policyCloudContent);
 	}
 
-	private async getPolicyUserSetting(policy: string): Promise<string> {
+	public async getPolicyUserSetting(policy: string): Promise<string> {
 		const policiesKey = await this.getNsCloudPoliciesSetting();
 		return policiesKey ? policiesKey[policy] : null;
+	}
+
+	public async getNsCloudPoliciesSetting(): Promise<IDictionary<string>> {
+		const setting = await this.$userSettingsService.getSettingValue<IDictionary<string>>(PolicyService.NS_CLOUD_POLICIES) || {};
+		return setting;
 	}
 
 	private async setPolicyUserSetting(policy: string, value: string): Promise<void> {
@@ -54,13 +56,14 @@ export class PolicyService implements IPolicyService {
 		await this.$userSettingsService.saveSetting(PolicyService.NS_CLOUD_POLICIES, policiesKey);
 	}
 
-	private getPathToPrivacyPolicy(): string {
-		return join(__dirname, "..", "..", "resources", PolicyService.POLICIES, PolicyService.PRIVACY_POLICY_FILE_NAME);
-	}
+	private async getPolicyContentFromAcceptData(data: IAcceptPolicyData): Promise<string> {
+		if (data.content) {
+			return data.content;
+		} else if (data.pathToPolicyFile) {
+			return await this.$nsCloudHashService.getLocalFileHash(data.pathToPolicyFile);
+		}
 
-	private async getNsCloudPoliciesSetting(): Promise<IDictionary<string>> {
-		const setting = await this.$userSettingsService.getSettingValue<IDictionary<string>>(PolicyService.NS_CLOUD_POLICIES) || {};
-		return setting;
+		return null;
 	}
 }
 

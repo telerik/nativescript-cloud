@@ -1,21 +1,22 @@
-import { Policy } from "./../constants";
+import { Policies } from "./../constants";
 
 export class PolicyAcceptCommand implements ICommand {
 	public allowedParameters: ICommandParameter[] = [
 		this.$stringParameterBuilder.createMandatoryParameter("Policy name cannot be empty."),
-		new (<any>this.$stringParameter).__proto__.constructor()
+		new (<any>this.$stringParameter).__proto__.constructor() // ¯\_(:|)_/¯
 	];
 
 	constructor(private $errors: IErrors,
 		private $nsCloudPolicyService: IPolicyService,
+		private $nsCloudServicesPolicyService: ICloudServicesPolicyService,
 		private $stringParameter: ICommandParameter,
 		private $stringParameterBuilder: IStringParameterBuilder) { }
 
 	public async execute(args: string[]): Promise<void> {
 		const policyName = args[0];
 
-		if (policyName === Policy.PRIVACY_POLICY_ALIAS) {
-			await this.$nsCloudPolicyService.acceptPrivacyPolicy();
+		if (policyName === Policies.CLOUD_SERVICES_POLICY_NAME) {
+			await this.$nsCloudServicesPolicyService.acceptCloudServicesPolicy();
 			return;
 		}
 

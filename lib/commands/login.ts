@@ -1,12 +1,10 @@
-import { Policy } from "../constants";
-
 export class LoginCommand implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
 
 	constructor(private $errors: IErrors,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudAuthenticationService: IAuthenticationService,
-		private $nsCloudPolicyService: IPolicyService,
+		private $nsCloudServicesPolicyService: ICloudServicesPolicyService,
 		private $commandsService: ICommandsService,
 		private $logger: ILogger,
 		private $options: IOptions,
@@ -21,15 +19,15 @@ export class LoginCommand implements ICommand {
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
-		if (await this.$nsCloudPolicyService.shouldAcceptPrivacyPolicy()) {
-			this.$logger.info(await this.$nsCloudPolicyService.getPrivacyPolicyMessage());
+		if (await this.$nsCloudServicesPolicyService.shouldAcceptCloudServicesPolicy()) {
+			this.$logger.info(await this.$nsCloudServicesPolicyService.getCloudServicesFullMessage());
 			const promptMessage = "Input yes to agree".green + " or " + "leave empty to decline".red.bold + ":";
 			const res = await this.$prompter.getString(promptMessage, { allowEmpty: true });
 
 			if (res !== "yes") {
-				this.$errors.failWithoutHelp(`You must agree to the ${Policy.PRIVACY_POLICY_NAME} to continue.`);
+				this.$errors.failWithoutHelp(`You must agree to continue.`);
 			} else {
-				await this.$nsCloudPolicyService.acceptPrivacyPolicy();
+				await this.$nsCloudServicesPolicyService.acceptCloudServicesPolicy();
 			}
 		}
 
