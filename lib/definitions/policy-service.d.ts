@@ -57,9 +57,9 @@ interface IAcceptPolicyData {
 	policyName: string;
 
 	/**
-	 * Path to the policy file which will be used to calculate the policy hash.
+	 * Url or local path to the policy content.
 	 */
-	pathToPolicyFile?: string;
+	policyUri?: string;
 
 	/**
 	 * The content of the policy whuch will be stored in the cloud.

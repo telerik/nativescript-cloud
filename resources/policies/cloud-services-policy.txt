@@ -1,1 +1,1 @@
-I allow Progress Software to use my personal data (first name, last name and email) to limit my cloud build usage according to the values specified in my Sidekick subscription plan.
+Progress Software collects and uses your personal data (first name, last name and email address) to limit your cloud build usage according to the values specified in your NativeScript Sidekick subscription plan.

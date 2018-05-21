@@ -17,6 +17,7 @@ export class AuthenticationService implements IAuthenticationService {
 		private $logger: ILogger,
 		private $nsCloudHttpServer: IHttpServer,
 		private $nsCloudServerAuthService: IServerAuthService,
+		private $nsCloudServicesPolicyService: ICloudServicesPolicyService,
 		private $nsCloudUserService: IUserService,
 		private $opener: IOpener) { }
 
@@ -106,6 +107,7 @@ export class AuthenticationService implements IAuthenticationService {
 
 		const userInfo = userData.userInfo;
 
+		await this.$nsCloudServicesPolicyService.acceptCloudServicesPolicy();
 		await this.$nsCloudAccountsService.sendPoliciesToCloud();
 		return userInfo;
 	}

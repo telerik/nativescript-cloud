@@ -3,7 +3,7 @@ import { Policies } from "./../constants";
 export class PolicyAcceptCommand implements ICommand {
 	public allowedParameters: ICommandParameter[] = [
 		this.$stringParameterBuilder.createMandatoryParameter("Policy name cannot be empty."),
-		new (<any>this.$stringParameter).__proto__.constructor() // ¯\_(:|)_/¯
+		this.$stringParameter
 	];
 
 	constructor(private $errors: IErrors,
@@ -20,12 +20,12 @@ export class PolicyAcceptCommand implements ICommand {
 			return;
 		}
 
-		const pathToPolicyFile = args[1];
-		if (!pathToPolicyFile || pathToPolicyFile.length === 0) {
+		const policyUri = args[1];
+		if (!policyUri || policyUri.length === 0) {
 			this.$errors.failWithoutHelp("Please provide policy path.");
 		}
 
-		await this.$nsCloudPolicyService.accept({ policyName, pathToPolicyFile });
+		await this.$nsCloudPolicyService.accept({ policyName, policyUri });
 	}
 }
 

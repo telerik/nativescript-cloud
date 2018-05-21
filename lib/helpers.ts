@@ -1,3 +1,5 @@
+import { parse } from "url";
+
 const Table = require("cli-table");
 
 export function isInteractive(): boolean {
@@ -20,4 +22,13 @@ export function createTable(headers: string[], data: string[][]): any {
 
 export function stringifyWithIndentation(data: any, indentation?: string | number): string {
 	return JSON.stringify(data, null, indentation || "  ");
+}
+
+export function isUrl(data: string): boolean {
+	try {
+		const u = parse(data);
+		return !!(u && u.host);
+	} catch (err) { }
+
+	return false;
 }

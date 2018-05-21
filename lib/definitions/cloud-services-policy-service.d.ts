@@ -3,11 +3,6 @@
  */
 interface ICloudServicesPolicyService {
 	/**
-	 * Returns the cloud services policy message.
-	 */
-	getCloudServicesPolicyMessage(): Promise<string>;
-
-	/**
 	 * Marks the cloud services policy as accepted.
 	 */
 	acceptCloudServicesPolicy(): Promise<void>;

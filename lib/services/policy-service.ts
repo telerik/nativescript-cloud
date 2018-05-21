@@ -1,7 +1,12 @@
+import * as temp from "temp";
+import { isUrl } from "../helpers";
+
 export class PolicyService implements IPolicyService {
 	private static readonly NS_CLOUD_POLICIES: string = "nsCloudPolicies";
 
 	constructor(private $errors: IErrors,
+		private $fs: IFileSystem,
+		private $httpClient: Server.IHttpClient,
 		private $nsCloudHashService: IHashService,
 		private $userSettingsService: IUserSettingsService) { }
 
@@ -22,16 +27,7 @@ export class PolicyService implements IPolicyService {
 	}
 
 	public async accept(data: IAcceptPolicyData): Promise<void> {
-		let policyCloudContent = await this.getPolicyContentFromAcceptData(data);
-		if (!policyCloudContent) {
-			this.$errors.failWithoutHelp("Invalid policy.");
-		}
-
-		await this.setPolicyUserSetting(data.policyName, policyCloudContent);
-	}
-
-	public async acceptInTheCloud(data: IAcceptPolicyData): Promise<void> {
-		let policyCloudContent = await this.getPolicyContentFromAcceptData(data);
+		const policyCloudContent = await this.getPolicyContentFromAcceptData(data);
 		if (!policyCloudContent) {
 			this.$errors.failWithoutHelp("Invalid policy.");
 		}
@@ -59,8 +55,19 @@ export class PolicyService implements IPolicyService {
 	private async getPolicyContentFromAcceptData(data: IAcceptPolicyData): Promise<string> {
 		if (data.content) {
 			return data.content;
-		} else if (data.pathToPolicyFile) {
-			return await this.$nsCloudHashService.getLocalFileHash(data.pathToPolicyFile);
+		} else if (data.policyUri) {
+			if (isUrl(data.policyUri)) {
+				const tempPolicyFile = temp.path({ prefix: data.policyName, suffix: ".txt" })
+				temp.track();
+				await this.$httpClient.httpRequest({
+					url: data.policyUri,
+					pipeTo: this.$fs.createWriteStream(tempPolicyFile)
+				});
+
+				return await this.$fs.readText(tempPolicyFile);
+			} else {
+				return await this.$nsCloudHashService.getLocalFileHash(data.policyUri);
+			}
 		}
 
 		return null;

@@ -61,7 +61,7 @@ export abstract class EulaServiceBase implements IEulaService {
 
 		// At this point we should have already downloaded the EULA, so just get the info for local file.
 		// If it does not exist - we were unable to download it.
-		const currentEulaHash = await this.$nsCloudHashService.getLocalFileHash(this.getPathToEula());
+		const currentEulaHash = await this.getLocalEulaHash();
 		if (!currentEulaHash) {
 			this.$logger.trace(`Checking ${this.getPathToEula()} state: no local copy of EULA found - as user had already accepted previous version of the EULA, consider it as the current one, so no need to accept new.`);
 			return false;
@@ -136,10 +136,14 @@ export abstract class EulaServiceBase implements IEulaService {
 	private async getCurrentEulaHash(): Promise<string> {
 		await this.downloadLatestEula({ shouldThrowError: true });
 
-		const localEulaHash = await this.$nsCloudHashService.getLocalFileHash(this.getPathToEula());
+		const localEulaHash = await this.getLocalEulaHash();
 		this.$logger.trace(`Downloaded latest ${this.getPathToEula()}, its hash is: ${localEulaHash}.`);
 
 		return localEulaHash;
+	}
+
+	private async getLocalEulaHash(): Promise<string> {
+		return this.$nsCloudHashService.getLocalFileHash(this.getPathToEula());
 	}
 
 	private getLockFileParams(): ILockFileOptions {
