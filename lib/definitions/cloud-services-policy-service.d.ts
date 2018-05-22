@@ -13,17 +13,37 @@ interface ICloudServicesPolicyService {
 	shouldAcceptCloudServicesPolicy(): Promise<boolean>;
 
 	/**
-	 * Returns the GDPR Data Subject Access Request url.
+	 * Returns all data related to the Cloud services policy.
 	 */
-	getGdprDataSubjectAccessRequestUrl(): string;
+	getCloudServicesPolicyData(): Promise<ICloudServicesPolicyData>;
 
 	/**
 	 * Returns the full cloud services CLI prompt message.
 	 */
 	getCloudServicesFullMessage(): Promise<string>;
+}
+
+/**
+ * Contains all data related to the Cloud services policy.
+ */
+interface ICloudServicesPolicyData {
+	/**
+	 * The message which describes what personal data is collected.
+	 */
+	collectedPersonalDataMessage: string;
 
 	/**
-	 * Returns the privacy policy url.
+	 * The reasons to collect the personal data.
 	 */
-	getPrivacyPolicyUrl(): string;
+	reasonsForCollectingPersonalData: string[];
+
+	/**
+	 * The url for submitting personal data subject request.
+	 */
+	personalDataSubjectAccessRequestUrl: string;
+
+	/**
+	 * The url for the Progress Software Privacy Policy.
+	 */
+	privacyPolicyUrl: string;
 }
