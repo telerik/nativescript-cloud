@@ -1,3 +1,5 @@
+import { EOL } from "os";
+
 export class LoginCommand implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
 
@@ -13,6 +15,7 @@ export class LoginCommand implements ICommand {
 
 		if (await this.$nsCloudServicesPolicyService.shouldAcceptCloudServicesPolicy()) {
 			this.$logger.info(await this.$nsCloudServicesPolicyService.getCloudServicesFullMessage());
+			this.$logger.info(EOL);
 		}
 
 		await this.$nsCloudAuthenticationService.login({ timeout: this.$options.timeout });

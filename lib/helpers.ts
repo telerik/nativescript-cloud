@@ -1,4 +1,5 @@
 import { parse } from "url";
+import * as crypto from "crypto";
 
 const Table = require("cli-table");
 
@@ -28,7 +29,11 @@ export function isUrl(data: string): boolean {
 	try {
 		const u = parse(data);
 		return !!(u && u.host);
-	} catch (err) { }
+	} catch (err) {
+		return false;
+	}
+}
 
-	return false;
+export function getHash(str: string, options?: { algorithm?: string, encoding?: crypto.HexBase64Latin1Encoding }): string {
+	return crypto.createHash(options && options.algorithm || 'sha256').update(str).digest(options && options.encoding || 'hex');
 }

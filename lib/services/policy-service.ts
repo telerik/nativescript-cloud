@@ -56,18 +56,19 @@ export class PolicyService implements IPolicyService {
 		if (data.content) {
 			return data.content;
 		} else if (data.policyUri) {
+			let fileHash = data.policyUri;
 			if (isUrl(data.policyUri)) {
-				const tempPolicyFile = temp.path({ prefix: data.policyName, suffix: ".txt" })
+				const tempPolicyFile = temp.path({ prefix: data.policyName, suffix: ".txt" });
 				temp.track();
 				await this.$httpClient.httpRequest({
 					url: data.policyUri,
 					pipeTo: this.$fs.createWriteStream(tempPolicyFile)
 				});
 
-				return await this.$fs.readText(tempPolicyFile);
-			} else {
-				return await this.$nsCloudHashService.getLocalFileHash(data.policyUri);
+				fileHash = tempPolicyFile;
 			}
+
+			return await this.$nsCloudHashService.getLocalFileHash(fileHash);
 		}
 
 		return null;
