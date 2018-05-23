@@ -5,9 +5,8 @@ export class MBaasProxy extends ServerServicesProxy implements IServerServicesPr
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
 		$nsCloudServerConfigManager: IServerConfigManager,
-		$nsCloudServicesPolicyService: ICloudServicesPolicyService,
 		$nsCloudUserService: IUserService) {
-		super($errors, $httpClient, $logger, $nsCloudServerConfigManager, $nsCloudServicesPolicyService, $nsCloudUserService);
+		super($errors, $httpClient, $logger, $nsCloudServerConfigManager, $nsCloudUserService);
 	}
 
 	public getServiceAddress(serviceName: string): string {
