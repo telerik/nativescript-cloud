@@ -7,16 +7,11 @@ export class ServerServicesProxy implements IServerServicesProxy {
 		private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
 		private $nsCloudServerConfigManager: IServerConfigManager,
-		private $nsCloudServicesPolicyService: ICloudServicesPolicyService,
 		private $nsCloudUserService: IUserService) {
 		this.serverConfig = this.$nsCloudServerConfigManager.getCurrentConfigData();
 	}
 
 	public async call<T>(options: ICloudRequestOptions): Promise<T> {
-		if (await this.$nsCloudServicesPolicyService.shouldAcceptCloudServicesPolicy()) {
-			this.$errors.failWithoutHelp(`Please agree to {N} cloud services policies.`);
-		}
-
 		const host = this.getServiceAddress(options.serviceName);
 		const finalUrlPath = this.getUrlPath(options.serviceName, options.urlPath);
 
