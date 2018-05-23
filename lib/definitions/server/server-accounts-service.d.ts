@@ -11,6 +11,7 @@ interface IServerAccountsService extends IGetUsageInfo {
 	getAccounts(): Promise<IAccount[]>
 	getUserInfo(): Promise<IUserInfo>;
 	getAccountFeatures(accountId: string): Promise<IDictionary<IFeatureInfo>>;
+	syncPolicies(data: IDictionary<string>): Promise<void>;
 }
 
 interface IAccount {

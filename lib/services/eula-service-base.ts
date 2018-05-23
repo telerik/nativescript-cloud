@@ -5,13 +5,14 @@ import * as temp from "temp";
 export abstract class EulaServiceBase implements IEulaService {
 	private isEulaDownloadedInCurrentProcess = false;
 
-	constructor(private $httpClient: Server.IHttpClient,
-		private $userSettingsService: IUserSettingsService,
-		private $logger: ILogger,
-		private $fs: IFileSystem,
-		private $nsCloudDateTimeService: IDateTimeService,
+	constructor(private $fs: IFileSystem,
+		private $httpClient: Server.IHttpClient,
 		private $lockfile: ILockFile,
-		private $settingsService: ISettingsService) { }
+		private $logger: ILogger,
+		private $nsCloudDateTimeService: IDateTimeService,
+		private $nsCloudHashService: IHashService,
+		private $settingsService: ISettingsService,
+		private $userSettingsService: IUserSettingsService) { }
 
 	// Exposed for Sidekick
 	public async getEulaData(): Promise<IEulaData> {
@@ -142,11 +143,7 @@ export abstract class EulaServiceBase implements IEulaService {
 	}
 
 	private async getLocalEulaHash(): Promise<string> {
-		if (this.$fs.exists(this.getPathToEula())) {
-			return this.$fs.getFileShasum(this.getPathToEula(), { algorithm: "sha256", encoding: "hex" });
-		}
-
-		return null;
+		return this.$nsCloudHashService.getLocalFileHash(this.getPathToEula());
 	}
 
 	private getLockFileParams(): ILockFileOptions {

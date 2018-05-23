@@ -24,6 +24,10 @@ export class ServerAccountsService extends ServerServiceBase implements IServerA
 	public getUserInfo(): Promise<IUserInfo> {
 		return this.sendRequest<IUserInfo>(HTTP_METHODS.GET, "api/user-info", null);
 	}
+
+	public syncPolicies(data: IDictionary<string>): Promise<void> {
+		return this.sendRequest<void>(HTTP_METHODS.POST, "api/consent", data);
+	}
 }
 
 $injector.register("nsCloudServerAccountsService", ServerAccountsService);

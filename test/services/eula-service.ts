@@ -1,4 +1,5 @@
 import { EulaService } from "../../lib/services/eula-service";
+import { HashService } from "../../lib/services/hash-service";
 import { Yok } from "mobile-cli-lib/yok";
 import { assert } from "chai";
 import { EulaConstants } from "../../lib/constants";
@@ -68,6 +69,8 @@ describe("eulaService", () => {
 			lock: async (lockFilePath?: string, lockFileOpts?: ILockFileOptions): Promise<void> => undefined,
 			unlock: (lockFilePath?: string): void => undefined
 		});
+
+		testInjector.register("nsCloudHashService", HashService);
 
 		return testInjector;
 	};

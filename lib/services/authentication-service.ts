@@ -8,12 +8,18 @@ export class AuthenticationService implements IAuthenticationService {
 	private localhostServer: Server;
 	private rejectLoginPromiseAction: (data: any) => void;
 
-	constructor(private $nsCloudServerAuthService: IServerAuthService,
-		private $fs: IFileSystem,
-		private $nsCloudHttpServer: IHttpServer,
+	private get $nsCloudAccountsService(): IAccountsService {
+		return this.$injector.resolve("nsCloudAccountsService");
+	}
+
+	constructor(private $fs: IFileSystem,
+		private $injector: IInjector,
 		private $logger: ILogger,
-		private $opener: IOpener,
-		private $nsCloudUserService: IUserService) { }
+		private $nsCloudHttpServer: IHttpServer,
+		private $nsCloudServerAuthService: IServerAuthService,
+		private $nsCloudServicesPolicyService: ICloudServicesPolicyService,
+		private $nsCloudUserService: IUserService,
+		private $opener: IOpener) { }
 
 	public async login(options?: ILoginOptions): Promise<IUser> {
 		options = options || {};
@@ -101,6 +107,8 @@ export class AuthenticationService implements IAuthenticationService {
 
 		const userInfo = userData.userInfo;
 
+		await this.$nsCloudServicesPolicyService.acceptCloudServicesPolicy();
+		await this.$nsCloudAccountsService.sendPoliciesToCloud();
 		return userInfo;
 	}
 

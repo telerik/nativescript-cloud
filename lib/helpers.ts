@@ -1,3 +1,6 @@
+import { parse } from "url";
+import * as crypto from "crypto";
+
 const Table = require("cli-table");
 
 export function isInteractive(): boolean {
@@ -20,4 +23,17 @@ export function createTable(headers: string[], data: string[][]): any {
 
 export function stringifyWithIndentation(data: any, indentation?: string | number): string {
 	return JSON.stringify(data, null, indentation || "  ");
+}
+
+export function isUrl(data: string): boolean {
+	try {
+		const u = parse(data);
+		return !!(u && u.host);
+	} catch (err) {
+		return false;
+	}
+}
+
+export function getHash(str: string, options?: { algorithm?: string, encoding?: crypto.HexBase64Latin1Encoding }): string {
+	return crypto.createHash(options && options.algorithm || 'sha256').update(str).digest(options && options.encoding || 'hex');
 }

@@ -1,0 +1,1 @@
+Allow cloud build usage according to your NativeScript Sidekick subscription plan.

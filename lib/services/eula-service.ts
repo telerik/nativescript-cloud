@@ -2,14 +2,15 @@ import { EulaConstants } from "../constants";
 import { EulaServiceBase } from "./eula-service-base";
 
 export class EulaService extends EulaServiceBase implements IEulaService {
-	constructor($httpClient: Server.IHttpClient,
-		$userSettingsService: IUserSettingsService,
-		$logger: ILogger,
-		$fs: IFileSystem,
-		$nsCloudDateTimeService: IDateTimeService,
+	constructor($fs: IFileSystem,
+		$httpClient: Server.IHttpClient,
 		$lockfile: ILockFile,
-		$settingsService: ISettingsService) {
-		super($httpClient, $userSettingsService, $logger, $fs, $nsCloudDateTimeService, $lockfile, $settingsService);
+		$logger: ILogger,
+		$nsCloudDateTimeService: IDateTimeService,
+		$nsCloudHashService: IHashService,
+		$settingsService: ISettingsService,
+		$userSettingsService: IUserSettingsService) {
+		super($fs, $httpClient, $lockfile, $logger, $nsCloudDateTimeService, $nsCloudHashService, $settingsService, $userSettingsService);
 	}
 
 	protected getAcceptedEulaHashPropertyName(): string {

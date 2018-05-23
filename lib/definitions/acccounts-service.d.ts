@@ -22,6 +22,11 @@ interface IAccountsService extends IGetUsageInfo {
 	 * @param accountIdOption Account id which will be parsed and used to find account.
 	 */
 	getAccountFeatures(accountIdOption: string): Promise<IDictionary<IFeatureInfo>>;
+
+	/**
+	 * Sends the current local policy data to the cloud for the current user.
+	 */
+	sendPoliciesToCloud(): Promise<void>;
 }
 
 interface IFeatureUsage extends IUsageInfoBase {
