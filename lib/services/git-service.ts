@@ -1,5 +1,4 @@
 import * as path from "path";
-import * as crypto from "crypto";
 import { sysInfo } from "nativescript-doctor";
 import { fromWindowsRelativePathToUnix } from "../helpers";
 
@@ -21,7 +20,8 @@ export class GitService implements IGitService {
 		private $hostInfo: IHostInfo,
 		private $logger: ILogger,
 		private $options: IProfileDir,
-		private $nsCloudUserService: IUserService) { }
+		private $nsCloudUserService: IUserService,
+		private $nsCloudHashService: IHashService) { }
 
 	public async gitPushChanges(projectSettings: INSCloudProjectSettings, remoteUrl: IRemoteUrl, codeCommitCredential: ICodeCommitCredentials, repositoryState?: IRepositoryState): Promise<void> {
 		this.cleanLocalRepositories();
@@ -178,11 +178,8 @@ export class GitService implements IGitService {
 	}
 
 	private getGitDirName(projectSettings: INSCloudProjectSettings): string {
-		const shasumData = crypto.createHash("sha1");
-		shasumData.update(`${this.$nsCloudUserService.getUser().email}_${projectSettings.projectDir}_${projectSettings.projectId}`);
-		const gitDirName = shasumData.digest("hex");
-
-		return gitDirName;
+		const dirName = `${this.$nsCloudUserService.getUser().email}_${projectSettings.projectDir}_${projectSettings.projectId}`;
+		return this.$nsCloudHashService.getHash(dirName, { algorithm: "sha1" });
 	}
 
 	private async getGitFilePath(): Promise<string> {

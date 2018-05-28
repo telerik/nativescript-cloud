@@ -31,6 +31,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $nsCloudUploadService: IUploadService,
 		private $nsCloudUserService: IUserService,
 		private $nsCloudVersionService: IVersionService,
+		private $nsCloudImageEncryptionService: IImageEncryptionService,
 		private $platformService: IPlatformService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
@@ -335,7 +336,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				flavorId: settings.projectSettings.flavorId,
 				additionalCliFlags: settings.additionalCliFlags,
 				useIncrementalBuild: !settings.projectSettings.clean,
-				userEmail: this.$nsCloudUserService.getUser().email
+				userEmail: this.$nsCloudUserService.getUser().email,
+				macOSImagePassword: await this.$nsCloudImageEncryptionService.getImagePassword(settings.projectSettings)
 			},
 			workflow,
 			targets: [],
