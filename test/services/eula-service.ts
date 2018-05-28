@@ -13,6 +13,9 @@ interface IEulaTestData {
 	isLocalEulaFileMissing?: boolean;
 	eulaLastModifiedTimeInEpoch?: number;
 	currentTimeInEpoch?: number;
+
+	expectedHttpRequestIfModifiedSinceHeader?: string;
+	actualHttpRequestIfModifiedSinceHeader?: string;
 }
 
 interface IEulaTestDataWithCache extends IEulaTestData {
@@ -33,6 +36,8 @@ describe("eulaService", () => {
 					throw new Error(unableToDownloadEulaErrorMessage);
 				}
 
+				testInfo.actualHttpRequestIfModifiedSinceHeader = options && options.headers && options.headers["If-Modified-Since"];
+
 				return null;
 			}
 		});
@@ -52,7 +57,10 @@ describe("eulaService", () => {
 			createWriteStream: (path: string, options?: { flags?: string; encoding?: string; string?: string; }): any => ({}),
 			getFileShasum: async (fileName: string, options?: { algorithm?: string, encoding?: string }): Promise<string> => testInfo.eulaFileShasum,
 			getFsStats: (path: string): IFsStats => (<any>{
-				mtime: { getTime: (): number => testInfo.eulaLastModifiedTimeInEpoch || 0 }
+				mtime: {
+					getTime: (): number => testInfo.eulaLastModifiedTimeInEpoch || 0,
+					toUTCString: (): string => new Date(testInfo.eulaLastModifiedTimeInEpoch || 0).toUTCString()
+				},
 			}),
 			copyFile: (sourceFileName: string, destinationFileName: string): void => undefined
 		});
@@ -109,6 +117,33 @@ describe("eulaService", () => {
 					const nsCloudEulaService = testInjector.resolve<IEulaService>(EulaService);
 					const eulaData = await (<any>nsCloudEulaService)[methodName]();
 					assert.deepEqual(eulaData, testCase.expectedResult);
+				});
+			});
+		});
+	});
+
+	const testRequestsData: IEulaTestData[] = [
+		{
+			testName: "should NOT send If-Modified-Since header when local EULA is missing",
+			isLocalEulaFileMissing: true,
+			expectedHttpRequestIfModifiedSinceHeader: undefined
+		},
+		{
+			testName: "should send If-Modified-Since header with the local EULA mtime",
+			expectedHttpRequestIfModifiedSinceHeader: new Date(2018, 5).toUTCString(),
+			eulaLastModifiedTimeInEpoch: new Date(2018, 5).getTime(),
+		}
+	];
+
+	["getEulaData", "getEulaDataWithCache"].forEach(methodName => {
+		describe(methodName, () => {
+			testRequestsData.forEach(testCase => {
+				it(testCase.testName, async () => {
+					const testInjector = createTestInjector(testCase);
+					const nsCloudEulaService = testInjector.resolve<IEulaService>(EulaService);
+					await (<any>nsCloudEulaService)[methodName]();
+
+					assert.equal(testCase.actualHttpRequestIfModifiedSinceHeader, testCase.expectedHttpRequestIfModifiedSinceHeader);
 				});
 			});
 		});
