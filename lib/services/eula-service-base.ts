@@ -85,15 +85,22 @@ export abstract class EulaServiceBase implements IEulaService {
 			await this.$lockfile.lock(lockFilePath, this.getLockFileParams());
 			this.$logger.trace(`Downloading EULA to ${this.getPathToEula()}.`);
 
+			const eulaFstat = this.getEulaFsStat();
+
 			await this.$httpClient.httpRequest({
 				url: this.getEulaUrl(),
 				pipeTo: this.$fs.createWriteStream(tempEulaPath),
+				headers: eulaFstat ? { "If-Modified-Since": eulaFstat.mtime.toUTCString() } : {},
 				timeout: EulaConstants.timeout
 			});
 
-			this.$logger.trace(`Successfully downloaded EULA to ${tempEulaPath}.`);
-			this.$fs.copyFile(tempEulaPath, this.getPathToEula());
-			this.$logger.trace(`Successfully copied EULA to ${this.getPathToEula()}.`);
+			if (!this.$fs.exists(tempEulaPath)) {
+				this.$logger.trace(`The previously downloaded EULA is up-to-date`);
+			} else {
+				this.$logger.trace(`Successfully downloaded EULA to ${tempEulaPath}.`);
+				this.$fs.copyFile(tempEulaPath, this.getPathToEula());
+				this.$logger.trace(`Successfully copied EULA to ${this.getPathToEula()}.`);
+			}
 
 			this.isEulaDownloadedInCurrentProcess = true;
 		} catch (err) {
@@ -119,7 +126,7 @@ export abstract class EulaServiceBase implements IEulaService {
 		try {
 			await this.$lockfile.lock(lockFilePath, this.getLockFileParams());
 			// download file only in case it has not been modified in the last 24 hours
-			const eulaFstat = this.$fs.exists(this.getPathToEula()) && this.$fs.getFsStats(this.getPathToEula());
+			const eulaFstat = this.getEulaFsStat();
 			const timeToCheck = 24 * 60 * 60 * 1000;
 			const currentTime = this.$nsCloudDateTimeService.getCurrentEpochTime();
 
@@ -170,6 +177,10 @@ export abstract class EulaServiceBase implements IEulaService {
 	private setAcceptedEulaHash(hash: string): Promise<void> {
 		const propertyName = this.getAcceptedEulaHashPropertyName();
 		return this.$userSettingsService.saveSetting<string>(propertyName, hash);
+	}
+
+	private getEulaFsStat() {
+		return this.$fs.exists(this.getPathToEula()) && this.$fs.getFsStats(this.getPathToEula());
 	}
 
 	private getPathToEula(): string {
