@@ -41,7 +41,7 @@ interface IAccountId {
 	accountId: string
 }
 
-interface IBuildRequestData extends IAccountId, IServerRequestData {
+interface IBuildRequestData extends IAccountId, IServerRequestData, IOptionalMachineId {
 	targets: string[];
 	buildFiles: IBuildFile[];
 	workflow?: IWorkflowRequestData;

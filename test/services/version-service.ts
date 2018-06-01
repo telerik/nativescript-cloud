@@ -3,35 +3,32 @@ import { PolyfillService } from "../../lib/services/polyfill-service";
 import { Yok } from "mobile-cli-lib/yok";
 import { assert } from "chai";
 
-const TNS_CLI_CLOUD_VERSION_ORIGINAL = process.env.TNS_CLI_CLOUD_VERSION;
 describe("versionService", () => {
-	const createTestInjector = (): IInjector => {
+	const createTestInjector = (cloudConfigurationData?:  ICloudConfigurationData): IInjector => {
 		const testInjector = new Yok();
 		testInjector.register("logger", {
 			trace: (formatStr?: any, ...args: any[]): void => (undefined)
 		});
 		testInjector.register("httpClient", {});
+		testInjector.register("nsCloudConfigurationService", {
+			getCloudConfigurationData: () => cloudConfigurationData
+		});
 		testInjector.register("nsCloudPolyfillService", PolyfillService);
 		testInjector.register("projectDataService", {});
 		return testInjector;
 	};
 
 	let isHttpRequestCalled = false;
-	afterEach(() => {
-		process.env.TNS_CLI_CLOUD_VERSION = TNS_CLI_CLOUD_VERSION_ORIGINAL;
-	});
-
 	beforeEach(() => {
 		isHttpRequestCalled = false;
-		process.env.TNS_CLI_CLOUD_VERSION = "";
 	});
 
 	describe("getCliVersion", () => {
 		const cliVersion = "5.0.0";
 		it("returns process.env.TNS_CLI_CLOUD_VERSION when it is set", async () => {
-			const testInjector = createTestInjector();
-			process.env.TNS_CLI_CLOUD_VERSION = cliVersion;
-
+			const testInjector = createTestInjector({
+				tnsCliCloudVersion: cliVersion
+			});
 			const versionService = testInjector.resolve<IVersionService>(VersionService);
 			const actualCliVersion = await versionService.getCliVersion(null);
 			assert.equal(actualCliVersion, cliVersion);
