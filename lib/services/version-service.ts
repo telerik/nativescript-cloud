@@ -16,7 +16,7 @@ export class VersionService implements IVersionService {
 	public async getCliVersion(runtimeVersion: string): Promise<string> {
 		try {
 			const cloudConfigData = this.$nsCloudConfigurationService.getCloudConfigurationData();
-			const cliCloudVersionOverride = cloudConfigData && cloudConfigData.tnsCliCloudVersion;
+			const cliCloudVersionOverride = cloudConfigData && cloudConfigData.tnsCliCloudVersion || process.env.TNS_CLI_CLOUD_VERSION;
 			const latestMatchingVersion = cliCloudVersionOverride || await this.getLatestMatchingVersion("nativescript", runtimeVersion);
 			if (!latestMatchingVersion) {
 				throw new Error("Cannot find CLI versions.");
