@@ -2,7 +2,6 @@ import { join } from "path";
 import { EOL } from "os";
 
 import { Policies } from "../constants";
-import { getHash } from "../helpers";
 
 export class CloudServicesPolicyService implements ICloudServicesPolicyService {
 	private static readonly POLICIES: string = "policies";
@@ -12,7 +11,8 @@ export class CloudServicesPolicyService implements ICloudServicesPolicyService {
 	private static readonly PRIVACY_POLICY_URL: string = "https://www.progress.com/legal/privacy-policy";
 
 	constructor(private $fs: IFileSystem,
-		private $nsCloudPolicyService: IPolicyService) { }
+		private $nsCloudPolicyService: IPolicyService,
+		private $nsCloudHashService: IHashService) { }
 
 	public async acceptCloudServicesPolicy(): Promise<void> {
 		return this.$nsCloudPolicyService.accept({ policyName: Policies.CLOUD_SERVICES_POLICY_NAME, content: await this.getCloudServicesFullMessageHash() });
@@ -43,7 +43,7 @@ export class CloudServicesPolicyService implements ICloudServicesPolicyService {
 	}
 
 	private async getCloudServicesFullMessageHash(): Promise<string> {
-		return getHash(await this.getCloudServicesFullMessage());
+		return this.$nsCloudHashService.getHash(await this.getCloudServicesFullMessage());
 	}
 
 	private async getPersonalDataCollectionReasons(): Promise<string[]> {

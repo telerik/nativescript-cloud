@@ -1,5 +1,5 @@
 import { parse } from "url";
-import * as crypto from "crypto";
+import * as randomstring from "randomstring";
 
 const Table = require("cli-table");
 
@@ -34,6 +34,6 @@ export function isUrl(data: string): boolean {
 	}
 }
 
-export function getHash(str: string, options?: { algorithm?: string, encoding?: crypto.HexBase64Latin1Encoding }): string {
-	return crypto.createHash(options && options.algorithm || 'sha256').update(str).digest(options && options.encoding || 'hex');
+export function getRandomString(options?: randomstring.GenerateOptions | number): string {
+	return randomstring.generate(options);
 }

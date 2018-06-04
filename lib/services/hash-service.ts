@@ -1,3 +1,5 @@
+import * as crypto from "crypto";
+
 export class HashService implements IHashService {
 	constructor(private $fs: IFileSystem) { }
 
@@ -7,6 +9,10 @@ export class HashService implements IHashService {
 		}
 
 		return null;
+	}
+
+	public getHash(str: string, options?: { algorithm?: string, encoding?: crypto.HexBase64Latin1Encoding }): string {
+		return crypto.createHash(options && options.algorithm || 'sha256').update(str).digest(options && options.encoding || 'hex');
 	}
 }
 
