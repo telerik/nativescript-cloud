@@ -71,7 +71,7 @@ export abstract class EulaServiceBase implements IEulaService {
 		return acceptedEulaHash !== currentEulaHash;
 	}
 
-	private async downloadLatestEula(opts: { shouldThrowError: boolean } = { shouldThrowError: false }): Promise<void> {
+	private async downloadLatestEula(opts: { forceDownload: boolean } = { forceDownload: false }): Promise<void> {
 		if (this.isEulaDownloadedInCurrentProcess) {
 			this.$logger.trace("EULA is already downloaded in current process. Skip new download.");
 			return;
@@ -90,7 +90,7 @@ export abstract class EulaServiceBase implements IEulaService {
 			await this.$httpClient.httpRequest({
 				url: this.getEulaUrl(),
 				pipeTo: this.$fs.createWriteStream(tempEulaPath),
-				headers: eulaFstat ? { "If-Modified-Since": eulaFstat.mtime.toUTCString() } : {},
+				headers: eulaFstat && !opts.forceDownload ? { "If-Modified-Since": eulaFstat.mtime.toUTCString() } : {},
 				timeout: EulaConstants.timeout
 			});
 
@@ -104,7 +104,7 @@ export abstract class EulaServiceBase implements IEulaService {
 
 			this.isEulaDownloadedInCurrentProcess = true;
 		} catch (err) {
-			if (opts.shouldThrowError) {
+			if (opts.forceDownload) {
 				this.$logger.trace("Unable to download latest EULA, but will rethrow the error as requested by caller. Error is:", err);
 
 				throw err;
@@ -141,7 +141,7 @@ export abstract class EulaServiceBase implements IEulaService {
 	}
 
 	private async getCurrentEulaHash(): Promise<string> {
-		await this.downloadLatestEula({ shouldThrowError: true });
+		await this.downloadLatestEula({ forceDownload: true });
 
 		const localEulaHash = await this.getLocalEulaHash();
 		this.$logger.trace(`Downloaded latest ${this.getPathToEula()}, its hash is: ${localEulaHash}.`);
