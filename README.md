@@ -6,9 +6,19 @@ Used for cloud support in NativeScript CLI
 * [Development](#development)
 
 ## Public API
-This section describes all methods that can be invoked when you have installed the `nativescript-cloud` extension and NativeScript CLI is required as library, i.e.:
+This section describes all methods that can be invoked when you have installed the `nativescript-cloud` extension and NativeScript CLI is required as library. You must load the installed extensions by calling [loadExtensions](https://github.com/NativeScript/nativescript-cli/blob/master/PublicAPI.md#loadextensions) method. After that you will be able to call methods from `nativescript-cloud` extension:
 ```JavaScript
 const tns = require("nativescript");
+Promise.all(tns.extensibilityService.loadExtensions())
+	.then(loadedExtensionsData => {
+		// Write your code here, after all extensions are loaded.
+	});
+```
+> NOTE: The extension must be installed before using it. You can do it by calling [installExtension](https://github.com/NativeScript/nativescript-cli/blob/master/PublicAPI.md#installextension) method of the CLI:
+```JavaScript
+tns.extensibilityService.installExtension("nativescript-cloud@latest")
+	.then(extensionData => console.log(`Successfully installed extension ${extensionData.extensionName}.`))
+	.catch(err => console.log("Failed to install extension."));
 ```
 
 ## Contents
