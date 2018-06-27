@@ -1,4 +1,4 @@
-# nativescript-cloud
+# nativescript-cloud-test
 Used for cloud support in NativeScript CLI
 
 # Contents
