@@ -79,8 +79,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 
 	private getiOSError(publishResult: IBuildServerResult, publishRequestData: IPublishRequestData) {
 		const itmsMessage = this.getFormattedError(publishResult.stdout, CloudPublishService.ITMS_ERROR_REGEX);
-		const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
-		const err = new Error(`${publishResult.errors}${EOL}${itmsMessage}${EOL}${generalMessage}`);
+		const err = new Error(`${publishResult.errors}${EOL}${itmsMessage}${EOL}${publishResult.stderr}`);
 		return err;
 	}
 
@@ -101,7 +100,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		try {
 			await this.waitForServerOperationToFinish(buildId, response);
 		} catch (ex) {
-			this.$logger.trace("Codesign generation failed with err: ", ex);
+			this.$logger.trace("Publish failed with err: ", ex);
 		}
 
 		const publishResult = await this.getObjectFromS3File<IBuildServerResult>(response.resultUrl);
