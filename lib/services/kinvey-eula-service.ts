@@ -1,6 +1,7 @@
 import { EulaConstants } from "../constants";
 import { EulaServiceBase } from "./eula-service-base";
 
+// TODO: Remove in 2.0.0 - currently this service is not used, but it has been publicly exposed, so we cannot remove it without bumping the major version.
 export class KinveyEulaService extends EulaServiceBase implements IEulaService {
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
