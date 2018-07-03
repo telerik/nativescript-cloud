@@ -14,6 +14,15 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return "Failed to start cloud build.";
 	}
 
+	private get $constants(): IDictionary<any> {
+		return this.$nsCloudPolyfillService.getPolyfillObject<IDictionary<any>>("constants", {
+			TNS_ANDROID_RUNTIME_NAME: "tns-android",
+			TNS_IOS_RUNTIME_NAME: "tns-ios",
+			PACKAGE_JSON_FILE_NAME: "package.json",
+			APP_GRADLE_FILE_NAME: "app.gradle"
+		});
+	}
+
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -36,7 +45,9 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
 		private $qr: IQrCodeGenerator,
-		private $staticConfig: IStaticConfig) {
+		private $staticConfig: IStaticConfig,
+		private $npmInstallationManager: INpmInstallationManager,
+		private $nsCloudPolyfillService: IPolyfillService) {
 		super($fs, $httpClient, $logger);
 	}
 
@@ -65,7 +76,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const buildId = uuid.v4();
 		const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
 		try {
-			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, buildId, account.id, androidBuildData, iOSBuildData);
+			const buildResult = await this.buildCore(projectSettings, platform, buildConfiguration, buildId, account.id, androidBuildData, iOSBuildData);
 			return buildResult;
 		} catch (err) {
 			err.buildId = buildId;
@@ -78,14 +89,9 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		buildConfiguration: string,
 		buildId: string,
 		accountId: string,
+		buildInformationString: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
-		const buildInformationString = `cloud build of '${projectSettings.projectDir}', platform: '${platform}', ` +
-			`configuration: '${buildConfiguration}', buildId: ${buildId}`;
-		this.$logger.info(`Starting ${buildInformationString}.`);
-
-		await this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
-		await this.prepareProject(buildId, projectSettings, platform, buildConfiguration, iOSBuildData);
 		let buildFiles: IServerItemBase[] = [];
 		if (this.$mobileHelper.isAndroidPlatform(platform) && this.$nsCloudBuildHelper.isReleaseConfiguration(buildConfiguration)) {
 			buildFiles.push({
@@ -194,6 +200,55 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, appId, androidBuildData, iOSBuildData);
 	}
 
+	private async buildCore(projectSettings: INSCloudProjectSettings,
+		platform: string,
+		buildConfiguration: string,
+		buildId: string,
+		accountId: string,
+		androidBuildData?: IAndroidBuildData,
+		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
+		const buildInformationString = `cloud build of '${projectSettings.projectDir}', platform: '${platform}', ` +
+			`configuration: '${buildConfiguration}', buildId: ${buildId}`;
+		this.$logger.info(`Starting ${buildInformationString}.`);
+
+		await this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
+		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
+		await this.setRuntimeVersion(projectData, platform);
+
+		// HACK: Ensure __PACKAGE__ is interpolated in app.gradle file in the user project.
+		// In case we don't interpolate every other cloud android build is bound to fail because it would set the application's identifier to __PACKAGE__
+		const userAppGradleFilePath = path.join(projectData.appResourcesDirectoryPath, this.$devicePlatformsConstants.Android, this.$constants.APP_GRADLE_FILE_NAME);
+		if (this.$fs.exists(userAppGradleFilePath)) {
+			const appGradleContents = this.$fs.readText(userAppGradleFilePath);
+			const appGradleReplacedContents = appGradleContents.replace(/__PACKAGE__/g, projectData.projectId);
+			if (appGradleReplacedContents !== appGradleContents) {
+				this.$fs.writeFile(userAppGradleFilePath, appGradleReplacedContents);
+			}
+		}
+
+		const result = await Promise.all([
+			this.executeBuild(projectSettings, platform, buildConfiguration, buildId, accountId, buildInformationString, androidBuildData, iOSBuildData),
+			this.prepareProject(buildId, projectSettings, platform, buildConfiguration, iOSBuildData, projectData)
+		]);
+
+		return result[0];
+	}
+
+	private async setRuntimeVersion(projectData: IProjectData, platform: string): Promise<void> {
+		const cliVersion = this.$staticConfig.version;
+		const runtimeNpmName = this.$mobileHelper.isAndroidPlatform(platform) ? this.$constants.TNS_ANDROID_RUNTIME_NAME : this.$constants.TNS_IOS_RUNTIME_NAME;
+		const runtimeVersion = await this.$npmInstallationManager.getLatestCompatibleVersion(runtimeNpmName, cliVersion);
+		const packageJsonPath = path.join(projectData.projectDir, this.$constants.PACKAGE_JSON_FILE_NAME);
+		const packageJsonContent = this.$fs.readJson(packageJsonPath);
+		if (!packageJsonContent.nativescript[runtimeNpmName]) {
+			packageJsonContent.nativescript[runtimeNpmName] = {
+				version: runtimeVersion
+			};
+		}
+
+		this.$fs.writeJson(packageJsonPath, packageJsonContent);
+	}
+
 	private prepareFilesToUpload(amazonStorageEntries: IAmazonStorageEntry[], buildFiles: IServerItemBase[]): IAmazonStorageEntryData[] {
 		let result: IAmazonStorageEntryData[] = [];
 		_.each(amazonStorageEntries, amazonStorageEntry => {
@@ -211,9 +266,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		projectSettings: INSCloudProjectSettings,
 		platform: string,
 		buildConfiguration: string,
-		iOSBuildData: IIOSBuildData): Promise<void> {
-
-		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
+		iOSBuildData: IIOSBuildData,
+		projectData: IProjectData): Promise<void> {
 		const appFilesUpdaterOptions: IAppFilesUpdaterOptions = {
 			bundle: projectSettings.bundle,
 			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase()
@@ -239,17 +293,6 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
 		const cliVersion = this.$staticConfig.version;
-
-		// HACK: Ensure __PACKAGE__ is interpolated in app.gradle file in the user project.
-		// In case we don't interpolate every other cloud android build is bound to fail because it would set the application's identifier to __PACKAGE__
-		const userAppGradleFilePath = path.join(projectData.appResourcesDirectoryPath, this.$devicePlatformsConstants.Android, "app.gradle");
-		if (this.$fs.exists(userAppGradleFilePath)) {
-			const appGradleContents = this.$fs.readText(userAppGradleFilePath);
-			const appGradleReplacedContents = appGradleContents.replace(/__PACKAGE__/g, projectData.projectId);
-			if (appGradleReplacedContents !== appGradleContents) {
-				this.$fs.writeFile(userAppGradleFilePath, appGradleReplacedContents);
-			}
-		}
 
 		const shouldUseOldPrepare = semver.valid(cliVersion) && semver.lt(cliVersion, semver.prerelease(cliVersion) ? "3.4.0-2017-11-02-10045" : "3.4.0");
 		if (shouldUseOldPrepare) {
