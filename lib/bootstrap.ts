@@ -44,7 +44,6 @@ $injector.require("nsCloudMBaasProxy", path.join(__dirname, "services", "server"
 $injector.require("nsCloudMBaasRequestService", path.join(__dirname, "services", "server", "mbaas", "mbaas-request-service"));
 $injector.require("nsCloudPackageInfoService", path.join(__dirname, "services", "package-info-service"));
 $injector.require("nsCloudUploadService", path.join(__dirname, "services", "upload-service"));
-$injector.require("nsCloudDateTimeService", path.join(__dirname, "services", "date-time-service"));
 $injector.require("nsCloudGitService", path.join(__dirname, "services", "git-service"));
 $injector.require("nsCloudVersionService", path.join(__dirname, "services", "version-service"));
 $injector.require("nsCloudPolyfillService", path.join(__dirname, "services", "polyfill-service"));

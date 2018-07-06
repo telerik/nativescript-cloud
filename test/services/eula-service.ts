@@ -18,10 +18,6 @@ interface IEulaTestData {
 	actualHttpRequestIfModifiedSinceHeader?: string;
 }
 
-interface IEulaTestDataWithCache extends IEulaTestData {
-	expectedToDownloadEula?: boolean;
-}
-
 interface IAcceptEulaTestData extends IEulaTestData {
 	expectedHash?: string;
 }
@@ -67,10 +63,6 @@ describe("eulaService", () => {
 
 		testInjector.register("settingsService", {
 			getProfileDir: () => ""
-		});
-
-		testInjector.register("nsCloudDateTimeService", {
-			getCurrentEpochTime: () => testInfo.currentTimeInEpoch || 0
 		});
 
 		testInjector.register("lockfile", {
@@ -147,59 +139,6 @@ describe("eulaService", () => {
 				});
 			});
 		});
-	});
-
-	describe("getEulaDataWithCache", () => {
-		const testDataWithCache: IEulaTestDataWithCache[] = [
-			{
-				testName: "should download EULA when it has not been downloaded for more than 24 hours",
-				currentTimeInEpoch: 24 * 60 * 60 * 1000 + 1,
-				eulaLastModifiedTimeInEpoch: 0,
-				expectedToDownloadEula: true
-			},
-			{
-				testName: "should NOT download EULA when it has not been downloaded for exactly 24 hours",
-				currentTimeInEpoch: 24 * 60 * 60 * 1000,
-				eulaLastModifiedTimeInEpoch: 0,
-				expectedToDownloadEula: false
-			},
-			{
-				testName: "should NOT download EULA when it has not been downloaded for less than 24 hours",
-				currentTimeInEpoch: 24 * 60 * 60 * 1000 - 1,
-				eulaLastModifiedTimeInEpoch: 0,
-				expectedToDownloadEula: false
-			}
-		];
-
-		testDataWithCache.forEach(cacheCaseData => {
-			const testCase: IEulaTestDataWithCache = _.merge({
-				expectedResult: { shouldAcceptEula: true, url: EulaConstants.eulaUrl },
-				acceptedEulaHash: "old hash",
-				eulaFileShasum: "new hash"
-			}, cacheCaseData);
-
-			it(testCase.testName, async () => {
-				const testInjector = createTestInjector(testCase);
-				const $logger = testInjector.resolve<ILogger>("logger");
-				const loggedMessage: string[] = [];
-				$logger.trace = (formatStr?: any, ...args: any[]): void => {
-					loggedMessage.push(formatStr);
-				};
-
-				const nsCloudEulaService = testInjector.resolve<IEulaService>(EulaService);
-				const eulaData = await nsCloudEulaService.getEulaDataWithCache();
-				assert.deepEqual(eulaData, testCase.expectedResult);
-
-				const msg = "Will download new EULA as either local EULA does not exist or the cache time has passed.";
-				if (testCase.expectedToDownloadEula) {
-					assert.include(loggedMessage, msg);
-				} else {
-					assert.notInclude(loggedMessage, msg);
-				}
-			});
-
-		});
-
 	});
 
 	describe("acceptEula", () => {

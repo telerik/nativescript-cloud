@@ -6,11 +6,10 @@ export class EulaService extends EulaServiceBase implements IEulaService {
 		$httpClient: Server.IHttpClient,
 		$lockfile: ILockFile,
 		$logger: ILogger,
-		$nsCloudDateTimeService: IDateTimeService,
 		$nsCloudHashService: IHashService,
 		$settingsService: ISettingsService,
 		$userSettingsService: IUserSettingsService) {
-		super($fs, $httpClient, $lockfile, $logger, $nsCloudDateTimeService, $nsCloudHashService, $settingsService, $userSettingsService);
+		super($fs, $httpClient, $lockfile, $logger, $nsCloudHashService, $settingsService, $userSettingsService);
 	}
 
 	protected getAcceptedEulaHashPropertyName(): string {

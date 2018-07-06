@@ -9,21 +9,18 @@ export abstract class EulaServiceBase implements IEulaService {
 		private $httpClient: Server.IHttpClient,
 		private $lockfile: ILockFile,
 		private $logger: ILogger,
-		private $nsCloudDateTimeService: IDateTimeService,
 		private $nsCloudHashService: IHashService,
 		private $settingsService: ISettingsService,
 		private $userSettingsService: IUserSettingsService) { }
 
 	// Exposed for Sidekick
-	public async getEulaData(): Promise<IEulaData> {
-		await this.downloadLatestEula();
-
-		return this.getEulaDataCore();
+	public getEulaData(): Promise<IEulaData> {
+		return this.getEulaDataWithCache();
 	}
 
 	// CLI always uses this one
 	public async getEulaDataWithCache(): Promise<IEulaData> {
-		await this.downloadEulaIfRequired();
+		await this.downloadLatestEula();
 
 		return this.getEulaDataCore();
 	}
@@ -77,12 +74,10 @@ export abstract class EulaServiceBase implements IEulaService {
 			return;
 		}
 
-		const lockFilePath = this.getLockFilePath("download.lock");
 		try {
 			const tempEulaPath = temp.path({ prefix: "eula", suffix: ".pdf" });
 			temp.track();
 
-			await this.$lockfile.lock(lockFilePath, this.getLockFileParams());
 			this.$logger.trace(`Downloading EULA to ${this.getPathToEula()}.`);
 
 			const eulaFstat = this.getEulaFsStat();
@@ -97,9 +92,15 @@ export abstract class EulaServiceBase implements IEulaService {
 			if (!this.$fs.exists(tempEulaPath)) {
 				this.$logger.trace(`The previously downloaded EULA is up-to-date`);
 			} else {
-				this.$logger.trace(`Successfully downloaded EULA to ${tempEulaPath}.`);
-				this.$fs.copyFile(tempEulaPath, this.getPathToEula());
-				this.$logger.trace(`Successfully copied EULA to ${this.getPathToEula()}.`);
+				const lockFilePath = this.getLockFilePath("download.lock");
+				await this.$lockfile.lock(lockFilePath, this.getLockFileParams());
+				try {
+					this.$logger.trace(`Successfully downloaded EULA to ${tempEulaPath}.`);
+					this.$fs.copyFile(tempEulaPath, this.getPathToEula());
+					this.$logger.trace(`Successfully copied EULA to ${this.getPathToEula()}.`);
+				} finally {
+					this.$lockfile.unlock(lockFilePath);
+				}
 			}
 
 			this.isEulaDownloadedInCurrentProcess = true;
@@ -111,32 +112,6 @@ export abstract class EulaServiceBase implements IEulaService {
 			}
 
 			this.$logger.trace("Unable to download latest EULA. Error is:", err);
-		} finally {
-			this.$lockfile.unlock(lockFilePath);
-		}
-	}
-
-	private async downloadEulaIfRequired(): Promise<void> {
-		if (this.isEulaDownloadedInCurrentProcess) {
-			this.$logger.trace("EULA is already downloaded in current process. A new download is not required.");
-			return;
-		}
-
-		const lockFilePath = this.getLockFilePath("check_download.lock");
-		try {
-			await this.$lockfile.lock(lockFilePath, this.getLockFileParams());
-			// download file only in case it has not been modified in the last 24 hours
-			const eulaFstat = this.getEulaFsStat();
-			const timeToCheck = 24 * 60 * 60 * 1000;
-			const currentTime = this.$nsCloudDateTimeService.getCurrentEpochTime();
-
-			const shouldDownloadEula = !eulaFstat || ((currentTime - eulaFstat.mtime.getTime()) > timeToCheck);
-			if (shouldDownloadEula) {
-				this.$logger.trace("Will download new EULA as either local EULA does not exist or the cache time has passed.");
-				await this.downloadLatestEula();
-			}
-		} finally {
-			this.$lockfile.unlock(lockFilePath);
 		}
 	}
 
@@ -150,16 +125,19 @@ export abstract class EulaServiceBase implements IEulaService {
 	}
 
 	private async getLocalEulaHash(): Promise<string> {
-		return this.$nsCloudHashService.getLocalFileHash(this.getPathToEula());
+		const pathToEula = this.getPathToEula();
+		const localEulaHash = this.$fs.exists(pathToEula) && await this.$nsCloudHashService.getLocalFileHash(pathToEula);
+		this.$logger.trace(`Downloaded latest ${this.getPathToEula()}, its hash is: ${localEulaHash}.`);
+		return localEulaHash;
 	}
 
 	private getLockFileParams(): ILockFileOptions {
 		// We'll retry 100 times and time between retries is 100ms, i.e. full wait in case we are unable to get lock will be 10 seconds.
-		// In case lock is older than 10 minutes, consider it stale and try to get a new lock.
+		// In case lock is older than 13 seconds, consider it stale and try to get a new lock.
 		return {
 			retryWait: 100,
 			retries: 100,
-			stale: 10 * 60 * 1000
+			stale: 13 * 1000
 		};
 	}
 
