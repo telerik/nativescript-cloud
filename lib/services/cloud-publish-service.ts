@@ -106,6 +106,8 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		const publishResult = await this.getObjectFromS3File<IBuildServerResult>(response.resultUrl);
 		this.$logger.trace("Publish result:", publishResult);
 
+		publishResult.errors = publishResult.errors || "";
+
 		if (publishResult.code || publishResult.errors) {
 			const err = getError(publishResult, publishRequestData);
 			err.stderr = publishResult.stderr;
