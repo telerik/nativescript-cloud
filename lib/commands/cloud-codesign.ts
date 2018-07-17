@@ -56,7 +56,7 @@ export class CloudCodesignCommand implements ICommand {
 			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
 		}
 
-		await this.$devicesService.detectCurrentlyAttachedDevices({ shouldReturnImmediateResult: false, platform: this.platform });
+		await this.$devicesService.initialize({ shouldReturnImmediateResult: false, platform: this.platform, skipEmulatorStart: true });
 		this.devices = this.$devicesService.getDeviceInstances()
 			.filter(d => !d.isEmulator && d.deviceInfo.platform.toLowerCase() === this.platform.toLowerCase())
 			.map(d => d.deviceInfo);
