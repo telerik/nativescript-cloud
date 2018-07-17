@@ -213,6 +213,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		await this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
 		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
+
+		// HACK: We need this in order to unify the runtime versions between locally prepared project and cloud project.
 		await this.setRuntimeVersion(projectData, platform);
 
 		// HACK: Ensure __PACKAGE__ is interpolated in app.gradle file in the user project.
@@ -236,17 +238,21 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 	private async setRuntimeVersion(projectData: IProjectData, platform: string): Promise<void> {
 		const cliVersion = this.$staticConfig.version;
-		const runtimeNpmName = this.$mobileHelper.isAndroidPlatform(platform) ? this.$constants.TNS_ANDROID_RUNTIME_NAME : this.$constants.TNS_IOS_RUNTIME_NAME;
-		const runtimeVersion = await this.$npmInstallationManager.getLatestCompatibleVersion(runtimeNpmName, cliVersion);
+		const runtimeName = this.getRuntimeName(platform);
+		const runtimeVersion = await this.$npmInstallationManager.getLatestCompatibleVersion(runtimeName, cliVersion);
 		const packageJsonPath = path.join(projectData.projectDir, this.$constants.PACKAGE_JSON_FILE_NAME);
 		const packageJsonContent = this.$fs.readJson(packageJsonPath);
-		if (!packageJsonContent.nativescript[runtimeNpmName]) {
-			packageJsonContent.nativescript[runtimeNpmName] = {
-				version: runtimeVersion
-			};
+		if (!packageJsonContent.nativescript) {
+			packageJsonContent.nativescript = {};
 		}
 
-		this.$fs.writeJson(packageJsonPath, packageJsonContent);
+		if (!packageJsonContent.nativescript[runtimeName]) {
+			packageJsonContent.nativescript[runtimeName] = {
+				version: runtimeVersion
+			};
+
+			this.$fs.writeJson(packageJsonPath, packageJsonContent);
+		}
 	}
 
 	private prepareFilesToUpload(amazonStorageEntries: IAmazonStorageEntry[], buildFiles: IServerItemBase[]): IAmazonStorageEntryData[] {
@@ -454,6 +460,18 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	private emitStepChanged(buildId: string, step: string, progress: number): void {
 		const buildStep: IBuildStep = { buildId, step, progress };
 		this.emit(constants.CLOUD_BUILD_EVENT_NAMES.STEP_CHANGED, buildStep);
+	}
+
+	private getRuntimeName(platform: string): string {
+		if (this.$mobileHelper.isAndroidPlatform(platform)) {
+			return this.$constants.TNS_ANDROID_RUNTIME_NAME;
+		}
+
+		if (this.$mobileHelper.isiOSPlatform(platform)) {
+			return this.$constants.TNS_IOS_RUNTIME_NAME;
+		}
+
+		return null;
 	}
 }
 
