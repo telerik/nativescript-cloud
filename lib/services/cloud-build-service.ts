@@ -3,6 +3,7 @@ import * as semver from "semver";
 import * as uuid from "uuid";
 import { escape } from "querystring";
 import * as constants from "../constants";
+import { settlePromises } from "../helpers";
 import { CloudService } from "./cloud-service";
 
 export class CloudBuildService extends CloudService implements ICloudBuildService {
@@ -90,69 +91,13 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 	public async executeBuild(projectSettings: INSCloudProjectSettings,
 		platform: string,
-		buildConfiguration: string,
+		buildRequestData: IBuildRequestData,
 		buildId: string,
-		accountId: string,
 		buildInformationString: string,
-		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
-		let buildFiles: IServerItemBase[] = [];
-		if (this.$mobileHelper.isAndroidPlatform(platform) && this.$nsCloudBuildHelper.isReleaseConfiguration(buildConfiguration)) {
-			buildFiles.push({
-				filename: uuid.v4(),
-				fullPath: androidBuildData.pathToCertificate,
-				disposition: constants.DISPOSITIONS.CRYPTO_STORE
-			});
-		} else if (this.$mobileHelper.isiOSPlatform(platform) && iOSBuildData.buildForDevice) {
-			buildFiles.push({
-				filename: uuid.v4(),
-				fullPath: iOSBuildData.pathToCertificate,
-				disposition: constants.DISPOSITIONS.KEYCHAIN
-			});
-			const provisionData = this.$nsCloudBuildHelper.getMobileProvisionData(iOSBuildData.pathToProvision);
-			buildFiles.push({
-				filename: `${provisionData.UUID}.mobileprovision`,
-				fullPath: iOSBuildData.pathToProvision,
-				disposition: constants.DISPOSITIONS.PROVISION
-			});
-		}
-
-		const fileNames = buildFiles.map(buildFile => buildFile.filename);
-		const buildCredentials = await this.$nsCloudServerBuildService.getBuildCredentials({ appId: projectSettings.projectId, fileNames: fileNames });
-
-		const filesToUpload = this.prepareFilesToUpload(buildCredentials.urls, buildFiles);
-		const additionalCliFlags: string[] = [];
-		if (projectSettings.bundle) {
-			additionalCliFlags.push("--bundle");
-		}
-
-		if (projectSettings.useHotModuleReload) {
-			additionalCliFlags.push("--hmr");
-		}
-
-		if (projectSettings.env) {
-			const envOptions = _.map(projectSettings.env, (value, key) => `--env.${key}=${value}`);
-			additionalCliFlags.push(...envOptions);
-		}
-
-		let buildProps = await this.prepareBuildRequest({
-			buildId,
-			projectSettings,
-			platform,
-			buildConfiguration,
-			buildCredentials,
-			filesToUpload,
-			additionalCliFlags,
-			accountId
-		});
-		if (this.$mobileHelper.isAndroidPlatform(platform)) {
-			buildProps = await this.$nsCloudBuildPropertiesService.getAndroidBuildProperties(projectSettings, buildProps, filesToUpload, androidBuildData);
-		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
-			buildProps = await this.$nsCloudBuildPropertiesService.getiOSBuildProperties(projectSettings, buildProps, filesToUpload, iOSBuildData);
-		}
 
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.START);
-		const buildResponse: IServerResponse = await this.$nsCloudServerBuildService.startBuild(buildProps);
+		const buildResponse: IServerResponse = await this.$nsCloudServerBuildService.startBuild(buildRequestData);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
 		await this.waitForServerOperationToFinish(buildId, buildResponse);
@@ -220,6 +165,64 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, appId, androidBuildData, iOSBuildData);
 	}
 
+	private async prepareBuildRequest(projectSettings: INSCloudProjectSettings,
+		platform: string,
+		buildConfiguration: string,
+		buildId: string,
+		accountId: string,
+		androidBuildData?: IAndroidBuildData,
+		iOSBuildData?: IIOSBuildData): Promise<IBuildRequestData> {
+
+		let buildFiles: IServerItemBase[] = [];
+		if (this.$mobileHelper.isAndroidPlatform(platform) && this.$nsCloudBuildHelper.isReleaseConfiguration(buildConfiguration)) {
+			buildFiles.push({
+				filename: uuid.v4(),
+				fullPath: androidBuildData.pathToCertificate,
+				disposition: constants.DISPOSITIONS.CRYPTO_STORE
+			});
+		} else if (this.$mobileHelper.isiOSPlatform(platform) && iOSBuildData.buildForDevice) {
+			buildFiles.push({
+				filename: uuid.v4(),
+				fullPath: iOSBuildData.pathToCertificate,
+				disposition: constants.DISPOSITIONS.KEYCHAIN
+			});
+			const provisionData = this.$nsCloudBuildHelper.getMobileProvisionData(iOSBuildData.pathToProvision);
+			buildFiles.push({
+				filename: `${provisionData.UUID}.mobileprovision`,
+				fullPath: iOSBuildData.pathToProvision,
+				disposition: constants.DISPOSITIONS.PROVISION
+			});
+		}
+
+		const fileNames = buildFiles.map(buildFile => buildFile.filename);
+		const buildCredentials = await this.$nsCloudServerBuildService.getBuildCredentials({ appId: projectSettings.projectId, fileNames: fileNames });
+
+		const filesToUpload = this.prepareFilesToUpload(buildCredentials.urls, buildFiles);
+		const additionalCliFlags: string[] = [];
+		if (projectSettings.bundle) {
+			const envOptions = _.keys(projectSettings.env).map(option => `--env.${option}`);
+			additionalCliFlags.push("--bundle", ...envOptions);
+		}
+
+		let buildRequestData = await this.prepareBuildRequestCore({
+			buildId,
+			projectSettings,
+			platform,
+			buildConfiguration,
+			buildCredentials,
+			filesToUpload,
+			additionalCliFlags,
+			accountId
+		});
+		if (this.$mobileHelper.isAndroidPlatform(platform)) {
+			buildRequestData = await this.$nsCloudBuildPropertiesService.getAndroidBuildProperties(projectSettings, buildRequestData, filesToUpload, androidBuildData);
+		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
+			buildRequestData = await this.$nsCloudBuildPropertiesService.getiOSBuildProperties(projectSettings, buildRequestData, filesToUpload, iOSBuildData);
+		}
+
+		return buildRequestData;
+	}
+
 	private async buildCore(projectSettings: INSCloudProjectSettings,
 		platform: string,
 		buildConfiguration: string,
@@ -248,12 +251,28 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			}
 		}
 
-		const result = await Promise.all([
-			this.executeBuild(projectSettings, platform, buildConfiguration, buildId, accountId, buildInformationString, androidBuildData, iOSBuildData),
+		const buildRequestData = await this.prepareBuildRequest(projectSettings, platform, buildConfiguration, buildId, accountId, androidBuildData, iOSBuildData);
+
+		const result = await settlePromises<any>([
+			this.executeBuild(projectSettings, platform, buildRequestData, buildId, buildInformationString, iOSBuildData),
 			this.prepareProject(buildId, projectSettings, platform, buildConfiguration, iOSBuildData, projectData)
 		]);
 
-		return result[0];
+		const executeBuildResult = result[0];
+		const prepareProjectResult = result[1];
+
+		if (prepareProjectResult.error) {
+			this.$logger.warn(prepareProjectResult.error.message);
+		} else {
+			const buildInfoFileDirname = path.dirname(executeBuildResult.result.outputFilePath);
+			this.$platformService.saveBuildInfoFile(platform, projectSettings.projectDir, buildInfoFileDirname);
+		}
+
+		if (executeBuildResult.error) {
+			this.$errors.failWithoutHelp(executeBuildResult.error.message);
+		}
+
+		return executeBuildResult.result;
 	}
 
 	private async setRuntimeVersion(projectData: IProjectData, platform: string): Promise<void> {
@@ -341,7 +360,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.END);
 	}
 
-	private async prepareBuildRequest(settings: IPrepareBuildRequestInfo): Promise<IBuildRequestData> {
+	private async prepareBuildRequestCore(settings: IPrepareBuildRequestInfo): Promise<IBuildRequestData> {
 		this.emitStepChanged(settings.buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.START);
 		let buildFiles;
 		try {

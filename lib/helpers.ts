@@ -45,3 +45,41 @@ export function getProjectId(projectData: IProjectData, platform: string): strin
 
 	return projectData.projectId;
 }
+
+/**
+ * Executes all promises and does not stop in case any of them throws.
+ * Returns the results of all promises in array when all are successfully resolved.
+ * In case any of the promises is rejected, rejects the resulted promise with all accumulated errors.
+ * @param {Promise<T>[]} promises Promises to be resolved.
+ * @returns {Promise<T[]>} New promise which will be resolved with the results of all promises. //
+ */
+export function settlePromises<T>(promises: Promise<any>[]): Promise<{result: T, error: Error}[]> {
+	return new Promise((resolve, reject) => {
+		let settledPromisesCount = 0;
+		let results: {result: T, error: Error}[] = [];
+
+		const length = promises.length;
+
+		if (!promises.length) {
+			resolve();
+		}
+
+		_.forEach(promises, (currentPromise, index) => {
+			currentPromise
+				.then(result => {
+					return { result };
+				})
+				.catch(error => {
+					return { error };
+				})
+				.then((current: any) => {
+					settledPromisesCount++;
+					results[index] = current;
+
+					if (settledPromisesCount === length) {
+						resolve(results);
+					}
+				});
+		});
+	});
+}
