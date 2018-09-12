@@ -11,6 +11,16 @@ interface ICleanupProjectResponse {
 /**
  * Describes data used for project cleaning passed from client.
  */
+interface ICleanupRequestDataBase extends IProjectNameComposition {
+	/**
+	 * Application's identifier
+	 */
+	appIdentifier: string | IDictionary<string>;
+}
+
+/**
+ * Describes data used for project cleaning passed from client.
+ */
 interface ICleanupProjectDataBase extends IProjectNameComposition {
 	/**
 	 * Application's identifier

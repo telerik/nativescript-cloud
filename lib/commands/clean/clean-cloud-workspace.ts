@@ -13,14 +13,14 @@ export class CleanCloudWorkspace implements ICommand {
 		private $prompter: IPrompter) { }
 
 	public async execute(args: string[]): Promise<void> {
-		let appIdentifier: string;
+		let appIdentifier: string | Mobile.IProjectIdentifier;
 		let projectName: string;
 
 		if (args.length === 0) {
 			try {
 				// We want to use the project data only when no parameters are provided.
 				this.$projectData.initializeProjectData();
-				appIdentifier = this.$projectData.projectId;
+				appIdentifier = this.$projectData.projectIdentifiers || this.$projectData.projectId;
 				projectName = this.$projectData.projectName;
 			} catch (err) {
 				// We are not in project and the app id and project name parameters are not provided.

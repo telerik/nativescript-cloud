@@ -25,7 +25,28 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		return path.join(options.projectDir, "cleanup-results");
 	}
 
-	public async cleanupProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupProjectResult> {
+	public async cleanupProject(cleanupRequestData: ICleanupRequestDataBase): Promise<ICleanupProjectResult> {
+		let identifiers: string[];
+		const cleanupTaskResults = [];
+
+		if (typeof cleanupRequestData.appIdentifier === "string") {
+			identifiers = [cleanupRequestData.appIdentifier];
+		} else {
+			identifiers =  _.uniq(_.values(cleanupRequestData.appIdentifier));
+		}
+
+		for (let index = 0; index < identifiers.length; index++) {
+			const appIdentifier = identifiers[index];
+			const taskResult = await this.startCleanProject({appIdentifier, projectName: cleanupRequestData.projectName});
+			cleanupTaskResults.push(taskResult);
+		}
+
+		return {
+			cleanupTaskResults
+		};
+	}
+
+	private async startCleanProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
 		const cleanupTaskId = uuid.v4();
 		try {
 			const result = await this.executeCleanupProject(cleanupTaskId, cleanupProjectData);
@@ -37,7 +58,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		}
 	}
 
-	private async executeCleanupProject(cleanupTaskId: string, { appIdentifier, projectName }: ICleanupProjectDataBase): Promise<ICleanupProjectResult> {
+	private async executeCleanupProject(cleanupTaskId: string, { appIdentifier, projectName }: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
 		const cleanupInfoMessage = `Application Id: ${appIdentifier}, Project Name: ${projectName}, Cleanup Task Id: ${cleanupTaskId}`;
 		this.$logger.info(`Starting cloud cleanup: ${cleanupInfoMessage}.`);
 
@@ -84,7 +105,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 			}
 		}
 
-		const result: ICleanupProjectResult = {
+		const result: ICleanupTaskResult = {
 			cleanupTaskId,
 			warnings: cleanupResponse.warnings,
 			codeCommitResponse: cleanupResponse.codeCommitResponse,
