@@ -36,7 +36,9 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
 		private $qr: IQrCodeGenerator,
-		private $staticConfig: IStaticConfig) {
+		private $staticConfig: IStaticConfig,
+		private $platformsData: IPlatformsData,
+		private $filesHashService: IFilesHashService) {
 		super($fs, $httpClient, $logger);
 	}
 
@@ -180,6 +182,11 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				imageData: await this.getImageData(buildResultUrl, itmsOptions)
 			}
 		};
+
+		if ((<any>this.$filesHashService).saveHashesForProject) {
+			const platformData = this.$platformsData.getPlatformData(platform, this.$projectDataService.getProjectData(projectSettings.projectDir));
+			await (<any>this.$filesHashService).saveHashesForProject(platformData, path.dirname(localBuildResult));
+		}
 
 		const buildInfoFileDirname = path.dirname(result.outputFilePath);
 		this.$platformService.saveBuildInfoFile(platform, projectSettings.projectDir, buildInfoFileDirname);
