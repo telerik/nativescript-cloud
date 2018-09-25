@@ -2,6 +2,7 @@ import * as path from "path";
 import * as uuid from "uuid";
 import * as constants from "../constants";
 import { CloudService } from "./cloud-service";
+import { getProjectId } from "../helpers";
 
 export class CloudCodesignService extends CloudService implements ICloudCodesignService {
 
@@ -134,7 +135,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectData.projectName);
 		return {
 			buildId,
-			appId: projectData.projectId,
+			appId: getProjectId(projectData, codesignData.platform.toLowerCase()),
 			appName: sanitizedProjectName,
 			clean: codesignData.clean,
 			username: codesignData.username,

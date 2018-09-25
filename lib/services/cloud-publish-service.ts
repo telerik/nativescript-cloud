@@ -3,6 +3,7 @@ import { basename } from "path";
 import * as uuid from "uuid";
 import { EOL } from "os";
 import { CloudService } from "./cloud-service";
+import { getProjectId } from "../helpers";
 
 export class CloudPublishService extends CloudService implements ICloudPublishService {
 	// Taken from: https://github.com/fastlane/fastlane/blob/master/fastlane_core/lib/fastlane_core/itunes_transporter.rb#L100
@@ -39,7 +40,8 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 			this.$errors.failWithoutHelp("Cannot perform publish - credentials are required.");
 		}
 
-		const appIdentifier = this.$projectDataService.getProjectData(publishData.projectDir).projectId;
+		const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
+		const appIdentifier =  getProjectId(projectData, this.$devicePlatformsConstants.iOS.toLowerCase());
 		const publishRequestData = {
 			appIdentifier,
 			credentials: publishData.credentials,
@@ -65,7 +67,8 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		}
 
 		publishData.track = publishData.track || DEFAULT_ANDROID_PUBLISH_TRACK;
-		const appIdentifier = this.$projectDataService.getProjectData(publishData.projectDir).projectId;
+		const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
+		const appIdentifier =  getProjectId(projectData, this.$devicePlatformsConstants.Android.toLowerCase());
 		return this.publishCore({
 			appIdentifier,
 			credentials: {

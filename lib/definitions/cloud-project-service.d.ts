@@ -1,7 +1,14 @@
 /**
- * Defines the properties of the project cleanup method.
+ * Defines the result of the project cleanup method.
  */
 interface ICleanupProjectResult {
+	cleanupTaskResults: ICleanupTaskResult[];
+}
+
+/**
+ * Defines the properties of single cleanup task.
+ */
+interface ICleanupTaskResult {
 	cleanupTaskId: string;
 	cloudTasksResults: IDictionary<IServerResult>;
 	codeCommitResponse: IDeleteRepositoryResponse;
@@ -14,9 +21,9 @@ interface ICleanupProjectResult {
 interface ICloudProjectService extends ICloudOperationService {
 	/**
 	 * Cleans all AWS CodeCommit data and build machines artefacts if they exist.
-	 * @param {ICleanupProjectDataBase} cleanupProjectData Data needed for project cleaning.
+	 * @param {ICleanupRequestDataBase} cleanupProjectData Data needed for project cleaning.
 	 * @returns {Promise<ICleanupProjectResult>} Information about the cleanup. It includes AWS CodeCommit result and the result from the cleanup on each build machine.
 	 * If the promise is rejected the error will contain cleanupTaskId property.
 	 */
-	cleanupProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupProjectResult>;
+	cleanupProject(cleanupProjectData: ICleanupRequestDataBase): Promise<ICleanupProjectResult>;
 }

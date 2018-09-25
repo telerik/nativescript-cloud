@@ -1,5 +1,5 @@
 import { EulaCommandHelper } from "../../lib/commands/eula-command-helper";
-import { Yok } from "mobile-cli-lib/yok";
+import { Yok } from "nativescript/lib/common/yok";
 import { assert } from "chai";
 import { EulaConstants } from "../../lib/constants";
 import { EOL } from "os";

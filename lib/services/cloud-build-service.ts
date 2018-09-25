@@ -223,6 +223,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
 		const appFilesUpdaterOptions: IAppFilesUpdaterOptions = {
 			bundle: projectSettings.bundle,
+			useHotModuleReload: projectSettings.useHotModuleReload,
 			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase()
 		};
 
@@ -252,7 +253,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const userAppGradleFilePath = path.join(projectData.appResourcesDirectoryPath, this.$devicePlatformsConstants.Android, "app.gradle");
 		if (this.$fs.exists(userAppGradleFilePath)) {
 			const appGradleContents = this.$fs.readText(userAppGradleFilePath);
-			const appGradleReplacedContents = appGradleContents.replace(/__PACKAGE__/g, projectData.projectId);
+			const appGradleReplacedContents = appGradleContents.replace(/__PACKAGE__/g, projectSettings.projectId);
 			if (appGradleReplacedContents !== appGradleContents) {
 				this.$fs.writeFile(userAppGradleFilePath, appGradleReplacedContents);
 			}

@@ -1,7 +1,7 @@
 import { CloudLibVersion } from "../../lib/commands/cloud-lib-version";
 import { PackageInfoService } from "../../lib/services/package-info-service";
-import { Yok } from "mobile-cli-lib/yok";
-import { FileSystem } from "mobile-cli-lib/file-system";
+import { Yok } from "nativescript/lib/common/yok";
+import { FileSystem } from "nativescript/lib/common/file-system";
 import * as fs from "fs";
 import * as path from "path";
 import { assert } from "chai";

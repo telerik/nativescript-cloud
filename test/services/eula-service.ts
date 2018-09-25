@@ -1,6 +1,6 @@
 import { EulaService } from "../../lib/services/eula-service";
 import { HashService } from "../../lib/services/hash-service";
-import { Yok } from "mobile-cli-lib/yok";
+import { Yok } from "nativescript/lib/common/yok";
 import { assert } from "chai";
 import { EulaConstants } from "../../lib/constants";
 
