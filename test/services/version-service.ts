@@ -1,6 +1,6 @@
 import { VersionService } from "../../lib/services/version-service";
 import { PolyfillService } from "../../lib/services/polyfill-service";
-import { Yok } from "mobile-cli-lib/yok";
+import { Yok } from "nativescript/lib/common/yok";
 import { assert } from "chai";
 
 describe("versionService", () => {

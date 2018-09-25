@@ -158,7 +158,6 @@ module.exports = function (grunt) {
 
 	grunt.registerTask("transpile_additional_project", function () {
 		transpileProject("nativescript");
-		transpileProject("mobile-cli-lib");
 	});
 
 	grunt.registerTask("setPackageName", function (version) {
@@ -193,7 +192,7 @@ module.exports = function (grunt) {
 	grunt.registerTask("generate_references", () => {
 		const referencesPath = path.join(__dirname, "references.d.ts");
 
-		// get all .d.ts files from nativescript-cli and mobile-cli-lib
+		// get all .d.ts files from nativescript-cli
 		const node_modules = "node_modules";
 		const nativescript = "nativescript";
 		const iOSDeviceLib = "ios-device-lib";
@@ -202,7 +201,6 @@ module.exports = function (grunt) {
 		const pathToIosDeviceLib = fs.existsSync(rootPathToIosDeviceLib) ? rootPathToIosDeviceLib : path.join(nodeModulesDirPath, nativescript, node_modules, iOSDeviceLib);
 
 		const pathsOfDtsFiles = getReferencesFromDir(path.join(nodeModulesDirPath, nativescript))
-			.concat(getReferencesFromDir(path.join(nodeModulesDirPath, "mobile-cli-lib")))
 			.concat(getReferencesFromDir(pathToIosDeviceLib))
 			.concat(getReferencesFromDir(path.join(nodeModulesDirPath, "cloud-device-emulator")));
 

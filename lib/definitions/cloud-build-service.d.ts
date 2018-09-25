@@ -210,7 +210,7 @@ interface IItmsPlistOptions extends IProjectNameComposition {
 /**
  * Describes the project settings required for different operations.
  */
-interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud, IProjectNameComposition, IWorkflowRequestData {
+interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud, IProjectNameComposition, IWorkflowRequestData, IHasUseHotModuleReloadOption {
 	/**
 	 * The directory where the project is located. This should be the path to the directory where application's package.json is located.
 	 */

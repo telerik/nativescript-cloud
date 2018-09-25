@@ -56,7 +56,8 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			workflowName: this.$options.workflow && this.$options.workflow.name,
 			workflowUrl: this.$options.workflow && this.$options.workflow.url,
 			clean: this.$options.clean,
-			env: this.$options.env
+			env: this.$options.env,
+			useHotModuleReload: this.$options.hmr
 		};
 
 		const buildConfiguration = this.$options.release ? CLOUD_BUILD_CONFIGURATIONS.RELEASE : CLOUD_BUILD_CONFIGURATIONS.DEBUG;
@@ -109,6 +110,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 				keyStoreAliasPassword: this.$options.keyStoreAliasPassword,
 				keyStorePassword: this.$options.keyStorePassword,
 				keyStorePath: this.$options.keyStorePath,
+				useHotModuleReload: this.$options.hmr,
 				env: this.$options.env
 			}, this.$options.platformTemplate);
 		} else {

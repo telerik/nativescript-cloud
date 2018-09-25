@@ -1,6 +1,6 @@
 import { ServerEmulatorsService } from "../../lib/services/server/server-emulators-service";
 import { HTTP_METHODS } from "../../lib/constants";
-import { Yok } from "mobile-cli-lib/yok";
+import { Yok } from "nativescript/lib/common/yok";
 import { assert } from "chai";
 
 describe("cloud emulator service", () => {

@@ -223,6 +223,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
 		const appFilesUpdaterOptions: IAppFilesUpdaterOptions = {
 			bundle: projectSettings.bundle,
+			useHotModuleReload: projectSettings.useHotModuleReload,
 			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase()
 		};
 

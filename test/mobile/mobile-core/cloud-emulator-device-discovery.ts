@@ -1,7 +1,7 @@
 import { CloudEmulatorDeviceDiscovery } from "../../../lib/mobile/mobile-core/cloud-emulator-device-discovery";
 import { DEVICE_DISCOVERY_EVENTS } from "../../../lib/constants";
 import { EventEmitter } from "events";
-import { Yok } from "mobile-cli-lib/yok";
+import { Yok } from "nativescript/lib/common/yok";
 import { assert } from "chai";
 
 class CustomDeviceEmitter extends EventEmitter implements CloudDeviceEmitter {
