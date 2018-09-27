@@ -115,8 +115,16 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const filesToUpload = this.prepareFilesToUpload(buildCredentials.urls, buildFiles);
 		const additionalCliFlags: string[] = [];
 		if (projectSettings.bundle) {
+			additionalCliFlags.push("--bundle");
+		}
+
+		if (projectSettings.useHotModuleReload) {
+			additionalCliFlags.push("--hmr");
+		}
+
+		if (projectSettings.env) {
 			const envOptions = _.keys(projectSettings.env).map(option => `--env.${option}`);
-			additionalCliFlags.push("--bundle", ...envOptions);
+			additionalCliFlags.push(...envOptions);
 		}
 
 		let buildProps = await this.prepareBuildRequest({
