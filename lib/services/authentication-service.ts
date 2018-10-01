@@ -49,7 +49,7 @@ export class AuthenticationService implements IAuthenticationService {
 
 						isResolved = true;
 
-						const decodedResponse = new Buffer(serverResponse, "base64").toString();
+						const decodedResponse = Buffer.from(<string>serverResponse, "base64").toString();
 						this.rejectLoginPromiseAction = null;
 						authCompleteResolveAction(decodedResponse);
 						response.end();
