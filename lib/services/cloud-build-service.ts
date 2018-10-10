@@ -123,7 +123,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		if (projectSettings.env) {
-			const envOptions = _.keys(projectSettings.env).map(option => `--env.${option}`);
+			const envOptions = _.map(projectSettings.env, (value, key) => `--env.${key}=${value}`);
 			additionalCliFlags.push(...envOptions);
 		}
 
