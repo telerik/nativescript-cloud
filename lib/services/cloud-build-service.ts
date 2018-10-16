@@ -191,7 +191,10 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			}
 		};
 
-		if ((<any>this.$filesHashService).saveHashesForProject) {
+		// In case HMR is passed, do not save the hashes as the files generated in the cloud may differ from the local ones.
+		// We need to get the hashes from the cloud build, so until we have it, it is safer to execute fullSync after build.
+		// This way we'll be sure HMR is working with cloud builds as it will rely on the local files.
+		if ((<any>this.$filesHashService).saveHashesForProject && !projectSettings.useHotModuleReload) {
 			const platformData = this.$platformsData.getPlatformData(platform, this.$projectDataService.getProjectData(projectSettings.projectDir));
 			await (<any>this.$filesHashService).saveHashesForProject(platformData, path.dirname(localBuildResult));
 		}

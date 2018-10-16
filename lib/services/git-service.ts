@@ -168,7 +168,7 @@ export class GitService implements IGitService {
 			const result = await this.executeCommand(projectSettings, ["config", "core.autocrlf"]);
 			return result && result.stdout && result.stdout.toString().trim().toLowerCase() === "false";
 		} catch (err) {
-			this.$logger.trace("Error while checking if core.autcrlf is false: ", err);
+			this.$logger.trace("Error while checking if core.autocrlf is false: ", err);
 			return false;
 		}
 	}
