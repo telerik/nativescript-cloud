@@ -11,6 +11,12 @@ export class GitService implements IGitService {
 	private static MAX_TIME_FOR_UNUSED_REPOSITORY = 1000 * 3600 * 24 * 30;
 	private static MINIMAL_GIT_MAJOR_VERSION = 2;
 	private static MINIMAL_GIT_MINOR_VERSION = 9;
+	/**
+	 * Used when we want to force creation of new local repository after release of nativescript-cloud package.
+	 * Just increment this version and new local repositories will be created for each project.
+	 * Required for cases where we want to change some git settings in the repo and ensure they are pushed in the cloud.
+	 */
+	private static GIT_REPO_VERSION = "v1";
 
 	private gitFilePath: string;
 
@@ -44,6 +50,13 @@ export class GitService implements IGitService {
 		}
 
 		await this.ensureGitIgnoreExists(projectSettings.projectDir);
+
+		const isAutocrlfFalse = await this.gitCheckIfAutocrlfIsFalse(projectSettings);
+		if (!isAutocrlfFalse) {
+			this.$logger.trace("Setting core.autocrlf to false");
+			// Commit line ending as is, do not allow git to change them.
+			await this.executeCommand(projectSettings, ["config", "--local", "core.autocrlf", "false"]);
+		}
 
 		await this.configureEnvironment(projectSettings, remoteUrl);
 		const statusResult = await this.gitStatus(projectSettings);
@@ -150,6 +163,16 @@ export class GitService implements IGitService {
 		}
 	}
 
+	private async gitCheckIfAutocrlfIsFalse(projectSettings: INSCloudProjectSettings): Promise<boolean> {
+		try {
+			const result = await this.executeCommand(projectSettings, ["config", "core.autocrlf"]);
+			return result && result.stdout && result.stdout.toString().trim().toLowerCase() === "false";
+		} catch (err) {
+			this.$logger.trace("Error while checking if core.autcrlf is false: ", err);
+			return false;
+		}
+	}
+
 	private async executeCommand(projectSettings: INSCloudProjectSettings, args: string[], options?: any, spawnFromEventOptions?: ISpawnFromEventOptions): Promise<ISpawnResult> {
 		options = options || { cwd: projectSettings.projectDir };
 		const gitDir = this.getGitDirPath(projectSettings);
@@ -178,7 +201,7 @@ export class GitService implements IGitService {
 	}
 
 	private getGitDirName(projectSettings: INSCloudProjectSettings): string {
-		const dirName = `${this.$nsCloudUserService.getUser().email}_${projectSettings.projectDir}_${projectSettings.projectId}`;
+		const dirName = `${this.$nsCloudUserService.getUser().email}_${projectSettings.projectDir}_${projectSettings.projectId}_${GitService.GIT_REPO_VERSION}`;
 		return this.$nsCloudHashService.getHash(dirName, { algorithm: "sha1" });
 	}
 
