@@ -25,10 +25,10 @@ export class ServerServicesProxy implements IServerServicesProxy {
 			headers[HTTP_HEADERS.ACCEPT] = options.accept;
 		}
 
+		const reqProto = this.getServiceProto(options.serviceName);
+		const reqUrl = new URL(finalUrlPath, `${reqProto}://${host}`)
 		let requestOpts: any = {
-			proto: this.getServiceProto(options.serviceName),
-			host: host,
-			path: finalUrlPath,
+			url: reqUrl.toString(),
 			method: options.method,
 			headers: headers,
 			pipeTo: options.resultStream,
