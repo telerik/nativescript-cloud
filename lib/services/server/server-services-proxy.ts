@@ -26,7 +26,7 @@ export class ServerServicesProxy implements IServerServicesProxy {
 		}
 
 		const reqProto = this.getServiceProto(options.serviceName);
-		const reqUrl = new URL(finalUrlPath, `${reqProto}://${host}`)
+		const reqUrl = new URL(finalUrlPath, `${reqProto}://${host}`);
 		let requestOpts: any = {
 			url: reqUrl.toString(),
 			method: options.method,
