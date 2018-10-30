@@ -124,6 +124,8 @@ export const KINVEY_SERVICE_NAME = "kinvey";
 
 export const BEARER_AUTH_SCHEME = "Bearer";
 
+export const SERVER_REQUEST_TIMEOUT = 30000;
+
 export class Authentication {
 	public static OAuth2 = "OAuth2";
 	public static OIDC = "OIDC";

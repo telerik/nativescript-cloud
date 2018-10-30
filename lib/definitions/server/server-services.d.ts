@@ -65,4 +65,5 @@ interface ICloudRequestOptions {
 	resultStream: NodeJS.WritableStream;
 	serviceName: string;
 	urlPath: string;
+	timeout?: number;
 }
