@@ -12,7 +12,8 @@ export class CloudRunCommand implements ICommand {
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $errors: IErrors,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
-		private $projectData: IProjectData) {
+		private $projectData: IProjectData,
+		private $androidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
 		this.$projectData.initializeProjectData();
 	}
 
@@ -26,6 +27,7 @@ export class CloudRunCommand implements ICommand {
 
 	public async canExecute(args: string[]): Promise<boolean> {
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+		this.$androidBundleValidatorHelper.validateNoAab();
 
 		if (args.length) {
 			this.$errors.fail("This input is not valid for the cloud run command");
@@ -51,8 +53,9 @@ export class CloudRunIosCommand extends CloudRunCommand implements ICommand {
 		$nsCloudOptionsProvider: ICloudOptionsProvider,
 		$devicesService: Mobile.IDevicesService,
 		$projectData: IProjectData,
+		$androidBundleValidatorHelper: IAndroidBundleValidatorHelper,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData);
+		super($liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData, $androidBundleValidatorHelper);
 	}
 }
 
@@ -72,8 +75,9 @@ export class CloudRunAndroidCommand extends CloudRunCommand implements ICommand 
 		$nsCloudOptionsProvider: ICloudOptionsProvider,
 		$devicesService: Mobile.IDevicesService,
 		$projectData: IProjectData,
+		$androidBundleValidatorHelper: IAndroidBundleValidatorHelper,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData);
+		super($liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData, $androidBundleValidatorHelper);
 	}
 }
 
