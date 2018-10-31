@@ -1,4 +1,5 @@
 import { CONTENT_TYPES, HTTP_HEADERS, BEARER_AUTH_SCHEME, SERVER_REQUEST_TIMEOUT } from "../../constants";
+import { URL } from "url";
 
 export class ServerServicesProxy implements IServerServicesProxy {
 	protected serverConfig: IServerConfig;
