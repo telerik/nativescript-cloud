@@ -1,4 +1,4 @@
-import { CONTENT_TYPES, HTTP_HEADERS, BEARER_AUTH_SCHEME } from "../../constants";
+import { CONTENT_TYPES, HTTP_HEADERS, BEARER_AUTH_SCHEME, SERVER_REQUEST_TIMEOUT } from "../../constants";
 
 export class ServerServicesProxy implements IServerServicesProxy {
 	protected serverConfig: IServerConfig;
@@ -25,13 +25,14 @@ export class ServerServicesProxy implements IServerServicesProxy {
 			headers[HTTP_HEADERS.ACCEPT] = options.accept;
 		}
 
+		const reqProto = this.getServiceProto(options.serviceName);
+		const reqUrl = new URL(finalUrlPath, `${reqProto}://${host}`);
 		let requestOpts: any = {
-			proto: this.getServiceProto(options.serviceName),
-			host: host,
-			path: finalUrlPath,
+			url: reqUrl.toString(),
 			method: options.method,
 			headers: headers,
-			pipeTo: options.resultStream
+			pipeTo: options.resultStream,
+			timeout: _.isUndefined(options.timeout) ? SERVER_REQUEST_TIMEOUT : options.timeout
 		};
 
 		if (options.bodyValues) {

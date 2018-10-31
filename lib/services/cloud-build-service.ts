@@ -65,7 +65,9 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
 		const buildId = uuid.v4();
+		this.$logger.info("Getting accounts information...");
 		const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
+		this.$logger.info("Using account %s.", account.id);
 		try {
 			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, buildId, account.id, androidBuildData, iOSBuildData);
 			return buildResult;
