@@ -7,7 +7,7 @@ export class CloudServicesPolicyService implements ICloudServicesPolicyService {
 	private static readonly POLICIES: string = "policies";
 	private static readonly CLOUD_SERVICES_POLICY_FILE_NAME: string = `${Policies.CLOUD_SERVICES_POLICY_NAME}.txt`;
 	private static readonly REASONS_FOR_COLLECTING_PERSONAL_DATA_FILE_NAME: string = "personal-data-collection-reasons.txt";
-	private static readonly PERSONAL_DATA_SUBJECT_ACCESS_REQUEST_URL: string = "https://app.onetrust.com/app/#/webform/65e969b1-9755-4cb6-adbb-0ae5939fb132";
+	private static readonly PERSONAL_DATA_SUBJECT_ACCESS_REQUEST_URL: string = "https://app.onetrust.com/app/#/webform/7897e80a-b8a4-4797-883a-bdacfe1ab8e4";
 	private static readonly PRIVACY_POLICY_URL: string = "https://www.progress.com/legal/privacy-policy";
 
 	constructor(private $fs: IFileSystem,
