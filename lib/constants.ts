@@ -76,7 +76,8 @@ export const HTTP_HEADERS = {
 	AUTHORIZATION: "Authorization",
 	CONNECTION: "Connection",
 	CONTENT_TYPE: "Content-Type",
-	LOCATION: "Location"
+	LOCATION: "Location",
+	X_NS_NAMESPACE: "X-NS-Namespace"
 };
 
 export const HTTP_STATUS_CODES = {

@@ -32,5 +32,6 @@
 			"apiVersion": "",
 			"authScheme": "Telerik"
 		}
-	}
+	},
+	"namespace": "kinvey"
 }
