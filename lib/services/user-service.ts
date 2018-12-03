@@ -36,7 +36,7 @@ export class UserService implements IUserService {
 
 	private determineUserService(): IUserService {
 		const serverConfig = this.$nsCloudServerConfigManager.getCurrentConfigData();
-		const namespace = <string>serverConfig["namespace"];
+		const namespace: string = serverConfig["namespace"];
 		if (namespace && namespace.toLowerCase() === "kinvey") {
 			return this.$injector.resolve<IUserService>("nsCloudKinveyUserService");
 		}

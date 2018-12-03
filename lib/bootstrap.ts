@@ -9,6 +9,8 @@ $injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-
 $injector.require("nsCloudBuildHelper", path.join(__dirname, "cloud-build-helper"));
 $injector.require("nsCloudBuildCommandHelper", path.join(__dirname, "commands", "build-command-helper"));
 $injector.require("nsCloudEulaCommandHelper", path.join(__dirname, "commands", "eula-command-helper"));
+$injector.require("nsCloudKinveyUserService", path.join(__dirname, "services", "kinvey-user-service"));
+$injector.require("nsCloudTelerikUserService", path.join(__dirname, "services", "telerik-user-service"));
 
 // Mobile.
 $injector.require("nsCloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
@@ -22,8 +24,6 @@ $injector.requirePublicClass("nsCloudEmulatorLauncher", path.join(__dirname, "se
 $injector.requirePublicClass("nsCloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
 $injector.requirePublicClass("nsCloudProjectService", path.join(__dirname, "services", "cloud-project-service"));
 $injector.requirePublicClass("nsCloudUserService", path.join(__dirname, "services", "user-service"));
-$injector.requirePublicClass("nsCloudKinveyUserService", path.join(__dirname, "services", "kinvey-user-service"));
-$injector.requirePublicClass("nsCloudTelerikUserService", path.join(__dirname, "services", "telerik-user-service"));
 $injector.requirePublicClass("nsCloudAccountsService", path.join(__dirname, "services", "accounts-service"));
 $injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "services", "eula-service"));
 $injector.requirePublicClass("nsCloudKinveyService", path.join(__dirname, "services", "kinvey-service"));

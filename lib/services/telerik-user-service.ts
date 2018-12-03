@@ -4,9 +4,12 @@ import { home } from "osenv";
 import { UserServiceBase } from "./user-service-base";
 
 export class TelerikUserService extends UserServiceBase implements IUserService {
-	constructor($injector: IInjector,
-		private $hostInfo: IHostInfo) {
-		super($injector);
+	constructor(private $hostInfo: IHostInfo,
+		$injector: IInjector,
+		$logger: ILogger,
+		$fs: IFileSystem,
+		$errors: IErrors) {
+		super($injector, $logger, $fs, $errors);
 		this.userFilePath = this.getUserFilePath();
 	}
 

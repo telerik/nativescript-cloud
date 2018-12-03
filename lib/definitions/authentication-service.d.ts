@@ -88,10 +88,10 @@ interface IKinveyUserData {
 	email: string;
 	firstName: string;
 	lastName: string
-	lastLoginTime: Date;
-	name: string;
+	lastLoginTime?: Date;
+	name?: string;
 	token: string;
-	twoFactorAuth: IKinveyTwoFactorAuth
+	twoFactorAuth?: IKinveyTwoFactorAuth
 }
 
 interface IKinveyTwoFactorAuth {

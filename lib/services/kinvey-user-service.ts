@@ -4,14 +4,17 @@ import { home } from "osenv";
 import { UserServiceBase } from "./user-service-base";
 
 export class KinveyUserService extends UserServiceBase implements IUserService {
-	constructor($injector: IInjector,
-		private $hostInfo: IHostInfo) {
-		super($injector);
+	constructor(private $hostInfo: IHostInfo,
+		$injector: IInjector,
+		$logger: ILogger,
+		$fs: IFileSystem,
+		$errors: IErrors) {
+		super($injector, $logger, $fs, $errors);
 		this.userFilePath = this.getUserFilePath();
 	}
 
 	public getUserData(): IUserData {
-		const userData: IKinveyUserData = <any>super.getUserData();
+		const userData: IKinveyUserData = super.getUserData();
 		return {
 			accessToken: userData.token,
 			refreshToken: "",
@@ -24,7 +27,7 @@ export class KinveyUserService extends UserServiceBase implements IUserService {
 	}
 
 	public setUserData(userData: IUserData): void {
-		const kinveyUserData: any = {
+		const kinveyUserData: IKinveyUserData = {
 			email: userData.userInfo.email,
 			firstName: userData.userInfo.firstName,
 			lastName: userData.userInfo.lastName,

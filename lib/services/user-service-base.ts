@@ -1,24 +1,14 @@
 export abstract class UserServiceBase {
-	private userData: IUserData;
 	protected userFilePath: string;
 
 	private get $nsCloudServerAccountsService(): IServerAccountsService {
 		return this.$injector.resolve<IServerAccountsService>("nsCloudServerAccountsService");
 	}
 
-	private get $errors(): IErrors {
-		return this.$injector.resolve<IErrors>("errors");
-	}
-
-	private get $fs(): IFileSystem {
-		return this.$injector.resolve<IFileSystem>("fs");
-	}
-
-	private get $logger(): ILogger {
-		return this.$injector.resolve<ILogger>("logger");
-	}
-
-	constructor(private $injector: IInjector) { }
+	constructor(private $injector: IInjector,
+		private $logger: ILogger,
+		private $fs: IFileSystem,
+		private $errors: IErrors) { }
 
 	public hasUser(): boolean {
 		try {
@@ -35,18 +25,14 @@ export abstract class UserServiceBase {
 		return userData.userInfo;
 	}
 
-	public getUserData(): IUserData {
-		let data: IUserData;
-
+	public getUserData(): any {
 		try {
-			data = this.$fs.readJson(this.userFilePath);
+			return this.$fs.readJson(this.userFilePath);
 		} catch (err) {
 			this.$logger.trace("Error while getting current user info:");
 			this.$logger.trace(err);
 			this.$errors.failWithoutHelp("Not logged in.");
 		}
-
-		return data;
 	}
 
 	public setToken(token: ITokenData): void {
@@ -58,18 +44,15 @@ export abstract class UserServiceBase {
 		}
 	}
 
-	public setUserData(userData: IUserData): void {
+	public setUserData(userData: any): void {
 		if (userData) {
-			this.userData = userData;
 			this.$fs.writeJson(this.userFilePath, userData);
 		} else {
-			this.userData = null;
 			this.$fs.deleteFile(this.userFilePath);
 		}
 	}
 
 	public clearUserData(): void {
-		this.userData = null;
 		this.$fs.deleteFile(this.userFilePath);
 	}
 
