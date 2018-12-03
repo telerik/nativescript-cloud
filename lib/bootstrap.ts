@@ -22,6 +22,8 @@ $injector.requirePublicClass("nsCloudEmulatorLauncher", path.join(__dirname, "se
 $injector.requirePublicClass("nsCloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
 $injector.requirePublicClass("nsCloudProjectService", path.join(__dirname, "services", "cloud-project-service"));
 $injector.requirePublicClass("nsCloudUserService", path.join(__dirname, "services", "user-service"));
+$injector.requirePublicClass("nsCloudKinveyUserService", path.join(__dirname, "services", "kinvey-user-service"));
+$injector.requirePublicClass("nsCloudTelerikUserService", path.join(__dirname, "services", "telerik-user-service"));
 $injector.requirePublicClass("nsCloudAccountsService", path.join(__dirname, "services", "accounts-service"));
 $injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "services", "eula-service"));
 $injector.requirePublicClass("nsCloudKinveyService", path.join(__dirname, "services", "kinvey-service"));

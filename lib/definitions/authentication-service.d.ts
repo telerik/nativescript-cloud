@@ -83,3 +83,17 @@ interface IUserInfo {
 	isProfilePublic: boolean;
 	twitterName: String;
 }
+
+interface IKinveyUserData {
+	email: string;
+	firstName: string;
+	lastName: string
+	lastLoginTime: Date;
+	name: string;
+	token: string;
+	twoFactorAuth: IKinveyTwoFactorAuth
+}
+
+interface IKinveyTwoFactorAuth {
+	enabled: boolean;
+}

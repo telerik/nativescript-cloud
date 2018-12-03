@@ -1,89 +1,47 @@
-import { join } from "path";
-import { home } from "osenv";
-
 export class UserService implements IUserService {
-	private userData: IUserData;
-	private userInfoDirectory: string;
-
-	private get $nsCloudServerAccountsService(): IServerAccountsService {
-		return this.$injector.resolve("nsCloudServerAccountsService");
-	}
+	private userService: IUserService;
 
 	constructor(private $injector: IInjector,
-		private $errors: IErrors,
-		private $fs: IFileSystem,
-		private $hostInfo: IHostInfo,
-		private $logger: ILogger) {
-		this.userInfoDirectory = join(this.$hostInfo.isWindows ? process.env.LocalAppData : join(home(), ".local", "share"),
-			"Telerik",
-			"NativeScript");
+		private $nsCloudServerConfigManager: IServerConfigManager) {
+		this.userService = this.determineUserService();
 	}
 
 	public hasUser(): boolean {
-		try {
-			const user = this.getUser();
-			return !!user;
-		} catch (err) {
-			return false;
-		}
+		return this.userService.hasUser();
 	}
 
 	public getUser(): IUser {
-		const userData = this.getUserData();
-
-		return userData.userInfo;
+		return this.userService.getUser();
 	}
 
 	public getUserData(): IUserData {
-		const filePath = this.getUserFilePath();
-		let data: IUserData;
-
-		try {
-			data = this.$fs.readJson(filePath);
-		} catch (err) {
-			this.$logger.trace("Error while getting current user info:");
-			this.$logger.trace(err);
-			this.$errors.failWithoutHelp("Not logged in.");
-		}
-
-		return data;
+		return this.userService.getUserData();
 	}
 
 	public setToken(token: ITokenData): void {
-		if (token) {
-			const newUserData = _.extend(this.getUserData(), token);
-			this.setUserData(newUserData);
-		} else {
-			this.clearUserData();
-		}
+		return this.userService.setToken(token);
 	}
 
 	public setUserData(userData: IUserData): void {
-		if (userData) {
-			this.userData = userData;
-			this.$fs.writeJson(this.getUserFilePath(), userData);
-		} else {
-			this.userData = null;
-			this.$fs.deleteFile(this.getUserFilePath());
-		}
+		return this.userService.setUserData(userData);
 	}
 
 	public clearUserData(): void {
-		this.userData = null;
-		this.$fs.deleteFile(this.getUserFilePath());
+		this.userService.clearUserData();
 	}
 
 	public async getUserAvatar(): Promise<string> {
-		if (!this.hasUser()) {
-			return null;
-		}
-
-		const userInfo = await this.$nsCloudServerAccountsService.getUserInfo();
-		return userInfo.externalAvatarUrl;
+		return this.userService.getUserAvatar();
 	}
 
-	private getUserFilePath(): string {
-		return join(this.userInfoDirectory, ".nativescript-user");
+	private determineUserService(): IUserService {
+		const serverConfig = this.$nsCloudServerConfigManager.getCurrentConfigData();
+		const namespace = <string>serverConfig["namespace"];
+		if (namespace && namespace.toLowerCase() === "kinvey") {
+			return this.$injector.resolve<IUserService>("nsCloudKinveyUserService");
+		}
+
+		return this.$injector.resolve<IUserService>("nsCloudTelerikUserService");
 	}
 }
 

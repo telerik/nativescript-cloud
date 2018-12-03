@@ -15,13 +15,13 @@ export class ServerServicesProxy implements IServerServicesProxy {
 	public async call<T>(options: ICloudRequestOptions): Promise<T> {
 		const host = this.getServiceAddress(options.serviceName);
 		const finalUrlPath = this.getUrlPath(options.serviceName, options.urlPath);
-		
+
 		const headers = options.headers || Object.create(null);
 		const authScheme = this.getAuthScheme(options.serviceName);
 		if (!_.has(headers, HTTP_HEADERS.AUTHORIZATION) && this.$nsCloudUserService.hasUser()) {
 			headers[HTTP_HEADERS.AUTHORIZATION] = `${authScheme} ${this.$nsCloudUserService.getUserData().accessToken}`;
 		}
-		
+
 		const namespace = this.getServiceValueOrDefault(options.serviceName, "namespace");
 		if (namespace) {
 			headers[HTTP_HEADERS.X_NS_NAMESPACE] = namespace;
