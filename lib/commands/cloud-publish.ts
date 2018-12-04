@@ -11,12 +11,18 @@ abstract class CloudPublish implements ICommand {
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
-		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
+		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
+		protected $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
 		this.$projectData.initializeProjectData();
 	}
 
 	public abstract execute(args: string[]): Promise<void>;
-	public abstract canExecute(args: string[]): Promise<boolean>;
+
+	public async canExecute(args: string[]): Promise<boolean> {
+		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
+
+		return true;
+	}
 }
 
 export class CloudPublishAndroid extends CloudPublish implements ICommand {
@@ -28,8 +34,10 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
-		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants);
+		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
+		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper
+		) {
+		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper);
 	}
 
 	public async execute(args: string[]): Promise<void> {
@@ -57,6 +65,8 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 	public async canExecute(args: string[]): Promise<boolean> {
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
+		await super.canExecute(args);
+
 		if (args.length > 1 || (!isInteractive() && args.length < 1)) {
 			this.$errors.fail("The command accepts only one parameter - Path to authentication JSON");
 		}
@@ -76,8 +86,9 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
-		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants);
+		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
+		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
+		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper);
 	}
 
 	public async execute(args: string[]): Promise<void> {
@@ -95,6 +106,8 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 
 	public async canExecute(args: string[]): Promise<boolean> {
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+
+		await super.canExecute(args);
 
 		if (args.length > 2 || (!isInteractive() && args.length < 1)) {
 			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);

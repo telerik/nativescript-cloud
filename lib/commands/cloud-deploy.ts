@@ -16,7 +16,8 @@ export class CloudDeploy extends BundleValidatorBaseCommand implements ICommand 
 		private $nsCloudBuildService: ICloudBuildService,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
-		private $projectData: IProjectData) {
+		private $projectData: IProjectData,
+		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
 		super($nsCloudPolyfillService);
 		this.$projectData.initializeProjectData();
 	}
@@ -40,6 +41,7 @@ export class CloudDeploy extends BundleValidatorBaseCommand implements ICommand 
 	public async canExecute(args: string[]): Promise<boolean> {
 		this.$bundleValidatorHelper.validate();
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
 
 		if (!args || !args.length) {
 			this.$errors.fail("Provide platform.");
