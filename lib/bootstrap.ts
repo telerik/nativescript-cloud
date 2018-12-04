@@ -9,6 +9,8 @@ $injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-
 $injector.require("nsCloudBuildHelper", path.join(__dirname, "cloud-build-helper"));
 $injector.require("nsCloudBuildCommandHelper", path.join(__dirname, "commands", "build-command-helper"));
 $injector.require("nsCloudEulaCommandHelper", path.join(__dirname, "commands", "eula-command-helper"));
+$injector.require("nsCloudKinveyUserService", path.join(__dirname, "services", "kinvey-user-service"));
+$injector.require("nsCloudTelerikUserService", path.join(__dirname, "services", "telerik-user-service"));
 
 // Mobile.
 $injector.require("nsCloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));

@@ -23,6 +23,7 @@ interface IServerConfigManager {
 interface IServerConfigBase {
 	apiVersion?: string;
 	serverProto?: string;
+	namespace?: string;
 }
 
 interface IServerConfig extends IServerConfigBase {

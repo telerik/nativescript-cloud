@@ -12,7 +12,7 @@ export class ConfigApplyCommand implements ICommand {
 
 	public async execute(args: string[]): Promise<void> {
 		const configurationName = args[0];
-		const globalServerConfig: IServerConfigBase = { apiVersion: this.$options.apiVersion, serverProto: this.$options.serverProto };
+		const globalServerConfig: IServerConfigBase = { apiVersion: this.$options.apiVersion, serverProto: this.$options.serverProto, namespace: this.$options.namespace };
 		this.$nsCloudServerConfigManager.applyConfig(configurationName, null, globalServerConfig);
 		this.$nsCloudServerConfigManager.printConfigData();
 	}

@@ -22,6 +22,11 @@ export class ServerServicesProxy implements IServerServicesProxy {
 			headers[HTTP_HEADERS.AUTHORIZATION] = `${authScheme} ${this.$nsCloudUserService.getUserData().accessToken}`;
 		}
 
+		const namespace = this.getServiceValueOrDefault(options.serviceName, "namespace");
+		if (namespace) {
+			headers[HTTP_HEADERS.X_NS_NAMESPACE] = namespace;
+		}
+
 		if (options.accept) {
 			headers[HTTP_HEADERS.ACCEPT] = options.accept;
 		}
