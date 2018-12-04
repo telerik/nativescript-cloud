@@ -12,14 +12,14 @@ abstract class CloudPublish implements ICommand {
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
-		protected $androidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
+		protected $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
 		this.$projectData.initializeProjectData();
 	}
 
 	public abstract execute(args: string[]): Promise<void>;
 
 	public async canExecute(args: string[]): Promise<boolean> {
-		this.$androidBundleValidatorHelper.validateNoAab();
+		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
 
 		return true;
 	}
@@ -35,9 +35,9 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
-		$androidBundleValidatorHelper: IAndroidBundleValidatorHelper
+		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper
 		) {
-		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants, $androidBundleValidatorHelper);
+		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper);
 	}
 
 	public async execute(args: string[]): Promise<void> {
@@ -87,8 +87,8 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
-		$androidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants, $androidBundleValidatorHelper);
+		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
+		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper);
 	}
 
 	public async execute(args: string[]): Promise<void> {
