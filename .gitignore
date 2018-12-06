@@ -54,3 +54,4 @@ nativescript-cloud-*.tgz
 **/.vscode
 .DS_Store
 scratch/*
+html/

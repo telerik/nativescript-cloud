@@ -101,6 +101,7 @@
       "run|cloud|android",
       "run|cloud|ios",
       "user"
-    ]
+    ],
+    "docs": "docs"
   }
 }

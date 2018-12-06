@@ -13,3 +13,4 @@ tscommand-*.tmp.txt
 tsconfig.json
 tslint.json
 Gruntfile.js
+html/
