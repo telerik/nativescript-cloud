@@ -9,6 +9,7 @@ $injector.require("nsCloudOutputFilter", path.join(__dirname, "cloud-output-filt
 $injector.require("nsCloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
 $injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
 $injector.require("nsCloudBuildHelper", path.join(__dirname, "cloud-build-helper"));
+$injector.require("nsAccountUtils", path.join(__dirname, "account-utils"));
 $injector.require("nsCloudBuildCommandHelper", path.join(__dirname, "commands", "build-command-helper"));
 $injector.require("nsCloudEulaCommandHelper", path.join(__dirname, "commands", "eula-command-helper"));
 $injector.require("nsCloudAndroidBundleValidatorHelper", path.join(__dirname, "cloud-android-bundle-validator-helper"));

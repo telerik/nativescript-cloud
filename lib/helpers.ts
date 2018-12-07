@@ -1,4 +1,5 @@
 import { parse } from "url";
+import { KINVEY_LOWER_CASE } from "./constants";
 import * as randomstring from "randomstring";
 
 const Table = require("cli-table");
@@ -23,6 +24,10 @@ export function createTable(headers: string[], data: string[][]): any {
 
 export function stringifyWithIndentation(data: any, indentation?: string | number): string {
 	return JSON.stringify(data, null, indentation || "  ");
+}
+
+export function isKinveyNamespace(namespace: string) {
+	return namespace && namespace.toLowerCase() === KINVEY_LOWER_CASE;
 }
 
 export function isUrl(data: string): boolean {

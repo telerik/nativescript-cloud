@@ -4,8 +4,14 @@ export class DevLoginCommand implements ICommand {
 		this.$stringParameterBuilder.createMandatoryParameter("Missing user name or password.")
 	];
 
+	public get dashedOptions() {
+		return this.$nsCloudOptionsProvider.dashedOptions;
+	}
+
 	constructor(private $errors: IErrors,
 		private $logger: ILogger,
+		private $options: ICloudOptions,
+		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $nsCloudAuthenticationService: IAuthenticationService,
 		private $nsCloudServicesPolicyService: ICloudServicesPolicyService,
 		private $stringParameterBuilder: IStringParameterBuilder) { }
@@ -16,7 +22,7 @@ export class DevLoginCommand implements ICommand {
 		}
 
 		try {
-			await this.$nsCloudAuthenticationService.devLogin(args[0], args[1]);
+			await this.$nsCloudAuthenticationService.devLogin(args[0], args[1], this.$options.instanceId || "");
 		} catch (err) {
 			this.$errors.failWithoutHelp(err.message);
 		}

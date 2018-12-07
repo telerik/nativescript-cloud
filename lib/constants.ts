@@ -28,6 +28,8 @@ export const ACCOUNTS_SERVICE_NAME = "accounts-service";
 export const PROJECT_SERVICE_NAME = "project-service";
 export const DEFAULT_ANDROID_PUBLISH_TRACK = "beta";
 export const UNLIMITED = "unlimited";
+export const NAMESPACE_LOWER_CASE = "namespace";
+export const KINVEY_LOWER_CASE = "kinvey";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
 	BUILD_OUTPUT: "buildOutput",
@@ -77,7 +79,8 @@ export const HTTP_HEADERS = {
 	CONNECTION: "Connection",
 	CONTENT_TYPE: "Content-Type",
 	LOCATION: "Location",
-	X_NS_NAMESPACE: "X-NS-Namespace"
+	X_NS_NAMESPACE: "X-NS-Namespace",
+	X_NS_INSTANCE_ID: "X-NS-Instance-Id"
 };
 
 export const HTTP_STATUS_CODES = {

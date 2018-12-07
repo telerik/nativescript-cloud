@@ -7,6 +7,7 @@ interface ICloudOptions extends IOptions, ISharedCloud {
 	local: boolean;
 	serverProto: string;
 	namespace: string;
+	instanceId: string;
 	track: string;
 	workflow: IWorkflowPropertyOptions;
 	vmTemplateName: string;
