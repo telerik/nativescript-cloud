@@ -14,10 +14,10 @@ Run on all connected devices | `$ tns cloud run --accountId <Account Identifier>
 
 ### Options
 
-* `--accountId` - Specifies the account for which to print the information. It is mandatory to pass this option. `<Account Identifier>` is the index or `Account` as listed by the `$ tns account` command or the unique identifier (you can get it from the `tns account` again).
-* `--certificate` - Specifies the local path to the certificate that will be used to codesign the application. `<Certificate Path>` is the actual path (full or relative to the current directory).
+* `--accountId` - A mandatory option that specifies the account which will be used to build the application. `<Account Identifier>` is the index (#) or unique identifier (Id) as listed by the `$ tns account` command.
+* `--certificate` - Specifies the local path to the certificate that will be used to codesign the application. `<Certificate Path>` is the full or relative to the current directory path to the certificate.
 * `--certificatePassword` - Specifies the password of the certificate passed with `--certificate` option.
-* `--provision` - Specifies the path to the provision that will be used for codesigning the application. `<Provision Path>` is the actual path (full or relative to the current directory).
+* `--provision` - Specifies the path to the provision that will be used to codesign the application. `<Provision Path>` is the full or relative to the current directory path to the certificate.
 * `--key-store-path` - Specifies the file path to the keystore file (P12) which you want to use to code sign your APK. You can use the `--key-store-*` options along with `--release` to produce a signed release build. You need to specify all `--key-store-*` options.
 * `--key-store-password` - Provides the password for the keystore file specified with `--key-store-path`. You can use the `--key-store-*` options along with `--release` to produce a signed release build. You need to specify all `--key-store-*` options.
 * `--device` - Specifies a connected device/simulator to start and run the app. `<Device ID>` is the index or `Device Identifier` of the target device as listed by the `$ tns device ios --available-devices` command.
@@ -39,6 +39,5 @@ Run on all connected devices | `$ tns cloud run --accountId <Account Identifier>
 
 Command | Description
 ----------|----------
-[logout](logout.html) | Logs you out.
-[user](user.html) | Prints information about the currently logged in user, including name, email address, subscription plan and license expiration date.
+[cloud build](cloud-build.html) | Builds the project in the cloud for a specified platform.
 <% } %>

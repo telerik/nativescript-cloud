@@ -2,7 +2,7 @@
 
 ### Description
 
-Runs your project on all connected Android devices and Android emulators, if configured. While your app is running, prints the output from the application in the console and watches for changes in your code. Once a change is detected, it synchronizes the change with all selected devices and restarts/refreshes the application.
+Runs your project on all connected Android devices and running emulators. While your app is running, prints the output from the application in the console and watches for changes in your code. Once a change is detected, it synchronizes the change with all selected devices and restarts/refreshes the application.
 
 To enable Hot Module Replacement (HMR) in Angular projects, follow the steps outlined in this wiki: https://github.com/NativeScript/nativescript-angular/wiki/HMR.
 
@@ -29,7 +29,7 @@ Start a default emulator if none are running, or run application on all connecte
 * `--hmr` - (Beta) Enables the hot module replacement (HMR) feature. HMR depends on `webpack` and adding the `--hmr` flag to the command will automatically enable the `--bundle` option as well. <% if(isConsole) { %> The HMR feature is currently in Beta. For more information about the current development state and any known issues, please check the relevant GitHub issue: https://github.com/NativeScript/NativeScript/issues/6398.<% } %>
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`.
 * `--syncAllFiles` - Watches all production dependencies inside node_modules for changes. Triggers project rebuild if necessary!
-* `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have Private Cloud feature enabled.
+* `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have access to the Private Cloud feature.
 
 <% if(isHtml) { %>
 
@@ -44,6 +44,6 @@ Start a default emulator if none are running, or run application on all connecte
 
 Command | Description
 ----------|----------
-[logout](logout.html) | Logs you out.
-[user](user.html) | Prints information about the currently logged in user, including name, email address, subscription plan and license expiration date.
+[cloud build](cloud-build.html) | Builds the project in the cloud for a specified platform.
+[cloud run](cloud-run.html) | Runs your project on all connected iOS and Android devices, Android emulators and iOS Simulators.
 <% } %>

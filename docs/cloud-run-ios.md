@@ -18,10 +18,10 @@ Start an emulator with specified device identifier and sdk | `$ tns cloud run io
 
 ### Options
 
-* `--accountId` - Specifies the account for which to print the information. It is mandatory to pass this option. `<Account Identifier>` is the index or `Account` as listed by the `$ tns account` command or the unique identifier (you can get it from the `tns account` again).
-* `--certificate` - Specifies the local path to the certificate that will be used to codesign the application. `<Certificate Path>` is the actual path (full or relative to the current directory).
+* `--accountId` - A mandatory option that specifies the account which will be used to build the application. `<Account Identifier>` is the index (#) or unique identifier (Id) as listed by the `$ tns account` command.
+* `--certificate` - Specifies the local path to the certificate that will be used to codesign the application. `<Certificate Path>` is the full or relative to the current directory path to the certificate.
 * `--certificatePassword` - Specifies the password of the certificate passed with `--certificate` option.
-* `--provision` - Specifies the path to the provision that will be used for codesigning the application. `<Provision Path>` is the actual path (full or relative to the current directory).
+* `--provision` - Specifies the path to the provision that will be used to codesign the application. `<Provision Path>` is the full or relative to the current directory path to the certificate.
 * `--device` - Specifies a connected device/simulator to start and run the app. `<Device ID>` is the index or `Device Identifier` of the target device as listed by the `$ tns device ios --available-devices` command.
 * `--emulator` - If set, runs the app in all available and configured ios simulators. It will start a simulator if none are already running.
 * `--sdk` - Specifies the target simulator's sdk.
@@ -33,7 +33,7 @@ Start an emulator with specified device identifier and sdk | `$ tns cloud run io
 * `--hmr` - (Beta) Enables the hot module replacement (HMR) feature. HMR depends on `webpack` and adding the `--hmr` flag to the command will automatically enable the `--bundle` option as well. <% if(isConsole) { %> The HMR feature is currently in Beta. For more information about the current development state and any known issues, please check the relevant GitHub issue: https://github.com/NativeScript/NativeScript/issues/6398.<% } %>
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`.
 * `--syncAllFiles` - Watches all production dependencies inside node_modules for changes. Triggers project rebuild if necessary!
-* `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have Private Cloud feature enabled.
+* `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have access to the Private Cloud feature.
 
 <% if(isHtml) { %>
 
@@ -47,6 +47,6 @@ Start an emulator with specified device identifier and sdk | `$ tns cloud run io
 
 Command | Description
 ----------|----------
-[logout](logout.html) | Logs you out.
-[user](user.html) | Prints information about the currently logged in user, including name, email address, subscription plan and license expiration date.
+[cloud build](cloud-build.html) | Builds the project in the cloud for a specified platform.
+[cloud run](cloud-run.html) | Runs your project on all connected iOS and Android devices, Android emulators and iOS Simulators.
 <% } %>
