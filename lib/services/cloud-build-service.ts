@@ -49,7 +49,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $staticConfig: IStaticConfig,
 		private $platformsData: IPlatformsData,
 		private $filesHashService: IFilesHashService,
-		private $npmInstallationManager: INpmInstallationManager,
+		private $packageInstallationManager: IPackageInstallationManager,
 		private $nsCloudPolyfillService: IPolyfillService) {
 		super($fs, $httpClient, $logger);
 	}
@@ -278,7 +278,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	private async setRuntimeVersion(projectData: IProjectData, platform: string): Promise<void> {
 		const cliVersion = this.$staticConfig.version;
 		const runtimeName = this.getRuntimeName(platform);
-		const runtimeVersion = await this.$npmInstallationManager.getLatestCompatibleVersion(runtimeName, cliVersion);
+		const runtimeVersion = await this.$packageInstallationManager.getLatestCompatibleVersion(runtimeName, cliVersion);
 		const packageJsonPath = path.join(projectData.projectDir, this.$constants.PACKAGE_JSON_FILE_NAME);
 		const packageJsonContent = this.$fs.readJson(packageJsonPath);
 		if (!packageJsonContent.nativescript) {
