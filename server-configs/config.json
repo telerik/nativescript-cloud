@@ -1,6 +1,6 @@
 {
-	"apiVersion": "v2",
-	"domainName": "digitalfactory.rocks",
+	"apiVersion": "v3",
+	"domainName": "nativescript.cloud",
 	"serverProto": "https",
 	"stage": "production",
 	"cloudServices": {
