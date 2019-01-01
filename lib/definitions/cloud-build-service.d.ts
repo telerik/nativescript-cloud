@@ -16,7 +16,7 @@ interface IBuildResultData extends IServerResultData {
 /**
  * Describes build step.
  */
-interface IBuildStep extends IBuildId {
+interface IBuildStep extends IBuildId, ICloudOperationId {
 	/**
 	 * The name of the step - prepare, upload, build or download.
 	 */
@@ -37,7 +37,14 @@ interface IBuildId {
 	buildId: string;
 }
 
-interface IBuildLog extends IBuildId {
+interface ICloudOperationId {
+	/**
+	 * The ID of the cloud operation.
+	 */
+	cloudOperationId: string;
+}
+
+interface IBuildLog extends IBuildId, ICloudOperationId {
 	data: string;
 	pipe: string;
 }
@@ -134,11 +141,7 @@ interface ICloudBuildService extends ICloudOperationService {
 /**
  * Defines properties passed to prepareBuildRequest method.
  */
-interface IPrepareBuildRequestInfo {
-	/**
-	 * The build's id.
-	 */
-	buildId: string;
+interface IPrepareBuildRequestInfo extends IBuildId, ICloudOperationId, IAccountId {
 
 	/**
 	 * Settings used to control the build workflow.
@@ -164,11 +167,6 @@ interface IPrepareBuildRequestInfo {
 	 * Files to upload prior to build.
 	 */
 	filesToUpload: IAmazonStorageEntryData[];
-
-	/**
-	 * Account from which to subtract successful builds.
-	 */
-	accountId: string;
 
 	/**
 	 * Additional flags that can be passed to CLI in the cloud (e.g. `--env.uglify` or `--bundle`)

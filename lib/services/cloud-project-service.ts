@@ -32,12 +32,12 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		if (typeof cleanupRequestData.appIdentifier === "string") {
 			identifiers = [cleanupRequestData.appIdentifier];
 		} else {
-			identifiers =  _.uniq(_.values(cleanupRequestData.appIdentifier));
+			identifiers = _.uniq(_.values(cleanupRequestData.appIdentifier));
 		}
 
 		for (let index = 0; index < identifiers.length; index++) {
 			const appIdentifier = identifiers[index];
-			const taskResult = await this.startCleanProject({appIdentifier, projectName: cleanupRequestData.projectName});
+			const taskResult = await this.startCleanProject({ appIdentifier, projectName: cleanupRequestData.projectName });
 			cleanupTaskResults.push(taskResult);
 		}
 
@@ -47,19 +47,19 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 	}
 
 	private async startCleanProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
-		const cleanupTaskId = uuid.v4();
+		const cloudOperationId = uuid.v4();
 		try {
-			const result = await this.executeCleanupProject(cleanupTaskId, cleanupProjectData);
-			this.$logger.trace(`Cleanup [${cleanupTaskId}] result: `, result);
+			const result = await this.executeCleanupProject(cloudOperationId, cleanupProjectData);
+			this.$logger.trace(`Cleanup [${cloudOperationId}] result: `, result);
 			return result;
 		} catch (err) {
-			err.cleanupTaskId = cleanupTaskId;
+			err.cloudOperationId = cloudOperationId;
 			throw err;
 		}
 	}
 
-	private async executeCleanupProject(cleanupTaskId: string, { appIdentifier, projectName }: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
-		const cleanupInfoMessage = `Application Id: ${appIdentifier}, Project Name: ${projectName}, Cleanup Task Id: ${cleanupTaskId}`;
+	private async executeCleanupProject(cloudOperationId: string, { appIdentifier, projectName }: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
+		const cleanupInfoMessage = `Application Id: ${appIdentifier}, Project Name: ${projectName}, Cleanup Task Id: ${cloudOperationId}`;
 		this.$logger.info(`Starting cloud cleanup: ${cleanupInfoMessage}.`);
 
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectName);
@@ -67,7 +67,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 			appIdentifier: appIdentifier,
 			projectName: sanitizedProjectName,
 			templateAppName: sanitizedProjectName,
-			projectCleanupId: cleanupTaskId
+			projectCleanupId: cloudOperationId
 		};
 
 		const cleanupResponse = await this.$nsCloudServerProjectService.cleanupProjectData(cleanupProjectData);
@@ -106,7 +106,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		}
 
 		const result: ICleanupTaskResult = {
-			cleanupTaskId,
+			cloudOperationId,
 			warnings: cleanupResponse.warnings,
 			codeCommitResponse: cleanupResponse.codeCommitResponse,
 			cloudTasksResults: tasksResults

@@ -29,13 +29,14 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		projectDir: string): Promise<ICodesignResultData> {
 		this.validateParameteres(codesignData, projectDir);
 		codesignData.clean = codesignData.clean === undefined ? true : codesignData.clean;
-		const buildId = uuid.v4();
+		const cloudOperationId = uuid.v4();
 
 		try {
-			const serverResult = await this.executeGeneration(codesignData, projectDir, buildId);
+			const serverResult = await this.executeGeneration(codesignData, projectDir, cloudOperationId);
 			return serverResult;
 		} catch (err) {
-			err.buildId = buildId;
+			err.buildId = cloudOperationId;
+			err.cloudOperationId = cloudOperationId;
 			throw err;
 		}
 	}
@@ -69,17 +70,17 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 
 	private async executeGeneration(codesignData: ICodesignData,
 		projectDir: string,
-		buildId: string): Promise<ICodesignResultData> {
+		cloudOperationId: string): Promise<ICodesignResultData> {
 		const codesignInformationString = "generation of iOS certificate and provision files";
 		this.$logger.info(`Starting ${codesignInformationString}.`);
 
 		const projectData = this.$projectDataService.getProjectData(projectDir);
-		const codesignRequest = await this.prepareCodesignRequest(buildId, codesignData, projectData);
+		const codesignRequest = await this.prepareCodesignRequest(cloudOperationId, codesignData, projectData);
 		const codesignResponse: IServerResponse = await this.$nsCloudServerBuildService.generateCodesignFiles(codesignRequest);
 		this.$logger.trace(`Codesign response: ${JSON.stringify(codesignResponse)}`);
 
 		try {
-			await this.waitForServerOperationToFinish(buildId, codesignResponse);
+			await this.waitForServerOperationToFinish(cloudOperationId, codesignResponse);
 		} catch (ex) {
 			this.$logger.trace("Codesign generation failed with err: ", ex);
 		}
@@ -114,7 +115,8 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		const fullOutput = await this.getContentOfS3File(codesignResponse.resultUrl);
 
 		const result = {
-			buildId,
+			cloudOperationId: cloudOperationId,
+			buildId: cloudOperationId,
 			stderr: codesignResult.stderr,
 			stdout: codesignResult.stdout,
 			fullOutput: fullOutput,
@@ -124,17 +126,17 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		return result;
 	}
 
-	protected async getServerLogs(logsUrl: string, buildId: string): Promise<void> {
+	protected async getServerLogs(logsUrl: string, cloudOperationId: string): Promise<void> {
 		// no specific implementation needed.
 	}
 
-	private async prepareCodesignRequest(buildId: string,
+	private async prepareCodesignRequest(cloudOperationId: string,
 		codesignData: ICodesignData,
 		projectData: IProjectData): Promise<ICodeSignRequestData> {
 
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectData.projectName);
 		return {
-			buildId,
+			cloudOperationId: cloudOperationId,
 			appId: getProjectId(projectData, codesignData.platform.toLowerCase()),
 			appName: sanitizedProjectName,
 			clean: codesignData.clean,

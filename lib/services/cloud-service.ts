@@ -15,7 +15,7 @@ export abstract class CloudService extends EventEmitter {
 	protected abstract failedToStartError: string;
 	protected abstract failedError: string;
 	protected abstract getServerResults(serverResult: IBuildServerResult): IServerItem[];
-	protected abstract getServerLogs(logsUrl: string, buildId: string): Promise<void>;
+	protected abstract getServerLogs(logsUrl: string, cloudOperationId: string): Promise<void>;
 
 	public abstract getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;
 
@@ -33,7 +33,7 @@ export abstract class CloudService extends EventEmitter {
 		return (await this.$httpClient.httpRequest(pathToFile)).body;
 	}
 
-	protected async waitForServerOperationToFinish(operationId: string, serverInformation: IServerResponse): Promise<void> {
+	protected async waitForServerOperationToFinish(cloudOperationId: string, serverInformation: IServerResponse): Promise<void> {
 		const promiseRetryOptions = {
 			retries: CloudService.OPERATION_STATUS_CHECK_RETRY_COUNT,
 			minTimeout: CloudService.OPERATION_STATUS_CHECK_INTERVAL
@@ -46,7 +46,6 @@ export abstract class CloudService extends EventEmitter {
 					this.$logger.trace(err);
 					reject(new Error(this.failedToStartError));
 				}
-
 			}).catch(retry);
 		}, promiseRetryOptions)
 			.then((serverStatus: IServerStatus) => {
@@ -54,20 +53,20 @@ export abstract class CloudService extends EventEmitter {
 					this.outputCursorPosition = 0;
 					const serverIntervalId = setInterval(async () => {
 						if (serverStatus.status === CloudService.OPERATION_COMPLETE_STATUS) {
-							await this.getServerLogs(serverInformation.outputUrl, operationId);
+							await this.getServerLogs(serverInformation.outputUrl, cloudOperationId);
 							clearInterval(serverIntervalId);
 							return resolve();
 						}
 
 						if (serverStatus.status === CloudService.OPERATION_FAILED_STATUS) {
-							await this.getServerLogs(serverInformation.outputUrl, operationId);
+							await this.getServerLogs(serverInformation.outputUrl, cloudOperationId);
 							clearInterval(serverIntervalId);
 							return reject(new Error(this.failedError));
 						}
 
 						if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS_OLD ||
 							serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
-							await this.getServerLogs(serverInformation.outputUrl, operationId);
+							await this.getServerLogs(serverInformation.outputUrl, cloudOperationId);
 						}
 
 						serverStatus = await this.getObjectFromS3File<IServerStatus>(serverInformation.statusUrl);
@@ -84,6 +83,7 @@ export abstract class CloudService extends EventEmitter {
 
 		let targetFileNames: string[] = [];
 		for (const serverResultObj of serverResultObjs) {
+			this.$logger.info(`Result url: ${serverResultObj.fullPath}`);
 			const targetFileName = path.join(destinationDir, serverResultObj.filename);
 			targetFileNames.push(targetFileName);
 			const targetFile = this.$fs.createWriteStream(targetFileName);

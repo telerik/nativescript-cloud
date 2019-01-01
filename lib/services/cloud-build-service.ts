@@ -64,15 +64,16 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		accountId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
-		const buildId = uuid.v4();
+		const cloudOperationId = uuid.v4();
 		this.$logger.info("Getting accounts information...");
 		const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
 		this.$logger.info("Using account %s.", account.id);
 		try {
-			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, buildId, account.id, androidBuildData, iOSBuildData);
+			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, cloudOperationId, account.id, androidBuildData, iOSBuildData);
 			return buildResult;
 		} catch (err) {
-			err.buildId = buildId;
+			err.buildId = cloudOperationId;
+			err.cloudOperationId = cloudOperationId;
 			throw err;
 		}
 	}
@@ -80,16 +81,16 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	public async executeBuild(projectSettings: INSCloudProjectSettings,
 		platform: string,
 		buildConfiguration: string,
-		buildId: string,
+		cloudOperationId: string,
 		accountId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
 		const buildInformationString = `cloud build of '${projectSettings.projectDir}', platform: '${platform}', ` +
-			`configuration: '${buildConfiguration}', buildId: ${buildId}`;
+			`configuration: '${buildConfiguration}', cloudOperationId: ${cloudOperationId}`;
 		this.$logger.info(`Starting ${buildInformationString}.`);
 
 		await this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
-		await this.prepareProject(buildId, projectSettings, platform, buildConfiguration, iOSBuildData);
+		await this.prepareProject(cloudOperationId, projectSettings, platform, buildConfiguration, iOSBuildData);
 		let buildFiles: IServerItemBase[] = [];
 		if (this.$mobileHelper.isAndroidPlatform(platform) && this.$nsCloudBuildHelper.isReleaseConfiguration(buildConfiguration)) {
 			buildFiles.push({
@@ -130,7 +131,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 
 		let buildProps = await this.prepareBuildRequest({
-			buildId,
+			cloudOperationId: cloudOperationId,
+			buildId: cloudOperationId,
 			projectSettings,
 			platform,
 			buildConfiguration,
@@ -145,13 +147,13 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			buildProps = await this.$nsCloudBuildPropertiesService.getiOSBuildProperties(projectSettings, buildProps, filesToUpload, iOSBuildData);
 		}
 
-		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.START);
+		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.START);
 		const buildResponse: IServerResponse = await this.$nsCloudServerBuildService.startBuild(buildProps);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
-		await this.waitForServerOperationToFinish(buildId, buildResponse);
+		await this.waitForServerOperationToFinish(cloudOperationId, buildResponse);
 		const buildResult: IBuildServerResult = await this.getObjectFromS3File<IBuildServerResult>(buildResponse.resultUrl);
-		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.END);
+		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.END);
 
 		this.$logger.trace("Build result:");
 		this.$logger.trace(buildResult);
@@ -163,7 +165,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		this.$logger.info(`Finished ${buildInformationString} successfully. Downloading result...`);
 
-		const localBuildResult = await this.downloadServerResult(buildId, buildResult, {
+		const localBuildResult = await this.downloadServerResult(cloudOperationId, buildResult, {
 			projectDir: projectSettings.projectDir,
 			platform,
 			emulator: iOSBuildData && !iOSBuildData.buildForDevice
@@ -182,7 +184,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const fullOutput = await this.getContentOfS3File(buildResponse.outputUrl);
 
 		const result = {
-			buildId,
+			cloudOperationId: cloudOperationId,
+			buildId: cloudOperationId,
 			stderr: buildResult.stderr,
 			stdout: buildResult.stdout,
 			fullOutput: fullOutput,
@@ -227,7 +230,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return result;
 	}
 
-	private async prepareProject(buildId: string,
+	private async prepareProject(cloudOperationId: string,
 		projectSettings: INSCloudProjectSettings,
 		platform: string,
 		buildConfiguration: string,
@@ -258,7 +261,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			teamId: undefined
 		};
 
-		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
+		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
 		const cliVersion = this.$staticConfig.version;
 
 		// HACK: Ensure __PACKAGE__ is interpolated in app.gradle file in the user project.
@@ -289,11 +292,11 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				env: projectSettings.env
 			});
 		}
-		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.END);
+		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.END);
 	}
 
 	private async prepareBuildRequest(settings: IPrepareBuildRequestInfo): Promise<IBuildRequestData> {
-		this.emitStepChanged(settings.buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.START);
+		this.emitStepChanged(settings.cloudOperationId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.START);
 		let buildFiles;
 		try {
 			await this.$nsCloudGitService.gitPushChanges(settings.projectSettings,
@@ -326,7 +329,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			await this.$nsCloudUploadService.uploadToS3(fileToUpload.filePath, fileToUpload.fileName, fileToUpload.uploadPreSignedUrl);
 		}
 
-		this.emitStepChanged(settings.buildId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.END);
+		this.emitStepChanged(settings.cloudOperationId, constants.BUILD_STEP_NAME.UPLOAD, constants.BUILD_STEP_PROGRESS.END);
 		const runtimeVersion = await this.$nsCloudVersionService.getProjectRuntimeVersion(settings.projectSettings.projectDir, settings.platform);
 		const cliVersion = await this.$nsCloudVersionService.getCliVersion(runtimeVersion);
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(settings.projectSettings.projectName);
@@ -341,9 +344,11 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		 * behavior in the tooling.
 		 */
 		const result: IBuildRequestData = {
+			cloudOperationId: settings.cloudOperationId,
 			accountId: settings.accountId,
 			properties: {
-				buildId: settings.buildId,
+				cloudOperationId: settings.cloudOperationId,
+				buildId: settings.cloudOperationId,
 				buildConfiguration: settings.buildConfiguration,
 				sharedCloud: settings.projectSettings.sharedCloud,
 				platform: settings.platform,
@@ -388,13 +393,13 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return [result];
 	}
 
-	protected async getServerLogs(logsUrl: string, buildId: string): Promise<void> {
+	protected async getServerLogs(logsUrl: string, cloudOperationId: string): Promise<void> {
 		try {
 			const logs = await this.getContentOfS3File(logsUrl);
 			// The logs variable will contain the full server log and we need to log only the logs that we don't have.
 			const contentToLog = this.$nsCloudOutputFilter.filter(logs.substr(this.outputCursorPosition));
 			if (contentToLog) {
-				const data: IBuildLog = { buildId, data: contentToLog, pipe: "stdout" };
+				const data: IBuildLog = { cloudOperationId: cloudOperationId, buildId: cloudOperationId, data: contentToLog, pipe: "stdout" };
 				this.emit(constants.CLOUD_BUILD_EVENT_NAMES.BUILD_OUTPUT, data);
 				this.$logger.info(contentToLog);
 			}
@@ -406,10 +411,10 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 	}
 
-	private async downloadServerResult(buildId: string, buildResult: IBuildServerResult, buildOutputOptions: IOutputDirectoryOptions): Promise<string> {
-		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.START);
+	private async downloadServerResult(cloudOperationId: string, buildResult: IBuildServerResult, buildOutputOptions: IOutputDirectoryOptions): Promise<string> {
+		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.START);
 		const targetFileNames = await super.downloadServerResults(buildResult, buildOutputOptions);
-		this.emitStepChanged(buildId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.END);
+		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.END);
 		return targetFileNames[0];
 	}
 
@@ -429,8 +434,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return this.$qr.generateDataUri(buildResultUrl);
 	}
 
-	private emitStepChanged(buildId: string, step: string, progress: number): void {
-		const buildStep: IBuildStep = { buildId, step, progress };
+	private emitStepChanged(cloudOperationId: string, step: string, progress: number): void {
+		const buildStep: IBuildStep = { cloudOperationId: cloudOperationId, buildId: cloudOperationId, step, progress };
 		this.emit(constants.CLOUD_BUILD_EVENT_NAMES.STEP_CHANGED, buildStep);
 	}
 }

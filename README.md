@@ -116,6 +116,7 @@ Detailed description of each parameter can be found [here](./lib/definitions/clo
 `buildOutput` event contains parts of the current build output:
 ```TypeScript
 interface IBuildLog {
+	cloudOperationId: string;
 	buildId: string;
 	data: string;
 	pipe: string;
@@ -128,6 +129,11 @@ interface IBuildLog {
 * Describes build step.
 */
 interface IBuildStep {
+	/**
+	* The ID of the cloud operation.
+	*/
+	cloudOperationId: string;
+
 	/**
 	* The ID of the build.
 	*/
@@ -176,6 +182,7 @@ tns.nsCloudBuildService.on("buildOutput", (data) => {
 	/*
 		Sample data object:
 		{
+			"cloudOperationId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
 			"buildId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
 			"pipe": "stdout",
 			"data": "Add platform ios with runtime version 2.5.*"
@@ -188,6 +195,7 @@ tns.nsCloudBuildService.on("stepChanged", (data) => {
 	/*
 		Sample data object:
 		{
+			"cloudOperationId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
 			"buildId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
 			"step": "build";
 			"progress": 100;
@@ -1181,7 +1189,7 @@ Definition:
  * Cleans all AWS CodeCommit data and build machines artefacts if they exist.
  * @param {ICleanupProjectDataBase} cleanupProjectData Data needed for project cleaning.
  * @returns {Promise<ICleanupProjectResult>} Information about the cleanup. It includes AWS CodeCommit result and the result from the cleanup on each build machine.
- * If the promise is rejected the error will contain cleanupTaskId property.
+ * If the promise is rejected the error will contain cloudOperationId property.
  */
 cleanupProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupProjectResult>;
 ```

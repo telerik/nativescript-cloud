@@ -36,7 +36,7 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 		protected $options: ICloudOptions,
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper
-		) {
+	) {
 		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper);
 	}
 

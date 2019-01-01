@@ -34,6 +34,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 
 	public async publishToItunesConnect(publishData: IItunesConnectPublishData): Promise<void> {
+		const cloudOperationId = uuid.v4();
 		this.validatePublishData(publishData);
 
 		if (!publishData.credentials || !publishData.credentials.username || !publishData.credentials.password) {
@@ -41,8 +42,9 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		}
 
 		const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
-		const appIdentifier =  getProjectId(projectData, this.$devicePlatformsConstants.iOS.toLowerCase());
+		const appIdentifier = getProjectId(projectData, this.$devicePlatformsConstants.iOS.toLowerCase());
 		const publishRequestData = {
+			cloudOperationId,
 			appIdentifier,
 			credentials: publishData.credentials,
 			packagePaths: publishData.packagePaths,
@@ -53,6 +55,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 
 	public async publishToGooglePlay(publishData: IGooglePlayPublishData): Promise<void> {
+		const cloudOperationId = uuid.v4();
 		this.validatePublishData(publishData);
 
 		if (!publishData.pathToAuthJson || !this.$fs.exists(publishData.pathToAuthJson)) {
@@ -68,8 +71,9 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 
 		publishData.track = publishData.track || DEFAULT_ANDROID_PUBLISH_TRACK;
 		const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
-		const appIdentifier =  getProjectId(projectData, this.$devicePlatformsConstants.Android.toLowerCase());
+		const appIdentifier = getProjectId(projectData, this.$devicePlatformsConstants.Android.toLowerCase());
 		return this.publishCore({
+			cloudOperationId,
 			appIdentifier,
 			credentials: {
 				authJson
@@ -99,9 +103,8 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		const response = await this.$nsCloudServerBuildService.publish(publishRequestData);
 
 		this.$logger.trace("Publish response", response);
-		const buildId = uuid.v4();
 		try {
-			await this.waitForServerOperationToFinish(buildId, response);
+			await this.waitForServerOperationToFinish(publishRequestData.cloudOperationId, response);
 		} catch (ex) {
 			this.$logger.trace("Publish failed with err: ", ex);
 		}
@@ -113,6 +116,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 			const err = getError(publishResult, publishRequestData);
 			err.stderr = publishResult.stderr;
 			err.stdout = publishResult.stdout;
+			err.cloudOperationId = publishRequestData.cloudOperationId;
 			throw err;
 		}
 
@@ -123,7 +127,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		return [];
 	}
 
-	protected async getServerLogs(logsUrl: string, buildId: string): Promise<void> {
+	protected async getServerLogs(logsUrl: string, cloudOperationId: string): Promise<void> {
 		// no specific implementation needed.
 	}
 

@@ -32,7 +32,7 @@ interface IWorkflowRequestData {
 	workflowName: string;
 }
 
-interface ICodeSignRequestData extends IBuildId, IAppId, IClean, ICredentials, ISharedCloud {
+interface ICodeSignRequestData extends IAppId, IClean, ICredentials, ISharedCloud, ICloudOperationId {
 	appName: string;
 	devices: Mobile.IDeviceInfo[];
 }
@@ -41,7 +41,7 @@ interface IAccountId {
 	accountId: string
 }
 
-interface IBuildRequestData extends IAccountId, IServerRequestData, IOptionalMachineId {
+interface IBuildRequestData extends IAccountId, IServerRequestData, IOptionalMachineId, ICloudOperationId {
 	targets: string[];
 	buildFiles: IBuildFile[];
 	workflow?: IWorkflowRequestData;
@@ -74,7 +74,7 @@ interface IPublishCredentials {
 	authJson?: string;
 }
 
-interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroidTrack, IOptionalTeamIdentifier {
+interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroidTrack, IOptionalTeamIdentifier, ICloudOperationId {
 	credentials: IPublishCredentials;
 	appIdentifier?: string;
 	sharedCloud?: boolean;

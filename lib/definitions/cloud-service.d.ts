@@ -1,7 +1,7 @@
 /**
  * Describes the result of a server operation.
  */
-interface IServerResultData extends IBuildId {
+interface IServerResultData extends IBuildId, ICloudOperationId {
 	/**
 	 * All data printed to the stderr during server operation.
 	 */
