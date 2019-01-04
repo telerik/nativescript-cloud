@@ -14,15 +14,17 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		return "Failed to start generation of codesign files.";
 	}
 
-	constructor($fs: IFileSystem,
+	constructor($errors: IErrors,
+		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
+		$injector: IInjector,
+		$nsCloudS3Service: IS3Service,
+		$nsCloudOutputFilter: ICloudOutputFilter,
 		private $nsCloudServerBuildService: IServerBuildService,
-		private $errors: IErrors,
 		private $projectHelper: IProjectHelper,
-		private $projectDataService: IProjectDataService,
-	) {
-		super($fs, $httpClient, $logger);
+		private $projectDataService: IProjectDataService) {
+		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter);
 	}
 
 	public async generateCodesignFiles(codesignData: ICodesignData,
@@ -41,7 +43,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		}
 	}
 
-	protected getServerResults(codesignResult: IBuildServerResult): IServerItem[] {
+	protected getServerResults(codesignResult: ICloudOperationResult): IServerItem[] {
 		const result = _.filter(codesignResult.buildItems, b => b.disposition === constants.DISPOSITIONS.CERTIFICATE
 			|| b.disposition === constants.DISPOSITIONS.PROVISION);
 
@@ -78,14 +80,13 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		const codesignRequest = await this.prepareCodesignRequest(cloudOperationId, codesignData, projectData);
 		const codesignResponse: IServerResponse = await this.$nsCloudServerBuildService.generateCodesignFiles(codesignRequest);
 		this.$logger.trace(`Codesign response: ${JSON.stringify(codesignResponse)}`);
-
+		let codesignResult;
 		try {
-			await this.waitForServerOperationToFinish(cloudOperationId, codesignResponse);
+			codesignResult = await this.waitForServerOperationToFinish(cloudOperationId, codesignResponse);
 		} catch (ex) {
 			this.$logger.trace("Codesign generation failed with err: ", ex);
 		}
 
-		const codesignResult = await this.getObjectFromS3File<IBuildServerResult>(codesignResponse.resultUrl);
 		this.$logger.trace("Codesign result:");
 		this.$logger.trace(codesignResult);
 
@@ -112,14 +113,11 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 
 		this.$logger.info(`The result of ${codesignInformationString} successfully downloaded. Codesign files paths: ${localCodesignResults}`);
 
-		const fullOutput = await this.getContentOfS3File(codesignResponse.resultUrl);
-
 		const result = {
 			cloudOperationId: cloudOperationId,
 			buildId: cloudOperationId,
 			stderr: codesignResult.stderr,
 			stdout: codesignResult.stdout,
-			fullOutput: fullOutput,
 			outputFilesPaths: localCodesignResults
 		};
 

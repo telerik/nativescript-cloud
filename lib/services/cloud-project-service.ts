@@ -12,13 +12,16 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		return "Failed to start cloud cleanup.";
 	}
 
-	constructor($fs: IFileSystem,
+	constructor($errors: IErrors,
+		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
-		private $nsCloudOutputFilter: ICloudOutputFilter,
+		$injector: IInjector,
+		$nsCloudS3Service: IS3Service,
+		$nsCloudOutputFilter: ICloudOutputFilter,
 		private $nsCloudServerProjectService: IServerProjectService,
 		private $projectHelper: IProjectHelper) {
-		super($fs, $httpClient, $logger);
+		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
@@ -91,9 +94,8 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 			const taskId = `Cloud Cleanup Task #${i + 1}`;
 			const task = cleanupResponse.buildMachineResponse[i];
 			try {
-				await this.waitForServerOperationToFinish(taskId, task);
-				const taskResult = await this.getObjectFromS3File<IServerResult>(task.resultUrl);
-				const output = this.$nsCloudOutputFilter.filter(await this.getContentOfS3File(task.outputUrl));
+				const taskResult = await this.waitForServerOperationToFinish(taskId, task);
+				const output = await this.getCollectedLogs(task);
 				if (this.hasContent(output)) {
 					this.$logger.info(output);
 				}
@@ -115,7 +117,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		return result;
 	}
 
-	protected getServerResults(result: IBuildServerResult): IServerItem[] {
+	protected getServerResults(result: ICloudOperationResult): IServerItem[] {
 		return [];
 	}
 

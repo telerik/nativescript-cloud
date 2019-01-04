@@ -18,15 +18,18 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		return "Failed to start publishing.";
 	}
 
-	constructor($fs: IFileSystem,
+	constructor($errors: IErrors,
+		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
-		private $errors: IErrors,
+		$injector: IInjector,
+		$nsCloudS3Service: IS3Service,
+		$nsCloudOutputFilter: ICloudOutputFilter,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $nsCloudUploadService: IUploadService,
 		private $projectDataService: IProjectDataService) {
-		super($fs, $httpClient, $logger);
+		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
@@ -84,18 +87,18 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		}, publishData, this.getAndroidError.bind(this));
 	}
 
-	private getiOSError(publishResult: IBuildServerResult, publishRequestData: IPublishRequestData) {
+	private getiOSError(publishResult: ICloudOperationResult, publishRequestData: IPublishRequestData) {
 		const itmsMessage = this.getFormattedError(publishResult.stdout, CloudPublishService.ITMS_ERROR_REGEX);
 		const err = new Error(`${publishResult.errors}${EOL}${itmsMessage}${EOL}${publishResult.stderr}`);
 		return err;
 	}
 
-	private getAndroidError(publishResult: IBuildServerResult, publishRequestData: IPublishRequestData) {
+	private getAndroidError(publishResult: ICloudOperationResult, publishRequestData: IPublishRequestData) {
 		const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
 		return new Error(`${publishResult.errors}${EOL}${generalMessage}`);
 	}
 
-	private async publishCore(publishRequestData: IPublishRequestData, publishDataCore: IPublishDataCore, getError: (publishResult: IBuildServerResult, publishRequestData: IPublishRequestData) => any): Promise<void> {
+	private async publishCore(publishRequestData: IPublishRequestData, publishDataCore: IPublishDataCore, getError: (publishResult: ICloudOperationResult, publishRequestData: IPublishRequestData) => any): Promise<void> {
 		publishRequestData.packagePaths = await this.getPreparePackagePaths(publishDataCore);
 		publishRequestData.sharedCloud = publishDataCore.sharedCloud;
 
@@ -103,13 +106,13 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		const response = await this.$nsCloudServerBuildService.publish(publishRequestData);
 
 		this.$logger.trace("Publish response", response);
+		let publishResult: ICloudOperationResult;
 		try {
-			await this.waitForServerOperationToFinish(publishRequestData.cloudOperationId, response);
+			publishResult = await this.waitForServerOperationToFinish(publishRequestData.cloudOperationId, response);
 		} catch (ex) {
 			this.$logger.trace("Publish failed with err: ", ex);
 		}
 
-		const publishResult = await this.getObjectFromS3File<IBuildServerResult>(response.resultUrl);
 		this.$logger.trace("Publish result:", publishResult);
 
 		if (publishResult.code || publishResult.errors) {
@@ -123,7 +126,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		this.$logger.info("Publishing finished successfully.");
 	}
 
-	protected getServerResults(codesignResult: IBuildServerResult): IServerItem[] {
+	protected getServerResults(codesignResult: ICloudOperationResult): IServerItem[] {
 		return [];
 	}
 

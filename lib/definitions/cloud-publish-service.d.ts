@@ -56,7 +56,7 @@ interface IGooglePlayPublishData extends IPublishDataCore, IOptionalAndroidTrack
 /**
  * Describes methods for publishing builds to each platform's respective application store through the cloud.
  */
-interface ICloudPublishService {
+interface ICloudPublishService extends ICloudOperationService {
 	/**
 	 * Publishes the given .ipa packages to iTunes Connect.
 	 * @param {IItunesConnectPublishData} publishData Data needed to publish to iTunes Connect.

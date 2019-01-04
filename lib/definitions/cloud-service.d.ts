@@ -11,11 +11,6 @@ interface IServerResultData extends IBuildId, ICloudOperationId {
 	 * All data printed to the stdout during server operation.
 	 */
 	stdout: string;
-
-	/**
-	 * The full ordered output - combination for stderr and stdout, but ordered in correct timeline.
-	 */
-	fullOutput: string;
 }
 
 /**
@@ -41,7 +36,7 @@ interface IServerResult {
 /**
  * Describes the result from build server operation.
  */
-interface IBuildServerResult extends IServerResult {
+interface ICloudOperationResult extends IServerResult {
 	/**
 	 * Items produced after execution of server command. Could be empty.
 	 * Naming is due to initial implementation that is related to other repos.
@@ -61,11 +56,17 @@ interface IServerItem extends IServerItemBase, IPlatform {
 /**
  * Defines common operations for server operation in the cloud.
  */
-interface ICloudOperationService {
+interface ICloudOperationService extends NodeJS.EventEmitter {
 	/**
 	 * Returns the path to the directory where the server request output may be found.
 	 * @param {IOutputDirectoryOptions} options Options that are used to determine the build output directory.
 	 * @returns {string} The build output directory.
 	 */
 	getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;
+
+	/**
+	 * Sends message to the provided cloud operation.
+	 * @param {ICloudOperationMessage} message The message which will be sent to the cloud operation.
+	 */
+	sendCloudMessage(message: ICloudOperationMessage<any>): Promise<void>;
 }

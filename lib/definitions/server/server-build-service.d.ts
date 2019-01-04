@@ -7,6 +7,7 @@ interface IServerBuildService {
 }
 
 interface IServerResponse {
+	requestVersion: string;
 	statusUrl: string;
 	resultUrl: string;
 	outputUrl: string;

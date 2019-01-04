@@ -1,81 +1,74 @@
 import * as path from "path";
 import { EventEmitter } from "events";
-import promiseRetry = require("promise-retry");
+import { CloudOperationMessageTypes } from "../constants";
 
-export abstract class CloudService extends EventEmitter {
-	private static OPERATION_STATUS_CHECK_INTERVAL = 1500;
-	private static OPERATION_STATUS_CHECK_RETRY_COUNT = 8;
-	private static OPERATION_COMPLETE_STATUS = "Success";
-	private static OPERATION_FAILED_STATUS = "Failed";
-	// TODO: Remove after 10.05.2018
-	private static OPERATION_IN_PROGRESS_STATUS_OLD = "Building";
-	private static OPERATION_IN_PROGRESS_STATUS = "InProgress";
-
-	protected outputCursorPosition: number;
+export abstract class CloudService extends EventEmitter implements ICloudOperationService {
+	private static readonly DEFAULT_SERVER_REQUEST_VERSION: string = "v1";
 	protected abstract failedToStartError: string;
 	protected abstract failedError: string;
-	protected abstract getServerResults(serverResult: IBuildServerResult): IServerItem[];
-	protected abstract getServerLogs(logsUrl: string, cloudOperationId: string): Promise<void>;
+
+	protected silent: boolean = true;
+	private cloudOperations: IDictionary<ICloudOperation>;
+
+	constructor(protected $errors: IErrors,
+		protected $fs: IFileSystem,
+		protected $httpClient: Server.IHttpClient,
+		protected $logger: ILogger,
+		private $injector: IInjector,
+		private $nsCloudS3Service: IS3Service,
+		private $nsCloudOutputFilter: ICloudOutputFilter) {
+		super();
+		this.cloudOperations = Object.create(null);
+	}
 
 	public abstract getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;
 
-	constructor(protected $fs: IFileSystem,
-		protected $httpClient: Server.IHttpClient,
-		protected $logger: ILogger) {
-		super();
+	protected abstract getServerResults(serverResult: ICloudOperationResult): IServerItem[];
+
+	public async sendCloudMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
+		const cloudOperation = this.cloudOperations[message.cloudOperationId];
+		if (!cloudOperation) {
+			this.$errors.failWithoutHelp(`Cloud operation with id: ${message.cloudOperationId} not found.`);
+		}
+
+		await cloudOperation.sendMessage(message);
 	}
 
-	protected async getObjectFromS3File<T>(pathToFile: string): Promise<T> {
-		return JSON.parse(await this.getContentOfS3File(pathToFile));
-	}
+	protected async waitForServerOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse): Promise<ICloudOperationResult> {
+		const cloudOperation: ICloudOperation = this.$injector.resolve(require(`../cloud-operation-${serverResponse.requestVersion || CloudService.DEFAULT_SERVER_REQUEST_VERSION}`), { id: cloudOperationId, serverResponse: serverResponse });
+		this.cloudOperations[cloudOperationId] = cloudOperation;
 
-	protected async getContentOfS3File(pathToFile: string): Promise<string> {
-		return (await this.$httpClient.httpRequest(pathToFile)).body;
-	}
-
-	protected async waitForServerOperationToFinish(cloudOperationId: string, serverInformation: IServerResponse): Promise<void> {
-		const promiseRetryOptions = {
-			retries: CloudService.OPERATION_STATUS_CHECK_RETRY_COUNT,
-			minTimeout: CloudService.OPERATION_STATUS_CHECK_INTERVAL
-		};
-		return promiseRetry((retry, attempt) => {
-			return new Promise<IServerStatus>(async (resolve, reject) => {
-				try {
-					resolve(await this.getObjectFromS3File<IServerStatus>(serverInformation.statusUrl));
-				} catch (err) {
-					this.$logger.trace(err);
-					reject(new Error(this.failedToStartError));
+		// TODO: add the event to the d.ts and remove the any.
+		cloudOperation.on("data", (d: ICloudOperationMessage<any>) => {
+			if (d.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !this.silent) {
+				const body: ICloudOperationOutput = d.body;
+				if (body.pipe === "stdout") {
+					this.$logger.error(body.data);
+				} else if (body.pipe === "stderr") {
+					this.$logger.info(body.data);
 				}
-			}).catch(retry);
-		}, promiseRetryOptions)
-			.then((serverStatus: IServerStatus) => {
-				return new Promise<void>((resolve, reject) => {
-					this.outputCursorPosition = 0;
-					const serverIntervalId = setInterval(async () => {
-						if (serverStatus.status === CloudService.OPERATION_COMPLETE_STATUS) {
-							await this.getServerLogs(serverInformation.outputUrl, cloudOperationId);
-							clearInterval(serverIntervalId);
-							return resolve();
-						}
+			} else if (d.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
+				const body: ICloudOperationInputRequest = d.body;
+				this.emit(CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST, body);
+			}
+		});
 
-						if (serverStatus.status === CloudService.OPERATION_FAILED_STATUS) {
-							await this.getServerLogs(serverInformation.outputUrl, cloudOperationId);
-							clearInterval(serverIntervalId);
-							return reject(new Error(this.failedError));
-						}
+		try {
+			await cloudOperation.init();
+		} catch (err) {
+			this.$logger.trace(err);
+			throw new Error(this.failedToStartError);
+		}
 
-						if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS_OLD ||
-							serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
-							await this.getServerLogs(serverInformation.outputUrl, cloudOperationId);
-						}
-
-						serverStatus = await this.getObjectFromS3File<IServerStatus>(serverInformation.statusUrl);
-					}, CloudService.OPERATION_STATUS_CHECK_INTERVAL);
-				});
-			});
+		try {
+			return await cloudOperation.waitForResult();
+		} catch (err) {
+			this.$logger.trace(err);
+			throw new Error(this.failedError);
+		}
 	}
 
-	protected async downloadServerResults(serverResult: IBuildServerResult, serverOutputOptions: IOutputDirectoryOptions): Promise<string[]> {
+	protected async downloadServerResults(serverResult: ICloudOperationResult, serverOutputOptions: IOutputDirectoryOptions): Promise<string[]> {
 		const destinationDir = this.getServerOperationOutputDirectory(serverOutputOptions);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
@@ -96,5 +89,13 @@ export abstract class CloudService extends EventEmitter {
 		}
 
 		return targetFileNames;
+	}
+
+	protected async getCollectedLogs(serverResponse: IServerResponse): Promise<string> {
+		try {
+			return this.$nsCloudOutputFilter.filter(await this.$nsCloudS3Service.getContentOfS3File(serverResponse.outputUrl));
+		} catch (err) {
+			this.$logger.warn(`Unable to get cloud operation output. Error is: ${err}`);
+		}
 	}
 }
