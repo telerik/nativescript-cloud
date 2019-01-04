@@ -32,7 +32,6 @@ export const NAMESPACE_LOWER_CASE = "namespace";
 export const KINVEY_LOWER_CASE = "kinvey";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
-	BUILD_OUTPUT: "buildOutput",
 	STEP_CHANGED: "stepChanged"
 };
 
@@ -136,4 +135,11 @@ export class Authentication {
 export class Policies {
 	public static readonly PRIVACY_POLICY_NAME: string = "Progress Software Privacy Policy";
 	public static readonly CLOUD_SERVICES_POLICY_NAME: string = "cloud-services-policy";
+}
+
+export class CloudOperationMessageTypes {
+	public static readonly CLOUD_OPERATION_OUTPUT = "output";
+	public static readonly CLOUD_OPERATION_INPUT_REQUEST = "inputRequest";
+	public static readonly CLOUD_OPERATION_INPUT = "input";
+	public static readonly CLOUD_OPERATION_SERVER_HELLO = "serverHello";
 }
