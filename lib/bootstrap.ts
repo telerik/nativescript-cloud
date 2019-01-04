@@ -56,6 +56,7 @@ $injector.require("nsCloudBuildPropertiesService", path.join(__dirname, "service
 $injector.require("nsCloudHashService", path.join(__dirname, "services", "hash-service"));
 $injector.require("nsCloudConfigurationService", path.join(__dirname, "services", "cloud-configuration-service"));
 $injector.require("nsCloudEncryptionService", path.join(__dirname, "services", "cloud-encryption-service"));
+$injector.require("nsCloudS3Service", path.join(__dirname, "services", "s3-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
