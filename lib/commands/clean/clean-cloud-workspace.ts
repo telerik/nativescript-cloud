@@ -1,18 +1,31 @@
 import { isInteractive } from "../../helpers";
+import { InteractiveCloudCommand } from "../interactive-cloud-command";
 
-export class CleanCloudWorkspace implements ICommand {
+export class CleanCloudWorkspace extends InteractiveCloudCommand implements ICommand {
 	private static COMMAND_REQUIREMENTS_ERROR_MESSAGE: string =
-	"The command should be executed inside project or the app id and project name parameters must be provided.";
+		"The command should be executed inside project or the app id and project name parameters must be provided.";
 
 	public allowedParameters: ICommandParameter[] = [];
 
-	constructor(private $errors: IErrors,
+	constructor(protected $logger: ILogger,
+		protected $prompter: IPrompter,
+		private $errors: IErrors,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudProjectService: ICloudProjectService,
-		private $projectData: IProjectData,
-		private $prompter: IPrompter) { }
+		private $projectData: IProjectData) {
+		super($nsCloudProjectService, $logger, $prompter)
+	}
 
-	public async execute(args: string[]): Promise<void> {
+	public async canExecute(args: string[]): Promise<boolean> {
+		if (!args || args.length > 2) {
+			return false;
+		}
+
+		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+		return true;
+	}
+
+	protected async executeCore(args: string[]): Promise<void> {
 		let appIdentifier: string | Mobile.IProjectIdentifier;
 		let projectName: string;
 
@@ -38,15 +51,6 @@ export class CleanCloudWorkspace implements ICommand {
 		}
 
 		await this.$nsCloudProjectService.cleanupProject({ appIdentifier, projectName });
-	}
-
-	public async canExecute(args: string[]): Promise<boolean> {
-		if (!args || args.length > 2) {
-			return false;
-		}
-
-		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
-		return true;
 	}
 
 	private async promptForProjectName(): Promise<string> {

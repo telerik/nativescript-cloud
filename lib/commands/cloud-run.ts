@@ -1,4 +1,6 @@
-export class CloudRunCommand implements ICommand {
+import { InteractiveCloudCommand } from "./interactive-cloud-command";
+
+export class CloudRunCommand extends InteractiveCloudCommand implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
 	public get dashedOptions() {
@@ -6,7 +8,9 @@ export class CloudRunCommand implements ICommand {
 	}
 
 	public platform: string;
-	constructor(private $liveSyncCommandHelper: ILiveSyncCommandHelper,
+	constructor(protected $logger: ILogger,
+		protected $prompter: IPrompter,
+		private $liveSyncCommandHelper: ILiveSyncCommandHelper,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudBuildService: ICloudBuildService,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
@@ -14,15 +18,8 @@ export class CloudRunCommand implements ICommand {
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $projectData: IProjectData,
 		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
+		super($nsCloudBuildService, $logger, $prompter);
 		this.$projectData.initializeProjectData();
-	}
-
-	public async execute(args: string[]): Promise<void> {
-		return this.$liveSyncCommandHelper.executeCommandLiveSync(this.platform, {
-			getOutputDirectory: this.$nsCloudBuildService.getServerOperationOutputDirectory.bind(this.$nsCloudBuildService),
-			buildPlatform: this.$nsCloudBuildCommandHelper.buildPlatform.bind(this.$nsCloudBuildCommandHelper),
-			skipNativePrepare: true
-		});
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -34,6 +31,14 @@ export class CloudRunCommand implements ICommand {
 		}
 
 		return true;
+	}
+
+	protected async executeCore(args: string[]): Promise<void> {
+		return this.$liveSyncCommandHelper.executeCommandLiveSync(this.platform, {
+			getOutputDirectory: this.$nsCloudBuildService.getServerOperationOutputDirectory.bind(this.$nsCloudBuildService),
+			buildPlatform: this.$nsCloudBuildCommandHelper.buildPlatform.bind(this.$nsCloudBuildCommandHelper),
+			skipNativePrepare: true
+		});
 	}
 }
 
@@ -51,11 +56,12 @@ export class CloudRunIosCommand extends CloudRunCommand implements ICommand {
 		$nsCloudBuildCommandHelper: IBuildCommandHelper,
 		$nsCloudBuildService: ICloudBuildService,
 		$nsCloudOptionsProvider: ICloudOptionsProvider,
-		$devicesService: Mobile.IDevicesService,
 		$projectData: IProjectData,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
+		protected $logger: ILogger,
+		protected $prompter: IPrompter,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
+		super($logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
 	}
 }
 
@@ -73,11 +79,12 @@ export class CloudRunAndroidCommand extends CloudRunCommand implements ICommand 
 		$nsCloudBuildCommandHelper: IBuildCommandHelper,
 		$nsCloudBuildService: ICloudBuildService,
 		$nsCloudOptionsProvider: ICloudOptionsProvider,
-		$devicesService: Mobile.IDevicesService,
 		$projectData: IProjectData,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
+		protected $logger: ILogger,
+		protected $prompter: IPrompter,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
+		super($logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
 	}
 }
 

@@ -1,13 +1,15 @@
-import { BundleValidatorBaseCommand } from "./bundle-validator-base-command";
+import { InteractiveCloudCommand } from "./interactive-cloud-command";
 
-export class CloudDeploy extends BundleValidatorBaseCommand implements ICommand {
+
+export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
 	public get dashedOptions() {
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
-	constructor($nsCloudPolyfillService: IPolyfillService,
+	constructor(protected $logger: ILogger,
+		protected $prompter: IPrompter,
 		private $platformService: IPlatformService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $errors: IErrors,
@@ -18,11 +20,26 @@ export class CloudDeploy extends BundleValidatorBaseCommand implements ICommand 
 		private $options: ICloudOptions,
 		private $projectData: IProjectData,
 		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudPolyfillService);
+		super($nsCloudBuildService, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 
-	public execute(args: string[]): Promise<void> {
+	public async canExecute(args: string[]): Promise<boolean> {
+		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
+
+		if (!args || !args.length) {
+			this.$errors.fail("Provide platform.");
+		}
+
+		if (args.length > 1) {
+			this.$errors.fail("Only a single platform is supported.");
+		}
+
+		return true;
+	}
+
+	protected executeCore(args: string[]): Promise<void> {
 		const buildData = this.$nsCloudBuildCommandHelper.getCloudBuildData(args[0]);
 		const outputDirectoryPath = this.$nsCloudBuildService.getServerOperationOutputDirectory({
 			platform: buildData.platform,
@@ -36,22 +53,6 @@ export class CloudDeploy extends BundleValidatorBaseCommand implements ICommand 
 		deployPlatformInfo.nativePrepare = { skipNativePrepare: true };
 
 		return this.$platformService.deployPlatform(deployPlatformInfo);
-	}
-
-	public async canExecute(args: string[]): Promise<boolean> {
-		this.$bundleValidatorHelper.validate();
-		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
-		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
-
-		if (!args || !args.length) {
-			this.$errors.fail("Provide platform.");
-		}
-
-		if (args.length > 1) {
-			this.$errors.fail("Only a single platform is supported.");
-		}
-
-		return true;
 	}
 }
 

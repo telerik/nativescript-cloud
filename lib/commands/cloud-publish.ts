@@ -1,22 +1,24 @@
 import { DEFAULT_ANDROID_PUBLISH_TRACK, ERROR_MESSAGES } from "../constants";
 import { isInteractive } from "../helpers";
+import { InteractiveCloudCommand } from "./interactive-cloud-command";
 
-abstract class CloudPublish implements ICommand {
+abstract class CloudPublish extends InteractiveCloudCommand {
 	public allowedParameters: ICommandParameter[];
 	public get dashedOptions() {
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
 	constructor(private $nsCloudOptionsProvider: ICloudOptionsProvider,
+		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
-		protected $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
+		protected $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
+		protected $nsCloudPublishService: ICloudPublishService) {
+		super($nsCloudPublishService, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
-
-	public abstract execute(args: string[]): Promise<void>;
 
 	public async canExecute(args: string[]): Promise<boolean> {
 		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
@@ -27,39 +29,18 @@ abstract class CloudPublish implements ICommand {
 
 export class CloudPublishAndroid extends CloudPublish implements ICommand {
 	constructor($nsCloudOptionsProvider: ICloudOptionsProvider,
+		$logger: ILogger,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		private $nsCloudPublishService: ICloudPublishService,
 		private $errors: IErrors,
+		protected $nsCloudPublishService: ICloudPublishService,
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
-		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper
+		protected $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper
 	) {
-		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper);
-	}
-
-	public async execute(args: string[]): Promise<void> {
-		let pathToAuthJson = args[0];
-		let track = this.$options.track;
-
-		if (!pathToAuthJson) {
-			pathToAuthJson = await this.$prompter.getString("Path to auth JSON", { allowEmpty: false });
-		}
-
-		if (!track) {
-			track = await this.$prompter.getString("Track", { defaultAction: () => DEFAULT_ANDROID_PUBLISH_TRACK });
-		}
-
-		const packagePath = await this.$nsCloudBuildCommandHelper.buildForPublishingPlatform(this.$devicePlatformsConstants.Android);
-		return this.$nsCloudPublishService.publishToGooglePlay({
-			track,
-			pathToAuthJson,
-			packagePaths: [packagePath],
-			sharedCloud: this.$options.sharedCloud,
-			projectDir: this.$projectData.projectDir,
-		});
+		super($nsCloudOptionsProvider, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -73,35 +54,46 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 
 		return true;
 	}
+
+	protected async executeCore(args: string[]): Promise<void> {
+		let pathToAuthJson = args[0];
+		let track = this.$options.track;
+
+		if (!pathToAuthJson) {
+			pathToAuthJson = await this.$prompter.getString("Path to auth JSON", { allowEmpty: false });
+		}
+
+		if (!track) {
+			track = await this.$prompter.getString("Track", { defaultAction: () => DEFAULT_ANDROID_PUBLISH_TRACK });
+		}
+
+		const packagePath = await this.$nsCloudBuildCommandHelper.buildForPublishingPlatform(this.$devicePlatformsConstants.Android);
+
+		return this.$nsCloudPublishService.publishToGooglePlay({
+			track,
+			pathToAuthJson,
+			packagePaths: [packagePath],
+			sharedCloud: this.$options.sharedCloud,
+			projectDir: this.$projectData.projectDir,
+		});
+	}
 }
 
 $injector.registerCommand("cloud|publish|android", CloudPublishAndroid);
 
 export class CloudPublishIos extends CloudPublish implements ICommand {
 	constructor($nsCloudOptionsProvider: ICloudOptionsProvider,
+		$logger: ILogger,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		private $nsCloudPublishService: ICloudPublishService,
 		private $errors: IErrors,
+		protected $nsCloudPublishService: ICloudPublishService,
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudOptionsProvider, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper);
-	}
-
-	public async execute(args: string[]): Promise<void> {
-		const credentials = await this.$nsCloudBuildCommandHelper.getAppleCredentials(args);
-		const packagePath = await this.$nsCloudBuildCommandHelper.buildForPublishingPlatform(this.$devicePlatformsConstants.iOS);
-		const itunesPublishdata: IItunesConnectPublishData = {
-			credentials,
-			packagePaths: [packagePath],
-			sharedCloud: this.$options.sharedCloud,
-			projectDir: this.$projectData.projectDir
-		};
-
-		await this.$nsCloudPublishService.publishToItunesConnect(itunesPublishdata);
+		super($nsCloudOptionsProvider, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -114,6 +106,20 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 		}
 
 		return true;
+	}
+
+	protected async executeCore(args: string[]): Promise<void> {
+		await super.execute(args);
+		const credentials = await this.$nsCloudBuildCommandHelper.getAppleCredentials(args);
+		const packagePath = await this.$nsCloudBuildCommandHelper.buildForPublishingPlatform(this.$devicePlatformsConstants.iOS);
+		const itunesPublishdata: IItunesConnectPublishData = {
+			credentials,
+			packagePaths: [packagePath],
+			sharedCloud: this.$options.sharedCloud,
+			projectDir: this.$projectData.projectDir
+		};
+
+		await this.$nsCloudPublishService.publishToItunesConnect(itunesPublishdata);
 	}
 }
 
