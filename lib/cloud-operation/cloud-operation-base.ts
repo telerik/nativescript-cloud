@@ -10,6 +10,7 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 	}
 
 	public abstract async init(): Promise<void>;
+	public abstract sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void>;
 
 	public async waitForResult(): Promise<ICloudOperationResult> {
 		try {
