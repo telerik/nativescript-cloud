@@ -35,7 +35,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 	}
 
 	protected async waitForServerOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse): Promise<ICloudOperationResult> {
-		const cloudOperation: ICloudOperation = this.$injector.resolve(require(`../cloud-operation-${serverResponse.requestVersion || CloudService.DEFAULT_SERVER_REQUEST_VERSION}`), { id: cloudOperationId, serverResponse: serverResponse });
+		const cloudOperation: ICloudOperation = this.$injector.resolve(require(`../cloud-operation/cloud-operation-${serverResponse.requestVersion || CloudService.DEFAULT_SERVER_REQUEST_VERSION}`), { id: cloudOperationId, serverResponse: serverResponse });
 		this.cloudOperations[cloudOperationId] = cloudOperation;
 
 		// TODO: add the event to the d.ts and remove the any.
@@ -43,9 +43,9 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 			if (d.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !this.silent) {
 				const body: ICloudOperationOutput = d.body;
 				if (body.pipe === "stdout") {
-					this.$logger.error(body.data);
-				} else if (body.pipe === "stderr") {
 					this.$logger.info(body.data);
+				} else if (body.pipe === "stderr") {
+					this.$logger.error(body.data);
 				}
 			} else if (d.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
 				const body: ICloudOperationInputRequest = d.body;

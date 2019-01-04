@@ -3,7 +3,7 @@ import promiseRetry = require("promise-retry");
 import { CloudOperationMessageTypes } from "../constants";
 import { CloudOperationBase } from "./cloud-operation-base";
 
-export class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
+module.exports = class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 	private static OPERATION_STATUS_CHECK_RETRY_COUNT = 8;
 	private static OPERATION_STATUS_CHECK_INTERVAL = 1500;
 
