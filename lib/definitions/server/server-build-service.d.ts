@@ -11,6 +11,7 @@ interface IServerResponse {
 	statusUrl: string;
 	resultUrl: string;
 	outputUrl: string;
+	communicationChannel: ICloudChannelData;
 }
 
 interface IBuildFile {
