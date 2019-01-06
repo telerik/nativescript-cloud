@@ -27,7 +27,7 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 		try {
 			await this.sendMessage<ICloudOperationStop>({ type: CloudOperationMessageTypes.CLOUD_OPERATION_STOP, cloudOperationId: this.cloudOperationId, body: { code } });
 		} catch (err) {
-			this.$logger.warn(err);
+			this.$logger.trace(err);
 		}
 	}
 

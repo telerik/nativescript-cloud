@@ -58,7 +58,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		try {
 			await cloudOperation.init();
 		} catch (err) {
-			this.$logger.error(err);
+			this.$logger.trace(err);
 			await cloudOperation.cleanup();
 			throw new Error(this.failedToStartError);
 		}

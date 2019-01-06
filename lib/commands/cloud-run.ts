@@ -8,17 +8,17 @@ export class CloudRunCommand extends InteractiveCloudCommand implements ICommand
 	}
 
 	public platform: string;
-	constructor(protected $logger: ILogger,
+	constructor(protected $errors: IErrors,
+		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $liveSyncCommandHelper: ILiveSyncCommandHelper,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudBuildService: ICloudBuildService,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
-		private $errors: IErrors,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $projectData: IProjectData,
 		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudBuildService, $logger, $prompter);
+		super($nsCloudBuildService, $errors, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 
@@ -52,16 +52,16 @@ export class CloudRunIosCommand extends CloudRunCommand implements ICommand {
 
 	constructor($liveSyncCommandHelper: ILiveSyncCommandHelper,
 		$nsCloudEulaCommandHelper: IEulaCommandHelper,
-		$errors: IErrors,
 		$nsCloudBuildCommandHelper: IBuildCommandHelper,
 		$nsCloudBuildService: ICloudBuildService,
 		$nsCloudOptionsProvider: ICloudOptionsProvider,
 		$projectData: IProjectData,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
+		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
+		super($errors, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
 	}
 }
 
@@ -75,16 +75,16 @@ export class CloudRunAndroidCommand extends CloudRunCommand implements ICommand 
 
 	constructor($liveSyncCommandHelper: ILiveSyncCommandHelper,
 		$nsCloudEulaCommandHelper: IEulaCommandHelper,
-		$errors: IErrors,
 		$nsCloudBuildCommandHelper: IBuildCommandHelper,
 		$nsCloudBuildService: ICloudBuildService,
 		$nsCloudOptionsProvider: ICloudOptionsProvider,
 		$projectData: IProjectData,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
+		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $errors, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
+		super($errors, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
 	}
 }
 

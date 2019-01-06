@@ -8,11 +8,11 @@ export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
-	constructor(protected $logger: ILogger,
+	constructor(protected $errors: IErrors,
+		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $platformService: IPlatformService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		private $errors: IErrors,
 		private $deployCommandHelper: IDeployCommandHelper,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudBuildService: ICloudBuildService,
@@ -20,7 +20,7 @@ export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 		private $options: ICloudOptions,
 		private $projectData: IProjectData,
 		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudBuildService, $logger, $prompter);
+		super($nsCloudBuildService, $errors, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 

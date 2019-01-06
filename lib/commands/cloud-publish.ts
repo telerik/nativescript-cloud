@@ -9,6 +9,7 @@ abstract class CloudPublish extends InteractiveCloudCommand {
 	}
 
 	constructor(private $nsCloudOptionsProvider: ICloudOptionsProvider,
+		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
@@ -16,7 +17,7 @@ abstract class CloudPublish extends InteractiveCloudCommand {
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		protected $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
 		protected $nsCloudPublishService: ICloudPublishService) {
-		super($nsCloudPublishService, $logger, $prompter);
+		super($nsCloudPublishService, $errors, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 
@@ -32,7 +33,7 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 		$logger: ILogger,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		private $errors: IErrors,
+		protected $errors: IErrors,
 		protected $nsCloudPublishService: ICloudPublishService,
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
@@ -40,7 +41,7 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		protected $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper
 	) {
-		super($nsCloudOptionsProvider, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
+		super($nsCloudOptionsProvider, $errors, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -86,14 +87,14 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 		$logger: ILogger,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		private $errors: IErrors,
+		protected $errors: IErrors,
 		protected $nsCloudPublishService: ICloudPublishService,
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudOptionsProvider, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
+		super($nsCloudOptionsProvider, $errors, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -110,7 +111,7 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 
 	protected async executeCore(args: string[]): Promise<void> {
 		const credentials = await this.$nsCloudBuildCommandHelper.getAppleCredentials(args);
-		const packagePath = "https://test.livesync.ly/ettdrva"; // await this.$nsCloudBuildCommandHelper.buildForPublishingPlatform(this.$devicePlatformsConstants.iOS);
+		const packagePath = await this.$nsCloudBuildCommandHelper.buildForPublishingPlatform(this.$devicePlatformsConstants.iOS);
 		const itunesPublishdata: IItunesConnectPublishData = {
 			credentials,
 			packagePaths: [packagePath],
