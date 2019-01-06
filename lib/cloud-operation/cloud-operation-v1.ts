@@ -60,10 +60,17 @@ module.exports = class CloudOperationV1 extends CloudOperationBase implements IC
 				this.serverStatus = await this.$nsCloudS3Service.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
 				if (this.serverStatus.status === CloudOperationV1.OPERATION_COMPLETE_STATUS) {
 					clearInterval(this.statusCheckInterval);
-					return resolve(await this.$nsCloudS3Service.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl));
+					this.result = await this.$nsCloudS3Service.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl);
+					return resolve(this.result);
 				}
 
 				if (this.serverStatus.status === CloudOperationV1.OPERATION_FAILED_STATUS) {
+					try {
+						this.result = await this.$nsCloudS3Service.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl);
+					} catch (err) {
+						this.$logger.trace(err)
+					}
+
 					clearInterval(this.statusCheckInterval);
 					return reject(new Error("Cloud operation failed"));
 				}
@@ -99,7 +106,7 @@ module.exports = class CloudOperationV1 extends CloudOperationBase implements IC
 			const contentToLog = this.$nsCloudOutputFilter.filter(logs.substr(this.outputCursorPosition));
 			if (contentToLog) {
 				const data: ICloudOperationMessage<ICloudOperationOutput> = { type: CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT, cloudOperationId: this.id, body: { data: contentToLog, pipe: "stdout" } };
-				this.emit("data", data);
+				this.emit("message", data);
 			}
 
 			this.outputCursorPosition = logs.length <= 0 ? 0 : logs.length - 1;

@@ -23,6 +23,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		$injector: IInjector,
 		$nsCloudS3Service: IS3Service,
 		$nsCloudOutputFilter: ICloudOutputFilter,
+		$processService: IProcessService,
 		private $nsCloudBuildHelper: ICloudBuildHelper,
 		private $nsCloudBuildPropertiesService: ICloudBuildPropertiesService,
 		private $mobileHelper: Mobile.IMobileHelper,
@@ -43,7 +44,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $staticConfig: IStaticConfig,
 		private $platformsData: IPlatformsData,
 		private $filesHashService: IFilesHashService) {
-		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter);
+		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {

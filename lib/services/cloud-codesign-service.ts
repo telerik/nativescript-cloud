@@ -21,10 +21,11 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		$injector: IInjector,
 		$nsCloudS3Service: IS3Service,
 		$nsCloudOutputFilter: ICloudOutputFilter,
+		$processService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter);
+		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
 	}
 
 	public async generateCodesignFiles(codesignData: ICodesignData,
@@ -84,6 +85,11 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		try {
 			codesignResult = await this.waitForServerOperationToFinish(cloudOperationId, codesignResponse);
 		} catch (ex) {
+			codesignResult = this.getResult(cloudOperationId);
+			if (!codesignResult) {
+				throw ex;
+			}
+
 			this.$logger.trace("Codesign generation failed with err: ", ex);
 		}
 

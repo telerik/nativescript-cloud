@@ -25,11 +25,12 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		$injector: IInjector,
 		$nsCloudS3Service: IS3Service,
 		$nsCloudOutputFilter: ICloudOutputFilter,
+		$processService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $nsCloudUploadService: IUploadService,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter);
+		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
@@ -110,6 +111,11 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		try {
 			publishResult = await this.waitForServerOperationToFinish(publishRequestData.cloudOperationId, response);
 		} catch (ex) {
+			publishResult = this.getResult(publishRequestData.cloudOperationId);
+			if (!publishResult) {
+				throw ex;
+			}
+
 			this.$logger.trace("Publish failed with err: ", ex);
 		}
 

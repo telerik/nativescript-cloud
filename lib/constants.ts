@@ -137,7 +137,7 @@ export class Policies {
 	public static readonly CLOUD_SERVICES_POLICY_NAME: string = "cloud-services-policy";
 }
 
-export class CloudOpertionWebsocketMessageActions {
+export class CloudOperationWebsocketMessageActions {
 	public static readonly SEND_MESSAGE: string = "sendmessage";
 }
 

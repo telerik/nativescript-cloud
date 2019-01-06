@@ -19,9 +19,10 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		$injector: IInjector,
 		$nsCloudS3Service: IS3Service,
 		$nsCloudOutputFilter: ICloudOutputFilter,
+		$processService: IProcessService,
 		private $nsCloudServerProjectService: IServerProjectService,
 		private $projectHelper: IProjectHelper) {
-		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter);
+		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
@@ -102,6 +103,10 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 
 				tasksResults[taskId] = taskResult;
 			} catch (err) {
+				if (this.getResult(taskId)) {
+					tasksResults[taskId] = this.getResult(taskId);
+				}
+
 				// We don't want to stop the execution if one of the tasks fails.
 				this.$logger.error(`${taskId} error: ${err}`);
 			}

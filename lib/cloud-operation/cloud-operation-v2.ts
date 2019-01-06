@@ -26,7 +26,11 @@ module.exports = class CloudOperationV2 extends CloudOperationBase implements IC
 	}
 
 	public async cleanup(exitCode?: number): Promise<void> {
-		clearTimeout(this.waitToStartTimeout);
+		if (this.waitToStartTimeout) {
+			clearTimeout(this.waitToStartTimeout);
+			this.waitToStartTimeout = null;
+		}
+
 		await this.communicationChannel.close(exitCode);
 	}
 
@@ -60,13 +64,13 @@ module.exports = class CloudOperationV2 extends CloudOperationBase implements IC
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
 			this.communicationChannel.on("message", async (m) => {
 				if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_RESULT) {
-					const body = <ICloudOperationResult>m.body;
-					if (body.code === 0) {
+					this.result = <ICloudOperationResult>m.body;
+					if (this.result.code === 0) {
 						this.status = CloudOperationV2.OPERATION_COMPLETE_STATUS;
-						return resolve(body);
+						return resolve(this.result);
 					} else {
 						this.status = CloudOperationV2.OPERATION_FAILED_STATUS;
-						return reject(body);
+						return reject(this.result);
 					}
 				}
 

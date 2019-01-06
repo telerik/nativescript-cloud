@@ -16,9 +16,11 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		protected $logger: ILogger,
 		private $injector: IInjector,
 		private $nsCloudS3Service: IS3Service,
-		private $nsCloudOutputFilter: ICloudOutputFilter) {
+		private $nsCloudOutputFilter: ICloudOutputFilter,
+		private $processService: IProcessService) {
 		super();
 		this.cloudOperations = Object.create(null);
+		this.$processService.attachToProcessExitSignals(this, this.cleanup);
 	}
 
 	public abstract getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;
@@ -49,8 +51,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 					this.$logger.error(data);
 				}
 			} else if (d.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
-				const body: ICloudOperationInputRequest = d.body;
-				this.emit(CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST, body);
+				this.emit(CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST, d);
 			}
 		});
 
@@ -68,7 +69,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 			return result;
 		} catch (err) {
 			this.$logger.trace(err);
-			cloudOperation.cleanup();
+			await cloudOperation.cleanup();
 			throw new Error(this.failedError);
 		}
 	}
@@ -102,5 +103,17 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		} catch (err) {
 			this.$logger.warn(`Unable to get cloud operation output. Error is: ${err}`);
 		}
+	}
+
+	protected getResult(cloudOperationId: string): ICloudOperationResult {
+		return this.cloudOperations[cloudOperationId].getResult();
+	}
+
+	private async cleanup(): Promise<void> {
+		await Promise.all(_(this.cloudOperations)
+			.values<ICloudOperation>()
+			.map(op => op.cleanup())
+			.value()
+		);
 	}
 }

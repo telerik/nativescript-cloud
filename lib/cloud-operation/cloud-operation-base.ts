@@ -5,6 +5,7 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 	protected static OPERATION_FAILED_STATUS = "Failed";
 	protected static OPERATION_IN_PROGRESS_STATUS = "InProgress";
 
+	protected result: ICloudOperationResult;
 	protected status: string;
 	protected initialized: boolean;
 
@@ -33,6 +34,10 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 			await this.cleanup();
 			throw err;
 		}
+	}
+
+	public getResult(): ICloudOperationResult {
+		return this.result;
 	}
 
 	protected abstract waitForResultCore(): Promise<ICloudOperationResult>;

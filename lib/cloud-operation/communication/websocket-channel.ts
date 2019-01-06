@@ -2,7 +2,7 @@ import * as WebSocket from "ws";
 import { v4 } from "uuid";
 
 import { CommunicationChannelBase } from "./communication-channel-base";
-import { CloudOperationMessageTypes, CloudOpertionWebsocketMessageActions } from "../../constants";
+import { CloudOperationMessageTypes, CloudOperationWebsocketMessageActions } from "../../constants";
 
 export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 	private ws: WebSocket;
@@ -26,7 +26,7 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 		return new Promise((resolve, reject) => {
 			try {
 				const id = v4();
-				const wsMsg: ICloudOperationWebsocketMessage<T> = { id, action: CloudOpertionWebsocketMessageActions.SEND_MESSAGE, cloudOperationId: this.cloudOperationId, body: message };
+				const wsMsg: ICloudOperationWebsocketMessage<T> = { id, action: CloudOperationWebsocketMessageActions.SEND_MESSAGE, cloudOperationId: this.cloudOperationId, body: message };
 				this.ws.send(JSON.stringify(wsMsg), err => {
 					if (err) {
 						return reject(err);
