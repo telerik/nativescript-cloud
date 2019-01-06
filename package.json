@@ -28,6 +28,7 @@
     "@types/semver": "5.3.30",
     "@types/source-map": "0.5.0",
     "@types/uuid": "2.0.29",
+    "@types/ws": "6.0.1",
     "chai": "3.5.0",
     "chai-as-promised": "7.0.0",
     "grunt": "1.0.1",
@@ -62,6 +63,7 @@
     "simple-plist": "0.2.1",
     "temp": "0.8.3",
     "uuid": "3.0.1",
+    "ws": "6.1.2",
     "xml-escape": "1.1.0"
   },
   "keywords": [

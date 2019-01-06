@@ -1,28 +1,43 @@
 interface ICloudOperation extends NodeJS.EventEmitter {
-    init(): Promise<void>;
-    waitForResult(): Promise<ICloudOperationResult>;
-    sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void>;
+	init(): Promise<void>;
+	waitForResult(): Promise<ICloudOperationResult>;
+	sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void>;
+	cleanup(exitCode?: number): Promise<void>;
+}
+
+interface ICloudOperationWebsocketMessage<T> extends ICloudOperationId {
+	id: string;
+	action: string;
+	body: ICloudOperationMessage<T>;
 }
 
 interface ICloudOperationMessage<T> extends ICloudOperationId {
-    type: string;
-    body: T;
+	type: string;
+	body?: T;
 }
 
 interface ICloudOperationOutput {
-    data: string;
-    pipe: string;
+	data: string;
+	pipe: string;
 }
 
 interface ICloudOperationInputBase {
-    inputType: string;
-    requestId: string;
+	inputType: string;
+	requestId: string;
 }
 
 interface ICloudOperationInputRequest extends ICloudOperationInputBase {
-    message: string;
+	message: string;
 }
 
 interface ICloudOperationInput extends ICloudOperationInputBase {
-    content: string;
+	content: string;
+}
+
+interface ICloudOperationStop {
+	code?: number;
+}
+
+interface ICloudOperationStatus {
+	status: string;
 }

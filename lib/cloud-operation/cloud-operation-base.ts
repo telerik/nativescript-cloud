@@ -5,24 +5,43 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 	protected static OPERATION_FAILED_STATUS = "Failed";
 	protected static OPERATION_IN_PROGRESS_STATUS = "InProgress";
 
+	protected status: string;
+	protected initialized: boolean;
+
 	constructor(protected id: string, protected serverResponse: IServerResponse) {
 		super();
 	}
 
-	public abstract async init(): Promise<void>;
 	public abstract sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void>;
+	public abstract cleanup(exitCode?: number): Promise<void>;
 
-	public async waitForResult(): Promise<ICloudOperationResult> {
+	public async init(): Promise<void> {
 		try {
-			await this.waitForResultCore();
-			return await this.getResultObject();
+			await this.initCore();
+			this.initialized = true;
 		} catch (err) {
-			this.cleanup();
+			await this.cleanup();
 			throw err;
 		}
 	}
 
-	protected abstract async waitForResultCore(): Promise<ICloudOperationResult>;
-	protected abstract cleanup(): void;
-	protected abstract getResultObject(): Promise<ICloudOperationResult>;
+	public async waitForResult(): Promise<ICloudOperationResult> {
+		this.isInitialized();
+		try {
+			return await this.waitForResultCore();
+		} catch (err) {
+			await this.cleanup();
+			throw err;
+		}
+	}
+
+	protected abstract waitForResultCore(): Promise<ICloudOperationResult>;
+	protected abstract initCore(): Promise<void>;
+
+	private isInitialized() {
+		if (!this.initialized) {
+			throw new Error("Not initialized");
+		}
+
+	}
 }

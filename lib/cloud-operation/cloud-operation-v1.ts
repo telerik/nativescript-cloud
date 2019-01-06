@@ -22,7 +22,17 @@ module.exports = class CloudOperationV1 extends CloudOperationBase implements IC
 		this.outputCursorPosition = 0;
 	}
 
-	public async init(): Promise<void> {
+
+	public async sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
+		this.$logger.warn("This version of the cloud operation does not support sending messages to the cloud services.");
+	}
+
+	public async cleanup(): Promise<void> {
+		clearInterval(this.statusCheckInterval);
+		clearInterval(this.logsCheckInterval);
+	}
+
+	protected async initCore(): Promise<void> {
 		const promiseRetryOptions = {
 			retries: CloudOperationV1.OPERATION_STATUS_CHECK_RETRY_COUNT,
 			minTimeout: CloudOperationV1.OPERATION_STATUS_CHECK_INTERVAL
@@ -44,17 +54,13 @@ module.exports = class CloudOperationV1 extends CloudOperationBase implements IC
 		this.pollForLogs();
 	}
 
-	public async sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
-		this.$logger.warn("This version of the cloud operation does not support sending messages to the cloud services.");
-	}
-
 	protected async waitForResultCore(): Promise<ICloudOperationResult> {
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
 			this.statusCheckInterval = setInterval(async () => {
 				this.serverStatus = await this.$nsCloudS3Service.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
 				if (this.serverStatus.status === CloudOperationV1.OPERATION_COMPLETE_STATUS) {
 					clearInterval(this.statusCheckInterval);
-					return resolve();
+					return resolve(await this.$nsCloudS3Service.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl));
 				}
 
 				if (this.serverStatus.status === CloudOperationV1.OPERATION_FAILED_STATUS) {
@@ -66,16 +72,7 @@ module.exports = class CloudOperationV1 extends CloudOperationBase implements IC
 		});
 	}
 
-	protected async getResultObject(): Promise<ICloudOperationResult> {
-		return await this.$nsCloudS3Service.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl);
-	}
-
-	protected cleanup() {
-		clearInterval(this.statusCheckInterval);
-		clearInterval(this.logsCheckInterval);
-	}
-
-	private pollForLogs() {
+	private pollForLogs(): void {
 		this.logsCheckInterval = setInterval(async () => {
 			if (this.serverStatus.status === CloudOperationBase.OPERATION_COMPLETE_STATUS) {
 				await this.getServerLogs(this.serverResponse.outputUrl);

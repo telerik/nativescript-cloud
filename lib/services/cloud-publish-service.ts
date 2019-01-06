@@ -9,7 +9,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	// Taken from: https://github.com/fastlane/fastlane/blob/master/fastlane_core/lib/fastlane_core/itunes_transporter.rb#L100
 	private static ITMS_ERROR_REGEX = /\[Transporter Error Output\]:.*/g;
 	private static GENERAL_ERROR_REGEX = /\[!\].*/g;
-
+	protected silent = false;
 	protected get failedError() {
 		return "Publishing failed.";
 	}

@@ -137,9 +137,21 @@ export class Policies {
 	public static readonly CLOUD_SERVICES_POLICY_NAME: string = "cloud-services-policy";
 }
 
+export class CloudOpertionWebsocketMessageActions {
+	public static readonly SEND_MESSAGE: string = "sendmessage";
+}
+
 export class CloudOperationMessageTypes {
-	public static readonly CLOUD_OPERATION_OUTPUT = "output";
-	public static readonly CLOUD_OPERATION_INPUT_REQUEST = "inputRequest";
-	public static readonly CLOUD_OPERATION_INPUT = "input";
-	public static readonly CLOUD_OPERATION_SERVER_HELLO = "serverHello";
+	public static readonly CLOUD_OPERATION_OUTPUT: string = "output";
+	public static readonly CLOUD_OPERATION_INPUT_REQUEST: string = "inputRequest";
+	public static readonly CLOUD_OPERATION_INPUT: string = "input";
+	public static readonly CLOUD_OPERATION_CLIENT_HELLO: string = "clientHello";
+	public static readonly CLOUD_OPERATION_SERVER_HELLO: string = "serverHello";
+	public static readonly CLOUD_OPERATION_STOP: string = "stop";
+	public static readonly CLOUD_OPERATION_STATUS: string = "status";
+	public static readonly CLOUD_OPERATION_RESULT: string = "result";
+}
+
+export class CloudCommunicationChannelTypes {
+	public static readonly WEBSOCKET: string = "Websocket";
 }

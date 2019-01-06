@@ -39,13 +39,14 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		this.cloudOperations[cloudOperationId] = cloudOperation;
 
 		// TODO: add the event to the d.ts and remove the any.
-		cloudOperation.on("data", (d: ICloudOperationMessage<any>) => {
+		cloudOperation.on("message", (d: ICloudOperationMessage<any>) => {
 			if (d.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !this.silent) {
 				const body: ICloudOperationOutput = d.body;
+				const data = this.$nsCloudOutputFilter.filter(body.data);
 				if (body.pipe === "stdout") {
-					this.$logger.info(body.data);
+					this.$logger.info(data);
 				} else if (body.pipe === "stderr") {
-					this.$logger.error(body.data);
+					this.$logger.error(data);
 				}
 			} else if (d.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
 				const body: ICloudOperationInputRequest = d.body;
@@ -56,14 +57,18 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		try {
 			await cloudOperation.init();
 		} catch (err) {
-			this.$logger.trace(err);
+			this.$logger.error(err);
+			await cloudOperation.cleanup();
 			throw new Error(this.failedToStartError);
 		}
 
 		try {
-			return await cloudOperation.waitForResult();
+			const result = await cloudOperation.waitForResult();
+			await cloudOperation.cleanup();
+			return result;
 		} catch (err) {
 			this.$logger.trace(err);
+			cloudOperation.cleanup();
 			throw new Error(this.failedError);
 		}
 	}
