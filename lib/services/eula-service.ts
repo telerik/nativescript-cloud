@@ -4,12 +4,12 @@ import { EulaServiceBase } from "./eula-service-base";
 export class EulaService extends EulaServiceBase implements IEulaService {
 	constructor($fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
-		$lockfile: ILockFile,
+		$nsCloudLockService: ILockService,
 		$logger: ILogger,
 		$nsCloudHashService: IHashService,
 		$settingsService: ISettingsService,
 		$userSettingsService: IUserSettingsService) {
-		super($fs, $httpClient, $lockfile, $logger, $nsCloudHashService, $settingsService, $userSettingsService);
+		super($fs, $httpClient, $nsCloudLockService, $logger, $nsCloudHashService, $settingsService, $userSettingsService);
 	}
 
 	protected getAcceptedEulaHashPropertyName(): string {
