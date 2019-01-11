@@ -3,6 +3,7 @@ import { HashService } from "../../lib/services/hash-service";
 import { Yok } from "nativescript/lib/common/yok";
 import { assert } from "chai";
 import { EulaConstants } from "../../lib/constants";
+import { NsCouldLockService } from "../../lib/services/lock-service";
 
 interface IEulaTestData {
 	testName: string;
@@ -66,9 +67,11 @@ describe("eulaService", () => {
 		});
 
 		testInjector.register("lockfile", {
-			lock: async (lockFilePath?: string, lockFileOpts?: ILockFileOptions): Promise<void> => undefined,
+			lock: async (lockFilePath?: string, lockFileOpts?: ILockOptions): Promise<void> => undefined,
 			unlock: (lockFilePath?: string): void => undefined
 		});
+
+		testInjector.register("nsCloudLockService", NsCouldLockService);
 
 		testInjector.register("nsCloudHashService", HashService);
 

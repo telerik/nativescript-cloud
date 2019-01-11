@@ -7,7 +7,7 @@ export abstract class EulaServiceBase implements IEulaService {
 
 	constructor(private $fs: IFileSystem,
 		private $httpClient: Server.IHttpClient,
-		private $lockfile: ILockFile,
+		private $nsCloudLockService: ILockService,
 		private $logger: ILogger,
 		private $nsCloudHashService: IHashService,
 		private $settingsService: ISettingsService,
@@ -93,14 +93,11 @@ export abstract class EulaServiceBase implements IEulaService {
 				this.$logger.trace(`The previously downloaded EULA is up-to-date`);
 			} else {
 				const lockFilePath = this.getLockFilePath("download.lock");
-				await this.$lockfile.lock(lockFilePath, this.getLockFileParams());
-				try {
+				this.$nsCloudLockService.executeActionWithLock(async () => {
 					this.$logger.trace(`Successfully downloaded EULA to ${tempEulaPath}.`);
 					this.$fs.copyFile(tempEulaPath, this.getPathToEula());
 					this.$logger.trace(`Successfully copied EULA to ${this.getPathToEula()}.`);
-				} finally {
-					this.$lockfile.unlock(lockFilePath);
-				}
+				}, lockFilePath, this.getLockOptions());
 			}
 
 			this.isEulaDownloadedInCurrentProcess = true;
@@ -131,7 +128,7 @@ export abstract class EulaServiceBase implements IEulaService {
 		return localEulaHash;
 	}
 
-	private getLockFileParams(): ILockFileOptions {
+	private getLockOptions(): ILockOptions {
 		// We'll retry 100 times and time between retries is 100ms, i.e. full wait in case we are unable to get lock will be 10 seconds.
 		// In case lock is older than 13 seconds, consider it stale and try to get a new lock.
 		return {
