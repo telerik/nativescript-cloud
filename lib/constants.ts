@@ -138,7 +138,7 @@ export class Policies {
 }
 
 export class CloudOperationWebsocketMessageActions {
-	public static readonly SEND_MESSAGE: string = "sendmessage";
+	public static readonly SEND_MESSAGE: string = "sendMessage";
 }
 
 export class CloudOperationMessageTypes {

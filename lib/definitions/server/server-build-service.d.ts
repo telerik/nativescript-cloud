@@ -7,7 +7,7 @@ interface IServerBuildService {
 }
 
 interface IServerResponse {
-	requestVersion: string;
+	cloudOperationVersion: string;
 	statusUrl: string;
 	resultUrl: string;
 	outputUrl: string;

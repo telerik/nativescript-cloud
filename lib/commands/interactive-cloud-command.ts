@@ -23,7 +23,7 @@ export abstract class InteractiveCloudCommand implements ICommand {
 			}
 
 			try {
-				const inputBody = { inputType: msg.type, requestId: msg.body.requestId, content: input };
+				const inputBody = { inputType: msg.body.inputType, requestId: msg.body.inputRequestId, content: input };
 				const cloudMessage: ICloudOperationMessage<ICloudOperationInput> = { type: CloudOperationMessageTypes.CLOUD_OPERATION_INPUT, cloudOperationId: msg.cloudOperationId, body: inputBody };
 				await this.interactiveService.sendCloudMessage(cloudMessage);
 			} catch (err) {

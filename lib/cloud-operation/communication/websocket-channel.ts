@@ -27,6 +27,7 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 			try {
 				const id = v4();
 				const wsMsg: ICloudOperationWebsocketMessage<T> = { id, action: CloudOperationWebsocketMessageActions.SEND_MESSAGE, cloudOperationId: this.cloudOperationId, body: message };
+				this.$logger.trace(wsMsg);
 				this.ws.send(JSON.stringify(wsMsg), err => {
 					if (err) {
 						return reject(err);

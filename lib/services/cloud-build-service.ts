@@ -137,7 +137,6 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		let buildProps = await this.prepareBuildRequest({
 			cloudOperationId: cloudOperationId,
-			buildId: cloudOperationId,
 			projectSettings,
 			platform,
 			buildConfiguration,
@@ -348,8 +347,6 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			cloudOperationId: settings.cloudOperationId,
 			accountId: settings.accountId,
 			properties: {
-				cloudOperationId: settings.cloudOperationId,
-				buildId: settings.cloudOperationId,
 				buildConfiguration: settings.buildConfiguration,
 				sharedCloud: settings.projectSettings.sharedCloud,
 				platform: settings.platform,

@@ -28,7 +28,7 @@ interface IBuildStep extends IBuildId, ICloudOperationId {
 	progress: number;
 }
 
-interface IBuildError extends Error, IBuildId { }
+interface IBuildError extends Error, IBuildId, ICloudOperationId { }
 
 interface IBuildId {
 	/**
@@ -141,7 +141,7 @@ interface ICloudBuildService extends ICloudOperationService {
 /**
  * Defines properties passed to prepareBuildRequest method.
  */
-interface IPrepareBuildRequestInfo extends IBuildId, ICloudOperationId, IAccountId {
+interface IPrepareBuildRequestInfo extends ICloudOperationId, IAccountId {
 
 	/**
 	 * Settings used to control the build workflow.

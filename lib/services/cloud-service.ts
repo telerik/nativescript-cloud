@@ -37,21 +37,22 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 	}
 
 	protected async waitForServerOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse): Promise<ICloudOperationResult> {
-		const cloudOperation: ICloudOperation = this.$injector.resolve(require(`../cloud-operation/cloud-operation-${serverResponse.requestVersion || CloudService.DEFAULT_SERVER_REQUEST_VERSION}`), { id: cloudOperationId, serverResponse: serverResponse });
+		const cloudOperation: ICloudOperation = this.$injector.resolve(require(`../cloud-operation/cloud-operation-${serverResponse.cloudOperationVersion || CloudService.DEFAULT_SERVER_REQUEST_VERSION}`), { id: cloudOperationId, serverResponse: serverResponse });
 		this.cloudOperations[cloudOperationId] = cloudOperation;
 
 		// TODO: add the event to the d.ts and remove the any.
-		cloudOperation.on("message", (d: ICloudOperationMessage<any>) => {
-			if (d.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !this.silent) {
-				const body: ICloudOperationOutput = d.body;
+		cloudOperation.on("message", (m: ICloudOperationMessage<any>) => {
+			this.$logger.trace(m);
+			if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !this.silent) {
+				const body: ICloudOperationOutput = m.body;
 				const data = this.$nsCloudOutputFilter.filter(body.data);
 				if (body.pipe === "stdout") {
 					this.$logger.info(data);
 				} else if (body.pipe === "stderr") {
 					this.$logger.error(data);
 				}
-			} else if (d.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
-				this.emit(CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST, d);
+			} else if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
+				this.emit(CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST, m);
 			}
 		});
 

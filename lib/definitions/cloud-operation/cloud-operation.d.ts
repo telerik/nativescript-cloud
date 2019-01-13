@@ -24,7 +24,7 @@ interface ICloudOperationOutput {
 
 interface ICloudOperationInputBase {
 	inputType: string;
-	requestId: string;
+	inputRequestId: string;
 }
 
 interface ICloudOperationInputRequest extends ICloudOperationInputBase {
