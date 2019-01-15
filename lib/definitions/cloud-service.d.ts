@@ -31,6 +31,7 @@ interface IServerResult {
 	code: number;
 	stdout: string;
 	stderr: string;
+	data: any;
 }
 
 /**
@@ -53,6 +54,7 @@ interface IServerItemBase {
 interface IServerItem extends IServerItemBase, IPlatform {
 	extension: string;
 }
+
 /**
  * Defines common operations for server operation in the cloud.
  */

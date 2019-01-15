@@ -57,6 +57,7 @@ $injector.require("nsCloudHashService", path.join(__dirname, "services", "hash-s
 $injector.require("nsCloudConfigurationService", path.join(__dirname, "services", "cloud-configuration-service"));
 $injector.require("nsCloudEncryptionService", path.join(__dirname, "services", "cloud-encryption-service"));
 $injector.require("nsCloudS3Service", path.join(__dirname, "services", "s3-service"));
+$injector.require("nsCloudAppleService", path.join(__dirname, "services", "cloud-apple-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
@@ -67,6 +68,8 @@ $injector.requireCommand("config|set", path.join(__dirname, "commands", "config"
 $injector.requireCommand("dev-login", path.join(__dirname, "commands", "dev-login"));
 $injector.requireCommand("login", path.join(__dirname, "commands", "login"));
 $injector.requireCommand("logout", path.join(__dirname, "commands", "logout"));
+
+$injector.requireCommand("cloud|dev-apple-login", path.join(__dirname, "commands", "cloud-dev-apple-login"));
 
 $injector.requireCommand("user", path.join(__dirname, "commands", "user"));
 $injector.requireCommand("kill-server", path.join(__dirname, "commands", "kill-server"));

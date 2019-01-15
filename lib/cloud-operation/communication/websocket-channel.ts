@@ -18,6 +18,7 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 	public async close(code?: number): Promise<void> {
 		await super.close(code);
 		if (this.ws.readyState === this.ws.OPEN) {
+			this.isConnected = false;
 			this.ws.close(code);
 		}
 	}

@@ -47,7 +47,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 
 		const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
 		const appIdentifier = getProjectId(projectData, this.$devicePlatformsConstants.iOS.toLowerCase());
-		const publishRequestData = {
+		const publishRequestData: IPublishRequestData = {
 			cloudOperationId,
 			appIdentifier,
 			credentials: publishData.credentials,

@@ -22,4 +22,12 @@ interface IBuildCommandHelper extends IBuildPlatformAction {
 	 * @returns {Promise<ICredentials>} The credentials.
 	 */
 	getAppleCredentials(args: string[]): Promise<ICredentials>;
+
+	/**
+	 * Used to retrieve extended credentials for iTunes Connect from commands.
+	 * @param {string[]} args The arguments passed to the command.
+	 * @param {ICloudOptions} options The options passed to the command.
+	 * @returns {Promise<ICredentials>} The credentials.
+	 */
+	getExtendedAppleCredentials(args: string[], options: ICloudOptions): Promise<IPublishCredentials>;
 }

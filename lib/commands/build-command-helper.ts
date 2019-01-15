@@ -90,7 +90,19 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			password = await this.$prompter.getPassword("Apple ID password");
 		}
 
-		return { username, password };
+		return {
+			username,
+			password
+		};
+	}
+
+	public async getExtendedAppleCredentials(args: string[], options: ICloudOptions): Promise<IPublishCredentials> {
+		const credentials = await this.getAppleCredentials(args);
+		const extendedCredentials = {
+			appleApplicationSpecificPassword: options.appleApplicationSpecificPassword,
+			appleSession: options.appleSessionBase64 ? Buffer.from(options.appleSessionBase64, "base64").toString() : undefined
+		};
+		return _.merge(credentials, extendedCredentials);
 	}
 
 	public async buildForPublishingPlatform(platformArg: string): Promise<string> {

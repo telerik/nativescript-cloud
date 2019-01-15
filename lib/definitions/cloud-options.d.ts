@@ -11,6 +11,8 @@ interface ICloudOptions extends IOptions, ISharedCloud {
 	track: string;
 	workflow: IWorkflowPropertyOptions;
 	vmTemplateName: string;
+	appleSessionBase64: string;
+	appleApplicationSpecificPassword: string;
 }
 
 /**

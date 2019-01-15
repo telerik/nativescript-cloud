@@ -45,7 +45,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 			this.$logger.trace(m);
 			if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !this.silent) {
 				const body: ICloudOperationOutput = m.body;
-				const data = this.$nsCloudOutputFilter.filter(body.data);
+				const data = Buffer.from(body.data, 'utf8').toString('utf8');
 				if (body.pipe === "stdout") {
 					this.$logger.info(data);
 				} else if (body.pipe === "stderr") {

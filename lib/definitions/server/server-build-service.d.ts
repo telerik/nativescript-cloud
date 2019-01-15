@@ -4,6 +4,7 @@ interface IServerBuildService {
 	getBuildCredentials(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse>;
 	generateCodesignFiles(codesignRequestData: ICodeSignRequestData): Promise<IServerResponse>;
 	publish(publishRequestData: IPublishRequestData): Promise<IServerResponse>;
+	appleLogin(appleLoginRequestData: IAppleLoginRequestData): Promise<IServerResponse>;
 }
 
 interface IServerResponse {
@@ -70,7 +71,7 @@ interface IAmazonStorageEntry {
 	fileName: string;
 }
 
-interface IPublishCredentials {
+interface IPublishCredentials extends IApple2FAOptions {
 	username?: string;
 	password?: string;
 	authJson?: string;
@@ -84,4 +85,8 @@ interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroid
 
 interface IServerRequestData {
 	properties: IDictionary<any>;
+}
+
+interface IAppleLoginRequestData extends ICloudOperationId {
+	credentials: ICredentials;
 }
