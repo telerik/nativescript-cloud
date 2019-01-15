@@ -1,6 +1,6 @@
 import promiseRetry = require("promise-retry");
 
-import { CloudOperationMessageTypes } from "../constants";
+import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
 import { CloudOperationBase } from "./cloud-operation-base";
 
 module.exports = class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
@@ -106,7 +106,7 @@ module.exports = class CloudOperationV1 extends CloudOperationBase implements IC
 			const contentToLog = this.$nsCloudOutputFilter.filter(logs.substr(this.outputCursorPosition));
 			if (contentToLog) {
 				const data: ICloudOperationMessage<ICloudOperationOutput> = { type: CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT, cloudOperationId: this.id, body: { data: contentToLog, pipe: "stdout" } };
-				this.emit("message", data);
+				this.emit(CloudCommunicationEvents.MESSAGE, data);
 			}
 
 			this.outputCursorPosition = logs.length <= 0 ? 0 : logs.length - 1;

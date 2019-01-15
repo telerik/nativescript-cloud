@@ -155,3 +155,7 @@ export class CloudOperationMessageTypes {
 export class CloudCommunicationChannelTypes {
 	public static readonly WEBSOCKET: string = "Websocket";
 }
+
+export class CloudCommunicationEvents {
+	public static readonly MESSAGE: string = "message";
+}

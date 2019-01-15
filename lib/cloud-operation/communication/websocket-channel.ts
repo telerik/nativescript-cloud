@@ -2,7 +2,7 @@ import * as WebSocket from "ws";
 import { v4 } from "uuid";
 
 import { CommunicationChannelBase } from "./communication-channel-base";
-import { CloudOperationMessageTypes, CloudOperationWebsocketMessageActions } from "../../constants";
+import { CloudOperationMessageTypes, CloudOperationWebsocketMessageActions, CloudCommunicationEvents } from "../../constants";
 
 export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 	private ws: WebSocket;
@@ -71,7 +71,7 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 	}
 
 	private addChannelListeners() {
-		this.ws.on("message", (m) => {
+		this.ws.on(CloudCommunicationEvents.MESSAGE, (m) => {
 			if (!m) {
 				return;
 			}
@@ -88,7 +88,7 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 				this.handshakeCompleteResolve();
 			}
 
-			this.emit("message", msg);
+			this.emit(CloudCommunicationEvents.MESSAGE, msg);
 		});
 
 		this.ws.on("error", err => this.emit("error", err));

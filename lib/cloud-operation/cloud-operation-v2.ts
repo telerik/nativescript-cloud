@@ -1,5 +1,5 @@
 import { CloudOperationBase } from "./cloud-operation-base";
-import { CloudCommunicationChannelTypes, CloudOperationMessageTypes } from "../constants";
+import { CloudCommunicationChannelTypes, CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
 import { WebsocketCommunicationChannel } from "./communication/websocket-channel";
 
 module.exports = class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
@@ -62,7 +62,7 @@ module.exports = class CloudOperationV2 extends CloudOperationBase implements IC
 
 	private subscribeForMessages(): Promise<ICloudOperationResult> {
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
-			this.communicationChannel.on("message", async (m) => {
+			this.communicationChannel.on(CloudCommunicationEvents.MESSAGE, async (m) => {
 				if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_RESULT) {
 					this.result = <ICloudOperationResult>m.body;
 					if (this.result.code === 0) {
@@ -74,7 +74,7 @@ module.exports = class CloudOperationV2 extends CloudOperationBase implements IC
 					}
 				}
 
-				this.emit("message", m);
+				this.emit(CloudCommunicationEvents.MESSAGE, m);
 			});
 
 			// TODO: subscribe for error and close and retry on close.

@@ -1,6 +1,6 @@
 import * as path from "path";
 import { EventEmitter } from "events";
-import { CloudOperationMessageTypes } from "../constants";
+import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
 
 export abstract class CloudService extends EventEmitter implements ICloudOperationService {
 	private static readonly DEFAULT_SERVER_REQUEST_VERSION: string = "v1";
@@ -40,9 +40,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		const cloudOperation: ICloudOperation = this.$injector.resolve(require(`../cloud-operation/cloud-operation-${serverResponse.cloudOperationVersion || CloudService.DEFAULT_SERVER_REQUEST_VERSION}`), { id: cloudOperationId, serverResponse: serverResponse });
 		this.cloudOperations[cloudOperationId] = cloudOperation;
 
-		// TODO: add the event to the d.ts and remove the any.
-		cloudOperation.on("message", (m: ICloudOperationMessage<any>) => {
-			this.$logger.trace(m);
+		cloudOperation.on(CloudCommunicationEvents.MESSAGE, (m: ICloudOperationMessage<any>) => {
 			if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !this.silent) {
 				const body: ICloudOperationOutput = m.body;
 				const data = Buffer.from(body.data, 'utf8').toString('utf8');
@@ -51,9 +49,9 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 				} else if (body.pipe === "stderr") {
 					this.$logger.error(data);
 				}
-			} else if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
-				this.emit(CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST, m);
 			}
+
+			this.emit(CloudCommunicationEvents.MESSAGE, m);
 		});
 
 		try {
