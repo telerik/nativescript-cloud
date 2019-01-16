@@ -18,6 +18,7 @@ export class KinveyUserService extends UserServiceBase implements IUserService {
 		return {
 			accessToken: userData.token,
 			refreshToken: "",
+			instanceId: userData.instanceId,
 			userInfo: {
 				email: userData.email,
 				firstName: userData.firstName,
@@ -31,7 +32,8 @@ export class KinveyUserService extends UserServiceBase implements IUserService {
 			email: userData.userInfo.email,
 			firstName: userData.userInfo.firstName,
 			lastName: userData.userInfo.lastName,
-			token: userData.accessToken
+			token: userData.accessToken,
+			instanceId: userData.instanceId
 		};
 
 		super.setUserData(kinveyUserData);

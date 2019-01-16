@@ -1,10 +1,12 @@
-import { AUTH_SERVICE_NAME, HTTP_METHODS } from "../../constants";
+import { AUTH_SERVICE_NAME, HTTP_METHODS, HTTP_HEADERS } from "../../constants";
 import { ServerServiceBase } from "./server-service-base";
 
 export class ServerAuthService extends ServerServiceBase implements IServerAuthService {
 	protected serviceName: string = AUTH_SERVICE_NAME;
 
 	constructor(protected $nsCloudServerServicesProxy: IServerServicesProxy,
+		private $nsAccountUtils: IAccountUtils,
+		private $nsCloudUserService: IUserService,
 		$injector: IInjector) {
 		super($nsCloudServerServicesProxy, $injector);
 	}
@@ -18,8 +20,14 @@ export class ServerAuthService extends ServerServiceBase implements IServerAuthS
 		return this.sendRequest<ITokenData>(HTTP_METHODS.POST, "api/refresh-token", { refreshToken });
 	}
 
-	public devLogin(username: string, password: string): Promise<IUserData> {
-		return this.sendRequest<IUserData>(HTTP_METHODS.POST, "api/credentials-grant", { username, password });
+	public devLogin(username: string, password: string, instanceId?: string): Promise<IUserData> {
+		const headers = Object.create(null);
+		if (this.$nsAccountUtils.isKinveyUser()) {
+			this.$nsCloudUserService.clearUserData();
+			headers[HTTP_HEADERS.X_NS_INSTANCE_ID] = instanceId;
+		}
+
+		return this.sendRequest<IUserData>(HTTP_METHODS.POST, "api/credentials-grant", { username, password }, headers);
 	}
 
 	public getTokenState(token: string): Promise<ITokenState> {

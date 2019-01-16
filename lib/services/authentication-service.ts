@@ -112,8 +112,9 @@ export class AuthenticationService implements IAuthenticationService {
 		return userInfo;
 	}
 
-	public async devLogin(username: string, password: string): Promise<IUser> {
-		const userData = await this.$nsCloudServerAuthService.devLogin(username, password);
+	public async devLogin(username: string, password: string, instanceId?: string): Promise<IUser> {
+		const userData = await this.$nsCloudServerAuthService.devLogin(username, password, instanceId);
+		userData.instanceId = instanceId;
 		this.$nsCloudUserService.setUserData(userData);
 
 		return userData.userInfo;

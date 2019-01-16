@@ -5,7 +5,7 @@ interface IAuthenticationService {
 	 * @param {string} password The password of the user.
 	 * @returns {Promise<IUser>} Returns the user information after successful login.
 	 */
-	devLogin(username: string, password: string): Promise<IUser>;
+	devLogin(username: string, password: string, instanceId?: string): Promise<IUser>;
 
 	/**
 	 * Opens login page and after successful login saves the user information.
@@ -58,6 +58,7 @@ interface ILoginOptions extends IOpenActionOptions {
 interface IUserData extends ITokenData {
 	refreshToken: string;
 	userInfo: IUser;
+	instanceId?: string;
 }
 
 interface ITokenData {
@@ -88,9 +89,10 @@ interface IKinveyUserData {
 	email: string;
 	firstName: string;
 	lastName: string
+	instanceId: string
+	token: string;
 	lastLoginTime?: Date;
 	name?: string;
-	token: string;
 	twoFactorAuth?: IKinveyTwoFactorAuth
 }
 

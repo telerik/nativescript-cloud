@@ -1,5 +1,5 @@
 interface IServerAuthService {
-	devLogin(username: string, password: string): Promise<IUserData>;
+	devLogin(username: string, password: string, instanceId?: string): Promise<IUserData>;
 	getLoginUrl(port: number): string;
 	refreshToken(refreshToken: string): Promise<ITokenData>;
 	getTokenState(token: string): Promise<ITokenState>;

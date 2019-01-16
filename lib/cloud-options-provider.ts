@@ -8,6 +8,7 @@ export class CloudOptionsProvider implements ICloudOptionsProvider {
 			local: { type: OptionType.Boolean, hasSensitiveValue: false },
 			serverProto: { type: OptionType.String , hasSensitiveValue: true},
 			namespace: { type: OptionType.String, hasSensitiveValue: true },
+			instanceId: {type: OptionType.String, hasSensitiveValue: false },
 			sharedCloud: { type: OptionType.Boolean, hasSensitiveValue: false },
 			workflow: { type: OptionType.Object, hasSensitiveValue: true },
 			vmTemplateName: { type: OptionType.String, hasSensitiveValue: false },
