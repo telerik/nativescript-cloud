@@ -12,6 +12,7 @@ export class HttpClient implements Server.IHttpClient {
 	private static STATUS_CODE_REGEX = /statuscode=(\d+)/i;
 	private static STUCK_REQUEST_ERROR_MESSAGE = "The request can't receive any response.";
 	private static STUCK_RESPONSE_ERROR_MESSAGE = "Can't receive all parts of the response.";
+	private static STUCK_REQUEST_TIMEOUT = 60000;
 	// We receive multiple response packets every ms but we don't need to be very aggressive here.
 	private static STUCK_RESPONSE_CHECK_INTERVAL = 10000;
 
@@ -107,6 +108,8 @@ export class HttpClient implements Server.IHttpClient {
 
 		const result = new Promise<Server.IResponse>((resolve, reject) => {
 			let timerId: number;
+			let stuckRequestTimerId: number;
+			let hasResponse = false;
 			const cleanupRequestData: ICleanupRequestData = Object.create({ timers: [] });
 			this.cleanupData.push(cleanupRequestData);
 
@@ -133,6 +136,17 @@ export class HttpClient implements Server.IHttpClient {
 			const requestObj = request(options);
 			cleanupRequestData.req = requestObj;
 
+			if (options.method !== "PUT" && options.method !== "POST") {
+				stuckRequestTimerId = setTimeout(() => {
+					clearTimeout(stuckRequestTimerId);
+					stuckRequestTimerId = null;
+					if (!hasResponse) {
+						this.setResponseResult(promiseActions, cleanupRequestData, { err: new Error(HttpClient.STUCK_REQUEST_ERROR_MESSAGE) });
+					}
+				}, options.timeout || HttpClient.STUCK_REQUEST_TIMEOUT);
+				cleanupRequestData.timers.push(stuckRequestTimerId);
+			}
+
 			requestObj
 				.on("error", (err: IHttpRequestError) => {
 					this.$logger.trace("An error occurred while sending the request:", err);
@@ -149,6 +163,7 @@ export class HttpClient implements Server.IHttpClient {
 				})
 				.on("response", (response: Server.IRequestResponseData) => {
 					cleanupRequestData.res = response;
+					hasResponse = true;
 					let lastChunkTimestamp = Date.now();
 					cleanupRequestData.stuckResponseIntervalId = setInterval(() => {
 						if (Date.now() - lastChunkTimestamp > HttpClient.STUCK_RESPONSE_CHECK_INTERVAL) {
