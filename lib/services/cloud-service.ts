@@ -20,7 +20,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		private $processService: IProcessService) {
 		super();
 		this.cloudOperations = Object.create(null);
-		this.$processService.attachToProcessExitSignals(this, this.cleanup);
+		this.$processService.attachToProcessExitSignals(this, this.cleanup.bind(this));
 	}
 
 	public abstract getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;

@@ -2,7 +2,7 @@ import { CloudOperationBase } from "./cloud-operation-base";
 import { CloudCommunicationChannelTypes, CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
 import { WebsocketCommunicationChannel } from "./communication/websocket-channel";
 
-module.exports = class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
+class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 	private static readonly WAIT_TO_START_TIMEOUT: number = 10 * 60 * 1000;
 
 	private communicationChannel: ICloudCommunicationChannel;
@@ -17,8 +17,6 @@ module.exports = class CloudOperationV2 extends CloudOperationBase implements IC
 		if (serverResponse.communicationChannel.type === CloudCommunicationChannelTypes.WEBSOCKET) {
 			this.communicationChannel = this.$injector.resolve(WebsocketCommunicationChannel, { data: serverResponse.communicationChannel, cloudOperationId: this.id });
 		}
-
-		// TODO: attach to process exit signals and cleanup with error.
 	}
 
 	public async sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
@@ -46,6 +44,12 @@ module.exports = class CloudOperationV2 extends CloudOperationBase implements IC
 
 			try {
 				await this.communicationChannel.connect();
+				this.communicationChannel.once('close', code => {
+					if (!this.result) {
+						this.cleanup(code);
+						reject(new Error(`Communication channel closed with code ${code}`));
+					}
+				});
 				this.status = CloudOperationV2.OPERATION_IN_PROGRESS_STATUS;
 			} catch (err) {
 				return reject(err);
@@ -62,10 +66,17 @@ module.exports = class CloudOperationV2 extends CloudOperationBase implements IC
 
 	private subscribeForMessages(): Promise<ICloudOperationResult> {
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
+			this.communicationChannel.once(CloudCommunicationEvents.CLOSE, code => {
+				if (!this.result) {
+					this.cleanup(code);
+					reject(new Error(`Communication channel closed with code ${code}`));
+				}
+			});
+
 			this.communicationChannel.on(CloudCommunicationEvents.MESSAGE, async (m) => {
 				if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_RESULT) {
 					this.result = <ICloudOperationResult>m.body;
-					if (this.result.code === 0) {
+					if (this.result.code === 0 || this.result.data) {
 						this.status = CloudOperationV2.OPERATION_COMPLETE_STATUS;
 						return resolve(this.result);
 					} else {
@@ -76,8 +87,8 @@ module.exports = class CloudOperationV2 extends CloudOperationBase implements IC
 
 				this.emit(CloudCommunicationEvents.MESSAGE, m);
 			});
-
-			// TODO: subscribe for error and close and retry on close.
 		});
 	}
 }
+
+module.exports = CloudOperationV2;

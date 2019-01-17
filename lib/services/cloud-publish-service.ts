@@ -116,7 +116,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 				throw ex;
 			}
 
-			this.$logger.trace("Publish failed with err: ", ex);
+			this.$logger.error("Publish failed with err: ", ex);
 		}
 
 		this.$logger.trace("Publish result:", publishResult);

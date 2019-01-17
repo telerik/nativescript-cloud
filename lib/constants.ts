@@ -150,6 +150,8 @@ export class CloudOperationMessageTypes {
 	public static readonly CLOUD_OPERATION_STOP: string = "stop";
 	public static readonly CLOUD_OPERATION_STATUS: string = "status";
 	public static readonly CLOUD_OPERATION_RESULT: string = "result";
+	public static readonly CLOUD_OPERATION_ECHO: string = "echo";
+	public static readonly CLOUD_OPERATION_ECHO_REPLY: string = "echoReply";
 }
 
 export class CloudCommunicationChannelTypes {
@@ -158,4 +160,10 @@ export class CloudCommunicationChannelTypes {
 
 export class CloudCommunicationEvents {
 	public static readonly MESSAGE: string = "message";
+	public static readonly CLOSE: string = "close";
+}
+
+export class CloudCommunicationChannelExitCodes {
+	public static readonly UNEXPECTED_RESPONSE: number = 128;
+	public static readonly MISSING_ECHO_REPLIES: number = 129;
 }

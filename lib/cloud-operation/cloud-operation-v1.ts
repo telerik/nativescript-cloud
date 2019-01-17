@@ -3,7 +3,7 @@ import promiseRetry = require("promise-retry");
 import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
 import { CloudOperationBase } from "./cloud-operation-base";
 
-module.exports = class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
+class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 	private static OPERATION_STATUS_CHECK_RETRY_COUNT = 8;
 	private static OPERATION_STATUS_CHECK_INTERVAL = 1500;
 
@@ -21,7 +21,6 @@ module.exports = class CloudOperationV1 extends CloudOperationBase implements IC
 
 		this.outputCursorPosition = 0;
 	}
-
 
 	public async sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
 		this.$logger.warn("This version of the cloud operation does not support sending messages to the cloud services.");
@@ -68,7 +67,7 @@ module.exports = class CloudOperationV1 extends CloudOperationBase implements IC
 					try {
 						this.result = await this.$nsCloudS3Service.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl);
 					} catch (err) {
-						this.$logger.trace(err)
+						this.$logger.trace(err);
 					}
 
 					clearInterval(this.statusCheckInterval);
@@ -116,3 +115,5 @@ module.exports = class CloudOperationV1 extends CloudOperationBase implements IC
 		}
 	}
 }
+
+module.exports = CloudOperationV1;

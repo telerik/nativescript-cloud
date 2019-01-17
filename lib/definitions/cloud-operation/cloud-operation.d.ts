@@ -36,9 +36,15 @@ interface ICloudOperationInput extends ICloudOperationInputBase {
 }
 
 interface ICloudOperationStop {
-	code?: number;
+	code: number;
+	reason?: string;
 }
 
 interface ICloudOperationStatus {
 	status: string;
+}
+
+interface ICloudOperationEcho {
+	identifier: string;
+	sequenceNumber: number;
 }

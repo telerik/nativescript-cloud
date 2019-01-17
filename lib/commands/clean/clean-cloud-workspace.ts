@@ -13,7 +13,7 @@ export class CleanCloudWorkspace extends InteractiveCloudCommand implements ICom
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudProjectService: ICloudProjectService,
 		private $projectData: IProjectData) {
-		super($nsCloudProjectService, $errors, $logger, $prompter)
+		super($nsCloudProjectService, $errors, $logger, $prompter);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {

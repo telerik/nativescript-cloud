@@ -1,6 +1,5 @@
 import { InteractiveCloudCommand } from "./interactive-cloud-command";
 
-
 export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 	public allowedParameters: ICommandParameter[];
 

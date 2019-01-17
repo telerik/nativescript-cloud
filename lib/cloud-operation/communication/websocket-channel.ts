@@ -2,12 +2,10 @@ import * as WebSocket from "ws";
 import { v4 } from "uuid";
 
 import { CommunicationChannelBase } from "./communication-channel-base";
-import { CloudOperationMessageTypes, CloudOperationWebsocketMessageActions, CloudCommunicationEvents } from "../../constants";
+import { CloudOperationWebsocketMessageActions, CloudCommunicationEvents, CloudCommunicationChannelExitCodes } from "../../constants";
 
 export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 	private ws: WebSocket;
-
-	private handshakeCompleteResolve: (value?: PromiseLike<void>) => void;
 
 	constructor(protected cloudOperationId: string,
 		protected data: ICloudChannelData,
@@ -15,11 +13,10 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 		super(cloudOperationId, data, $logger);
 	}
 
-	public async close(code?: number): Promise<void> {
-		await super.close(code);
+	protected async closeCore(code: number, reason?: string): Promise<void> {
 		if (this.ws.readyState === this.ws.OPEN) {
-			this.isConnected = false;
-			this.ws.close(code);
+			this.ws.removeAllListeners();
+			this.ws.close();
 		}
 	}
 
@@ -47,51 +44,31 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 			try {
 				this.ws = new WebSocket(this.data.config.url);
 				this.ws.once("close", (c, r) => {
-					this.emit("close", c, r);
 					reject(new Error(`Connection closed with code: ${c}`));
+					this.close(c, r);
 				});
 
 				this.ws.once("unexpected-response", () => {
-					reject(new Error("Unexpected response received."))
-				})
+					const errMsg = "Unexpected response received.";
+					reject(new Error(errMsg));
+					this.close(CloudCommunicationChannelExitCodes.UNEXPECTED_RESPONSE, errMsg);
+				});
 			} catch (err) {
 				return reject(err);
 			}
 
-			this.handshakeCompleteResolve = resolve;
 			this.addChannelListeners();
-			this.ws.once("open", async () => {
-				try {
-					await this.sendMessageCore({ type: CloudOperationMessageTypes.CLOUD_OPERATION_CLIENT_HELLO, cloudOperationId: this.cloudOperationId });
-				} catch (err) {
-					return reject(err);
-				}
-			});
+			this.ws.once("open", resolve);
 		});
 	}
 
 	private addChannelListeners() {
-		this.ws.on(CloudCommunicationEvents.MESSAGE, (m) => {
-			if (!m) {
-				return;
-			}
-
-			// TODO: handle errors.
-			let msg: ICloudOperationMessage<any>;
-			if (_.isBuffer(m)) {
-				msg = JSON.parse(m.toString());
-			} else {
-				msg = JSON.parse(<string>m);
-			}
-
-			if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_SERVER_HELLO) {
-				this.handshakeCompleteResolve();
-			}
-
+		this.ws.on(CloudCommunicationEvents.MESSAGE, m => {
+			const msg = super._handleMessage(m);
 			this.emit(CloudCommunicationEvents.MESSAGE, msg);
 		});
 
-		this.ws.on("error", err => this.emit("error", err));
-		this.ws.on("close", (code, reason) => this.emit("close", code, reason));
+		this.ws.once("error", err => this.emit("error", err));
+		this.ws.once("close", (code, reason) => this.emit("close", code, reason));
 	}
 }
