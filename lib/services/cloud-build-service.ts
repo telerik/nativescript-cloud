@@ -353,6 +353,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 				sessionKey: settings.buildCredentials.sessionKey, // TODO: remove this parameter after we deploy our new server.
 				templateAppName: sanitizedProjectName,
 				projectName: sanitizedProjectName,
+				iOSBuildToolsVersion: "10.1",
 				framework: "tns",
 				flavorId: settings.projectSettings.flavorId,
 				additionalCliFlags: settings.additionalCliFlags,
