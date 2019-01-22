@@ -40,7 +40,8 @@ export class KinveyUserService extends UserServiceBase implements IUserService {
 	}
 
 	private getUserFilePath(): string {
-		return join(this.$hostInfo.isWindows ? join(process.env.AppData) : join(home(), ".local", "share"),
+		return join(this.$hostInfo.isWindows ? join(process.env.AppData) :
+		this.$hostInfo.isDarwin ? join(home(), "Library", "Application Support") : join(home(), ".config"),
 			"KinveyStudio",
 			"kinveyUser.json");
 	}
