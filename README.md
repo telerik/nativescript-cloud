@@ -72,6 +72,14 @@ tns.extensibilityService.installExtension("nativescript-cloud@latest")
   * [getAuthServices](#getauthservices-method)
   * [getDefaultAuthService](#getdefaultauthservice-method)
   * [changeDefaultAuthService](#changedefaultauthservice-method)
+* [nsCloudConfigManager](#nscloudconfigmanager)
+  * [reset](#reset-method)
+  * [applyConfig](#applyConfig-method)
+  * [getCurrentConfigData](#getCurrentConfigData-method)
+  * [getServiceDomainName](#getServiceDomainName-method)
+  * [getCloudServicesDomainNames](#getCloudServicesDomainNames-method)
+  * [getServiceValueOrDefault](#getServiceValueOrDefault-method)
+  * [printConfigData](#printConfigData-method)
 
 ### nsCloudBuildService
 The `nsCloudBuildService` allows build of applications in the cloud. You can call the following methods:
@@ -1468,6 +1476,165 @@ tns.nsCloudKinveyService.getAuthServices({ environmentId: "<env-id>" })
 	.catch(err => console.error("Unable to change dafault auth service. Error is: ", err));
 
 ```
+
+### nsCloudConfigManager
+The `nsCloudConfigManager` allows to manage cloud configuration. You can call the following methods:
+
+#### reset method
+`reset` resets the current cloud configuration to the default one - production. </br>
+Definition:
+
+```TypeScript
+/**
+ * Resets config.json to it's default values.
+ * @returns {void}
+ */
+reset(): void;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/cloud-config-manager.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudConfigManager.reset();
+```
+
+#### applyConfig method
+`applyConfig` applies specific configuration and saves it in config.json. </br>
+Definition:
+
+```TypeScript
+/**
+ * Applies specific configuration and saves it in config.json
+ * @param {string} configName The name of the configuration to be applied.
+ * @param {IConfigOptions} [options] The config options.
+ * @param {IServerConfigBase} [globalServerConfig] The global server configuration which will
+ * be used when changing the configuration. This parameter will override the default global configuration.
+ * @returns {void}
+ */
+applyConfig(configName: string, options?: IConfigOptions, globalServerConfig?: IServerConfigBase): void;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/cloud-config-manager.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudConfigManager.applyConfig("test");
+```
+
+#### getCurrentConfigData method
+`getCurrentConfigData` returns the current cloud configuration. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns the current cloud configuration.
+ * @returns {IServerConfig}
+ */
+getCurrentConfigData(): IServerConfig;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/cloud-config-manager.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+console.log(tns.nsCloudConfigManager.getCurrentConfigData());
+```
+
+#### getServiceDomainName method
+`getServiceDomainName` returns the domain of the provided cloud service. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns the domain of the provided cloud service.
+ * @param serviceName The name of the cloud service.
+ * @returns {string}
+ */
+getServiceDomainName(serviceName: string): string;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/cloud-config-manager.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+console.log(tns.nsCloudConfigManager.getServiceDomainName("accounts-service"));
+```
+
+#### getCloudServicesDomainNames method
+`getCloudServicesDomainNames` returns the domain names of all cloud services. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns the domain names of all cloud services.
+ * @returns {string[]} The domain names of all cloud services.
+ */
+getCloudServicesDomainNames(): string[];
+```
+Detailed description of each parameter can be found [here](./lib/definitions/cloud-config-manager.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+console.log(tns.nsCloudConfigManager.getCloudServicesDomainNames());
+```
+
+#### getServiceValueOrDefault method
+`getServiceValueOrDefault` returns the value stored in the configuration of the provided service or the default value stored in the global configuration. </br>
+Definition:
+
+```TypeScript
+/**
+ * Returns the value stored in the configuration of the provided service or the default value stored in the
+ * global configuration.
+ * @param serviceName The name of the cloud service.
+ * @param valueName The name of the value.
+ * @returns {string} The value specified in the provided service config or the value specified in the global config.
+ */
+getServiceValueOrDefault(serviceName: string, valueName: string): string;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/cloud-config-manager.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+console.log(tns.nsCloudConfigManager.getServiceValueOrDefault("accounts-service", "serverProto"));
+```
+
+#### printConfigData method
+`printConfigData` prints the current cloud configuration on the stdout of the process. </br>
+Definition:
+
+```TypeScript
+/**
+ * Prints the current cloud configuration on the stdout of the process.
+ * @returns {void}
+ */
+printConfigData(): void;
+```
+Detailed description of each parameter can be found [here](./lib/definitions/cloud-config-manager.d.ts).
+</br>
+
+Usage:
+```JavaScript
+const tns = require("nativescript");
+
+tns.nsCloudConfigManager.printConfigData();
+```
+
 
 ## Development
 The project is written in TypeScript. After cloning it, you can set it up by executing the following commands in your terminal:
