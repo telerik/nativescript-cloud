@@ -6,15 +6,15 @@ export class ConfigApplyCommand implements ICommand {
 	}
 
 	constructor(private $nsCloudOptionsProvider: ICloudOptionsProvider,
-		private $nsCloudServerConfigManager: IServerConfigManager,
+		private $nsCloudConfigManager: ICloudConfigManager,
 		private $options: ICloudOptions,
 		private $stringParameterBuilder: IStringParameterBuilder) { }
 
 	public async execute(args: string[]): Promise<void> {
 		const configurationName = args[0];
 		const globalServerConfig: IServerConfigBase = { apiVersion: this.$options.apiVersion, serverProto: this.$options.serverProto, namespace: this.$options.namespace };
-		this.$nsCloudServerConfigManager.applyConfig(configurationName, null, globalServerConfig);
-		this.$nsCloudServerConfigManager.printConfigData();
+		this.$nsCloudConfigManager.applyConfig(configurationName, null, globalServerConfig);
+		this.$nsCloudConfigManager.printConfigData();
 	}
 }
 

@@ -1,4 +1,4 @@
-interface IServerConfigManager {
+interface ICloudConfigManager {
 	/**
 	 * Resets config.json to it's default values.
 	 * @returns {void}
@@ -8,15 +8,45 @@ interface IServerConfigManager {
 	/**
 	 * Applies specific configuration and saves it in config.json
 	 * @param {string} configName The name of the configuration to be applied.
-	 * @param optional {IConfigOptions} options The config options.
-	 * @param optional {IServerConfigBase} globalServerConfig The global server configuration which will
+	 * @param {IConfigOptions} [options] The config options.
+	 * @param {IServerConfigBase} [globalServerConfig] The global server configuration which will
 	 * be used when changing the configuration. This parameter will override the default global configuration.
 	 * @returns {void}
 	 */
 	applyConfig(configName: string, options?: IConfigOptions, globalServerConfig?: IServerConfigBase): void;
 
+	/**
+	 * Returns the current cloud configuration.
+	 * @returns {IServerConfig}
+	 */
 	getCurrentConfigData(): IServerConfig;
 
+	/**
+	 * Returns the domain of the provided cloud service.
+	 * @param serviceName The name of the cloud service.
+	 * @returns {string}
+	 */
+	getServiceDomainName(serviceName: string): string;
+
+	/**
+	 * Returns the domain names of all cloud services.
+	 * @returns {string[]} The domain names of all cloud services.
+	 */
+	getCloudServicesDomainNames(): string[];
+
+	/**
+	 * Returns the value stored in the configuration of the provided service or the default value stored in the
+	 * global configuration.
+	 * @param serviceName The name of the cloud service.
+	 * @param valueName The name of the value.
+	 * @returns {string} The value specified in the provided service config or the value specified in the global config.
+	 */
+	getServiceValueOrDefault(serviceName: string, valueName: string): string;
+
+	/**
+	 * Prints the current cloud configuration on the stdout of the process.
+	 * @returns {void}
+	 */
 	printConfigData(): void;
 }
 

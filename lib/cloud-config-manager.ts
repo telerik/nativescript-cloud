@@ -1,10 +1,10 @@
 import * as path from "path";
 
-export class ServerConfigManager implements IServerConfigManager {
+export class ServerConfigManager implements ICloudConfigManager {
 	private static CONFIG_FILE_NAME: string = "config";
 	private static BASE_CONFIG_FILE_NAME: string = `${ServerConfigManager.CONFIG_FILE_NAME}-base`;
 
-	/*don't require logger and everything that has logger as dependency in config.js due to cyclic dependency*/
+	/* don't require logger and everything that has logger as dependency in config.js due to cyclic dependency */
 	constructor(protected $fs: IFileSystem,
 		protected $options: IProfileDir) {
 		const baseConfigPath = this.getConfigPath(ServerConfigManager.CONFIG_FILE_NAME);
@@ -37,6 +37,37 @@ export class ServerConfigManager implements IServerConfigManager {
 
 	public getCurrentConfigData(): IServerConfig {
 		return this.loadConfig(ServerConfigManager.CONFIG_FILE_NAME);
+	}
+
+	public getServiceDomainName(serviceName: string): string {
+		const config = this.getCurrentConfigData();
+		const serviceConfig = config.cloudServices[serviceName];
+		// When we want to use localhost or PR builds for cloud services
+		// we need to return the specified full domain name.
+		if (serviceConfig.fullHostName) {
+			return serviceConfig.fullHostName;
+		}
+
+		// If we want to use the official domains we need the domain name and the subdomain for the service.
+		return `${serviceConfig.subdomain}.${config.domainName}`;
+	}
+
+	public getServiceValueOrDefault(serviceName: string, valueName: string): string {
+		const config = this.getCurrentConfigData();
+		const serviceConfig = config.cloudServices[serviceName];
+		if (_.has(serviceConfig, valueName)) {
+			return serviceConfig[valueName];
+		}
+
+		return <string>config[valueName];
+	}
+
+	public getCloudServicesDomainNames(): string[] {
+		const cloudServices = this.getCurrentConfigData().cloudServices;
+		return _(cloudServices)
+			.keys()
+			.map(s => this.getServiceDomainName(s))
+			.value();
 	}
 
 	private loadConfig(name: string, options?: IConfigOptions): IServerConfig {
@@ -74,4 +105,4 @@ export class ServerConfigManager implements IServerConfigManager {
 	}
 }
 
-$injector.register("nsCloudServerConfigManager", ServerConfigManager);
+$injector.register("nsCloudConfigManager", ServerConfigManager);

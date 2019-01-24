@@ -7,11 +7,11 @@ export class AccountUtils implements IAccountUtils {
 		return this.$injector.resolve<IKinveyService>("nsCloudKinveyService");
 	}
 
-	constructor(private $nsCloudServerConfigManager: IServerConfigManager,
+	constructor(private $nsCloudConfigManager: ICloudConfigManager,
 		private $injector: IInjector, ) { }
 
 	public isKinveyUser(): boolean {
-		const serverConfig = this.$nsCloudServerConfigManager.getCurrentConfigData();
+		const serverConfig = this.$nsCloudConfigManager.getCurrentConfigData();
 		const namespace: string = serverConfig[NAMESPACE_LOWER_CASE];
 		return isKinveyNamespace(namespace);
 	}

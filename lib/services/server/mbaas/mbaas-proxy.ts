@@ -4,14 +4,9 @@ export class MBaasProxy extends ServerServicesProxy implements IServerServicesPr
 	constructor($errors: IErrors,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
-		$nsCloudServerConfigManager: IServerConfigManager,
+		$nsCloudConfigManager: ICloudConfigManager,
 		$nsCloudUserService: IUserService) {
-		super($errors, $httpClient, $logger, $nsCloudServerConfigManager, $nsCloudUserService);
-	}
-
-	public getServiceAddress(serviceName: string): string {
-		const serviceConfig = this.serverConfig.mBaaS[serviceName];
-		return serviceConfig.fullHostName;
+		super($errors, $httpClient, $logger, $nsCloudConfigManager, $nsCloudUserService);
 	}
 
 	public getUrlPath(serviceName: string, urlPath: string): string {
@@ -22,6 +17,11 @@ export class MBaasProxy extends ServerServicesProxy implements IServerServicesPr
 
 	protected getAuthScheme(serviceName: string): string {
 		return this.serverConfig.mBaaS[serviceName].authScheme || super.getAuthScheme(serviceName);
+	}
+
+	protected getServiceDomainName(serviceName: string): string {
+		const serviceConfig = this.serverConfig.mBaaS[serviceName];
+		return serviceConfig.fullHostName;
 	}
 }
 
