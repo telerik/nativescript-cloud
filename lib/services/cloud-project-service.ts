@@ -1,5 +1,4 @@
 import * as path from "path";
-import * as uuid from "uuid";
 import { EOL } from "os";
 import { CloudService } from "./cloud-service";
 
@@ -51,20 +50,15 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 	}
 
 	private async startCleanProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
-		const cloudOperationId = uuid.v4();
-		try {
+		return await this.executeCloudOperation("Cloud cleanup", async (cloudOperationId: string): Promise<ICleanupTaskResult> => {
 			const result = await this.executeCleanupProject(cloudOperationId, cleanupProjectData);
 			this.$logger.trace(`Cleanup [${cloudOperationId}] result: `, result);
 			return result;
-		} catch (err) {
-			err.cloudOperationId = cloudOperationId;
-			throw err;
-		}
+		});
 	}
 
 	private async executeCleanupProject(cloudOperationId: string, { appIdentifier, projectName }: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
-		const cleanupInfoMessage = `Application Id: ${appIdentifier}, Project Name: ${projectName}, Cleanup Task Id: ${cloudOperationId}`;
-		this.$logger.info(`Starting cloud cleanup: ${cleanupInfoMessage}.`);
+		this.$logger.info(`Cloud cleanup: Application Id: ${appIdentifier}, Project Name: ${projectName}.`);
 
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectName);
 		const cleanupProjectData: ICleanupProjectData = {

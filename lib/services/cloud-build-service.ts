@@ -69,18 +69,13 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		accountId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
-		const cloudOperationId = uuid.v4();
-		this.$logger.info("Getting accounts information...");
-		const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
-		this.$logger.info("Using account %s.", account.id);
-		try {
+		return await this.executeCloudOperation("Cloud build", async (cloudOperationId: string): Promise<IBuildResultData> => {
+			this.$logger.info("Getting accounts information...");
+			const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
+			this.$logger.info("Using account %s.", account.id);
 			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, cloudOperationId, account.id, androidBuildData, iOSBuildData);
 			return buildResult;
-		} catch (err) {
-			err.buildId = cloudOperationId;
-			err.cloudOperationId = cloudOperationId;
-			throw err;
-		}
+		});
 	}
 
 	public async executeBuild(projectSettings: INSCloudProjectSettings,
@@ -90,9 +85,9 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		accountId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
-		const buildInformationString = `cloud build of '${projectSettings.projectDir}', platform: '${platform}', ` +
-			`configuration: '${buildConfiguration}', cloudOperationId: ${cloudOperationId}`;
-		this.$logger.info(`Starting ${buildInformationString}.`);
+		const buildInformationString = `Cloud build of '${projectSettings.projectDir}', platform: '${platform}', ` +
+			`configuration: '${buildConfiguration}'`;
+		this.$logger.info(`${buildInformationString}.`);
 
 		await this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
 		await this.prepareProject(cloudOperationId, projectSettings, platform, buildConfiguration, iOSBuildData);

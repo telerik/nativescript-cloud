@@ -1,7 +1,6 @@
-import { DEFAULT_ANDROID_PUBLISH_TRACK } from "../constants";
 import { basename } from "path";
-import * as uuid from "uuid";
 import { EOL } from "os";
+import { DEFAULT_ANDROID_PUBLISH_TRACK } from "../constants";
 import { CloudService } from "./cloud-service";
 import { getProjectId } from "../helpers";
 
@@ -38,54 +37,57 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 
 	public async publishToItunesConnect(publishData: IItunesConnectPublishData): Promise<void> {
-		const cloudOperationId = uuid.v4();
-		this.validatePublishData(publishData);
+		return await this.executeCloudOperation("Cloud publish iOS", async (cloudOperationId: string): Promise<void> => {
+			this.validatePublishData(publishData);
 
-		if (!publishData.credentials || !publishData.credentials.username || !publishData.credentials.password) {
-			this.$errors.failWithoutHelp("Cannot perform publish - credentials are required.");
-		}
+			if (!publishData.credentials || !publishData.credentials.username || !publishData.credentials.password) {
+				this.$errors.failWithoutHelp("Cannot perform publish - credentials are required.");
+			}
 
-		const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
-		const appIdentifier = getProjectId(projectData, this.$devicePlatformsConstants.iOS.toLowerCase());
-		const publishRequestData: IPublishRequestData = {
-			cloudOperationId,
-			appIdentifier,
-			credentials: publishData.credentials,
-			packagePaths: publishData.packagePaths,
-			platform: this.$devicePlatformsConstants.iOS
-		};
+			const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
+			const appIdentifier = getProjectId(projectData, this.$devicePlatformsConstants.iOS.toLowerCase());
 
-		return this.publishCore(publishRequestData, publishData, this.getiOSError.bind(this));
+			const publishRequestData: IPublishRequestData = {
+				cloudOperationId,
+				appIdentifier,
+				credentials: publishData.credentials,
+				packagePaths: publishData.packagePaths,
+				platform: this.$devicePlatformsConstants.iOS
+			};
+
+			await this.publishCore(publishRequestData, publishData, this.getiOSError.bind(this));
+		});
 	}
 
 	public async publishToGooglePlay(publishData: IGooglePlayPublishData): Promise<void> {
-		const cloudOperationId = uuid.v4();
-		this.validatePublishData(publishData);
+		return await this.executeCloudOperation("Cloud publish Android", async (cloudOperationId: string): Promise<void> => {
+			this.validatePublishData(publishData);
 
-		if (!publishData.pathToAuthJson || !this.$fs.exists(publishData.pathToAuthJson)) {
-			this.$errors.failWithoutHelp("Cannot perform publish - auth json file is not supplied or the provided path does not exist.");
-		}
+			if (!publishData.pathToAuthJson || !this.$fs.exists(publishData.pathToAuthJson)) {
+				this.$errors.failWithoutHelp("Cannot perform publish - auth json file is not supplied or the provided path does not exist.");
+			}
 
-		let authJson: string;
-		try {
-			authJson = JSON.stringify(this.$fs.readJson(publishData.pathToAuthJson));
-		} catch (ex) {
-			this.$errors.failWithoutHelp("Cannot perform publish - auth json file is not in JSON format.");
-		}
+			let authJson: string;
+			try {
+				authJson = JSON.stringify(this.$fs.readJson(publishData.pathToAuthJson));
+			} catch (ex) {
+				this.$errors.failWithoutHelp("Cannot perform publish - auth json file is not in JSON format.");
+			}
 
-		publishData.track = publishData.track || DEFAULT_ANDROID_PUBLISH_TRACK;
-		const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
-		const appIdentifier = getProjectId(projectData, this.$devicePlatformsConstants.Android.toLowerCase());
-		return this.publishCore({
-			cloudOperationId,
-			appIdentifier,
-			credentials: {
-				authJson
-			},
-			packagePaths: publishData.packagePaths,
-			platform: this.$devicePlatformsConstants.Android,
-			track: publishData.track
-		}, publishData, this.getAndroidError.bind(this));
+			publishData.track = publishData.track || DEFAULT_ANDROID_PUBLISH_TRACK;
+			const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
+			const appIdentifier = getProjectId(projectData, this.$devicePlatformsConstants.Android.toLowerCase());
+			await this.publishCore({
+				cloudOperationId,
+				appIdentifier,
+				credentials: {
+					authJson
+				},
+				packagePaths: publishData.packagePaths,
+				platform: this.$devicePlatformsConstants.Android,
+				track: publishData.track
+			}, publishData, this.getAndroidError.bind(this));
+		});
 	}
 
 	private getiOSError(publishResult: ICloudOperationResult, publishRequestData: IPublishRequestData) {

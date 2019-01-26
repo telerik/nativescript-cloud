@@ -1,6 +1,7 @@
 import * as path from "path";
 import { EventEmitter } from "events";
 import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
+import { v4 } from "uuid";
 
 export abstract class CloudService extends EventEmitter implements ICloudOperationService {
 	private static readonly DEFAULT_SERVER_REQUEST_VERSION: string = "v1";
@@ -25,8 +26,6 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 
 	public abstract getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;
 
-	protected abstract getServerResults(serverResult: ICloudOperationResult): IServerItem[];
-
 	public async sendCloudMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
 		const cloudOperation = this.cloudOperations[message.cloudOperationId];
 		if (!cloudOperation) {
@@ -34,6 +33,20 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		}
 
 		await cloudOperation.sendMessage(message);
+	}
+
+	protected abstract getServerResults(serverResult: ICloudOperationResult): IServerItem[];
+
+	protected async executeCloudOperation<T>(cloudOperationName: string, action: (cloudOperationId: string) => Promise<T>): Promise<T> {
+		const cloudOperationId: string = v4();
+		try {
+			this.$logger.info(`Starting ${cloudOperationName}. Cloud operation id: ${cloudOperationId}`);
+			const result = await action(cloudOperationId);
+			return result
+		} catch (err) {
+			err.cloudOperationId = cloudOperationId;
+			throw err;
+		}
 	}
 
 	protected async waitForServerOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse): Promise<ICloudOperationResult> {

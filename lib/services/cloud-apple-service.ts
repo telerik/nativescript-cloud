@@ -1,4 +1,3 @@
-import * as uuid from "uuid";
 import { CloudService } from "./cloud-service";
 
 export class CloudAppleService extends CloudService implements ICloudAppleService {
@@ -24,19 +23,14 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 	}
 
 	public async appleLogin(credentials: ICredentials): Promise<string> {
-		const cloudOperationId = uuid.v4();
-		try {
-			this.$logger.info(`Starting Apple login, cloudOperationId: ${cloudOperationId}`);
+		return await this.executeCloudOperation("Apple login", async (cloudOperationId: string): Promise<string> => {
 			const appleLoginData: IAppleLoginRequestData = { cloudOperationId, credentials };
 			const response = await this.$nsCloudServerBuildService.appleLogin(appleLoginData);
 
 			this.$logger.trace("Apple login response", response);
 			let appleLoginResult = await this.waitForServerOperationToFinish(appleLoginData.cloudOperationId, response);
 			return appleLoginResult.data.appleSessionBase64;
-		} catch (err) {
-			err.cloudOperationId = cloudOperationId;
-			throw err;
-		}
+		});
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {

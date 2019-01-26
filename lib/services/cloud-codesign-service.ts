@@ -1,5 +1,4 @@
 import * as path from "path";
-import * as uuid from "uuid";
 import * as constants from "../constants";
 import { CloudService } from "./cloud-service";
 import { getProjectId } from "../helpers";
@@ -29,18 +28,12 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 
 	public async generateCodesignFiles(codesignData: ICodesignData,
 		projectDir: string): Promise<ICodesignResultData> {
-		this.validateParameteres(codesignData, projectDir);
-		codesignData.clean = codesignData.clean === undefined ? true : codesignData.clean;
-		const cloudOperationId = uuid.v4();
-
-		try {
+		return await this.executeCloudOperation("Cloud code sign", async (cloudOperationId: string): Promise<ICodesignResultData> => {
+			this.validateParameters(codesignData, projectDir);
+			codesignData.clean = codesignData.clean === undefined ? true : codesignData.clean;
 			const serverResult = await this.executeGeneration(codesignData, projectDir, cloudOperationId);
 			return serverResult;
-		} catch (err) {
-			err.buildId = cloudOperationId;
-			err.cloudOperationId = cloudOperationId;
-			throw err;
-		}
+		});
 	}
 
 	protected getServerResults(codesignResult: ICloudOperationResult): IServerItem[] {
@@ -59,7 +52,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		return path.join(options.projectDir, constants.CODESIGN_FILES_DIR_NAME, options.platform.toLowerCase());
 	}
 
-	private validateParameteres(codesignData: ICodesignData,
+	private validateParameters(codesignData: ICodesignData,
 		projectDir: string): void {
 		if (!codesignData || !codesignData.username || !codesignData.password) {
 			this.$errors.failWithoutHelp(`Codesign failed. Reason is missing code sign data. Apple Id and Apple Id password are required..`);
