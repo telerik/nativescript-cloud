@@ -1,6 +1,5 @@
 import { CloudOperationBase } from "./cloud-operation-base";
-import { CloudCommunicationChannelTypes, CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
-import { WebsocketCommunicationChannel } from "./communication/websocket-channel";
+import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
 
 class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 	private static readonly WAIT_TO_START_TIMEOUT: number = 10 * 60 * 1000;
@@ -11,12 +10,10 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 
 	constructor(protected id: string,
 		protected serverResponse: IServerResponse,
-		private $injector: IInjector) {
+		private $nsCloudCommunicationChannelFactory: ICloudCommunicationChannelFactory) {
 		super(id, serverResponse);
 
-		if (serverResponse.communicationChannel.type === CloudCommunicationChannelTypes.WEBSOCKET) {
-			this.communicationChannel = this.$injector.resolve(WebsocketCommunicationChannel, { data: serverResponse.communicationChannel, cloudOperationId: this.id });
-		}
+		this.communicationChannel = this.$nsCloudCommunicationChannelFactory.create(serverResponse.communicationChannel, this.id);
 	}
 
 	public async sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {

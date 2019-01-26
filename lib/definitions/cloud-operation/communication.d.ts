@@ -10,11 +10,15 @@ interface ICloudCommunicationChannel extends NodeJS.EventEmitter {
 	on<T>(event: string, listener: (data: ICloudOperationMessage<T>) => void): this;
 }
 
-interface ICloudChannelData extends ICloudOperationId {
+interface ICloudCommunicationChannelData<T> extends ICloudOperationId {
 	type: string;
-	config: IWebsocketCloudChannelConfigProperties
+	config: T;
 }
 
 interface IWebsocketCloudChannelConfigProperties {
 	url: string;
+}
+
+interface ICloudCommunicationChannelFactory {
+	create<T>(communicationChannelData: ICloudCommunicationChannelData<T>, cloudOperationId: string): ICloudCommunicationChannel;
 }

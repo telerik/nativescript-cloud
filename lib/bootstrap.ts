@@ -16,6 +16,7 @@ $injector.require("nsCloudTelerikUserService", path.join(__dirname, "services", 
 
 // Cloud operation.
 $injector.require("nsCloudOperationFactory", path.join(__dirname, "cloud-operation", "cloud-operation-factory"));
+$injector.require("nsCloudCommunicationChannelFactory", path.join(__dirname, "cloud-operation", "communication", "communication-channel-factory"));
 
 // Mobile.
 $injector.require("nsCloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));

@@ -13,7 +13,7 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 	private handshakeCompleteResolve: (value?: PromiseLike<void>) => void;
 
 	constructor(protected cloudOperationId: string,
-		protected data: ICloudChannelData,
+		protected data: ICloudCommunicationChannelData<any>,
 		protected $logger: ILogger) {
 		super();
 	}

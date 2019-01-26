@@ -8,7 +8,7 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 	private ws: WebSocket;
 
 	constructor(protected cloudOperationId: string,
-		protected data: ICloudChannelData,
+		protected data: ICloudCommunicationChannelData<IWebsocketCloudChannelConfigProperties>,
 		protected $logger: ILogger) {
 		super(cloudOperationId, data, $logger);
 	}
