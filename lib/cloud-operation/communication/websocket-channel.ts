@@ -1,15 +1,15 @@
-import * as WebSocket from "ws";
 import { v4 } from "uuid";
 
 import { CommunicationChannelBase } from "./communication-channel-base";
 import { CloudOperationWebsocketMessageActions, CloudCommunicationEvents, CloudCommunicationChannelExitCodes } from "../../constants";
 
 export class WebsocketCommunicationChannel extends CommunicationChannelBase {
-	private ws: WebSocket;
+	private ws: IWebSocket;
 
 	constructor(protected cloudOperationId: string,
 		protected data: ICloudCommunicationChannelData<IWebsocketCloudChannelConfigProperties>,
-		protected $logger: ILogger) {
+		protected $logger: ILogger,
+		private $nsCloudWebSocketFactory: IWebSocketFactory) {
 		super(cloudOperationId, data, $logger);
 	}
 
@@ -42,7 +42,7 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 	protected connectCore(): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			try {
-				this.ws = new WebSocket(this.data.config.url);
+				this.ws = this.$nsCloudWebSocketFactory.create(this.data.config.url);
 				this.ws.once("close", (c, r) => {
 					reject(new Error(`Connection closed with code: ${c}`));
 					this.close(c, r);
