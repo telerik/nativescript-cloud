@@ -14,7 +14,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		protected $fs: IFileSystem,
 		protected $httpClient: Server.IHttpClient,
 		protected $logger: ILogger,
-		private $injector: IInjector,
+		private $nsCloudOperationFactory: ICloudOperationFactory,
 		private $nsCloudS3Service: IS3Service,
 		private $nsCloudOutputFilter: ICloudOutputFilter,
 		private $processService: IProcessService) {
@@ -37,7 +37,8 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 	}
 
 	protected async waitForServerOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse): Promise<ICloudOperationResult> {
-		const cloudOperation: ICloudOperation = this.$injector.resolve(require(`../cloud-operation/cloud-operation-${serverResponse.cloudOperationVersion || CloudService.DEFAULT_SERVER_REQUEST_VERSION}`), { id: cloudOperationId, serverResponse: serverResponse });
+		const cloudOperationVersion = serverResponse.cloudOperationVersion || CloudService.DEFAULT_SERVER_REQUEST_VERSION;
+		const cloudOperation: ICloudOperation = this.$nsCloudOperationFactory.create(cloudOperationVersion, cloudOperationId, serverResponse);
 		this.cloudOperations[cloudOperationId] = cloudOperation;
 
 		cloudOperation.on(CloudCommunicationEvents.MESSAGE, (m: ICloudOperationMessage<any>) => {

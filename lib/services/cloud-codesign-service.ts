@@ -5,7 +5,6 @@ import { CloudService } from "./cloud-service";
 import { getProjectId } from "../helpers";
 
 export class CloudCodesignService extends CloudService implements ICloudCodesignService {
-
 	protected get failedError() {
 		return "Generation of codesign files failed.";
 	}
@@ -18,14 +17,14 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
-		$injector: IInjector,
+		$nsCloudOperationFactory: ICloudOperationFactory,
 		$nsCloudS3Service: IS3Service,
 		$nsCloudOutputFilter: ICloudOutputFilter,
 		$processService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $injector, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
 	}
 
 	public async generateCodesignFiles(codesignData: ICodesignData,
