@@ -39,20 +39,20 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 				}
 			}, CloudOperationV2.WAIT_TO_START_TIMEOUT);
 
+			const closeHandler = (code: number) => {
+				this.cleanup(code);
+				reject(new Error(`Communication channel closed with code ${code}`));
+			};
 			try {
+				this.communicationChannel.once(CloudCommunicationEvents.CLOSE, closeHandler);
 				await this.communicationChannel.connect();
-				this.communicationChannel.once('close', code => {
-					if (!this.result) {
-						this.cleanup(code);
-						reject(new Error(`Communication channel closed with code ${code}`));
-					}
-				});
 				this.status = CloudOperationV2.OPERATION_IN_PROGRESS_STATUS;
 			} catch (err) {
 				return reject(err);
 			}
 
 			this.waitResultPromise = this.subscribeForMessages();
+			this.communicationChannel.removeListener(CloudCommunicationEvents.CLOSE, closeHandler);
 			resolve();
 		});
 	}
@@ -62,19 +62,20 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 	}
 
 	private subscribeForMessages(): Promise<ICloudOperationResult> {
+		let isResolved = false;
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
 			this.communicationChannel.once(CloudCommunicationEvents.CLOSE, code => {
-				if (!this.result) {
-					this.cleanup(code);
+				this.cleanup(code);
+				if (!isResolved) {
 					reject(new Error(`Communication channel closed with code ${code}`));
 				}
 			});
-
 			this.communicationChannel.on(CloudCommunicationEvents.MESSAGE, async (m) => {
 				if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_RESULT) {
 					this.result = <ICloudOperationResult>m.body;
 					if (this.result.code === 0 || this.result.data) {
 						this.status = CloudOperationV2.OPERATION_COMPLETE_STATUS;
+						isResolved = true;
 						return resolve(this.result);
 					} else {
 						this.status = CloudOperationV2.OPERATION_FAILED_STATUS;
