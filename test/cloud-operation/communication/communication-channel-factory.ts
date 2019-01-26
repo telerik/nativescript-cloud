@@ -9,9 +9,7 @@ describe("nsCloudCommunicationChannelFactory", () => {
 	const createTestInjector = (): IInjector => {
 		const testInjector = new Yok();
 
-		testInjector.register("logger", {
-			trace: (formatStr?: any, ...args: any[]): void => undefined,
-		});
+		testInjector.register("logger", {});
 		testInjector.register("nsCloudCommunicationChannelFactory", CommunicationChannelFactory);
 		testInjector.register("nsCloudWebSocketFactory", {
 			create: (): any => null
@@ -21,8 +19,8 @@ describe("nsCloudCommunicationChannelFactory", () => {
 		return testInjector;
 	};
 	beforeEach(() => {
-		const injector = createTestInjector();
-		factory = injector.resolve("nsCloudCommunicationChannelFactory");
+		const testInjector = createTestInjector();
+		factory = testInjector.resolve("nsCloudCommunicationChannelFactory");
 	});
 
 	describe("create", () => {

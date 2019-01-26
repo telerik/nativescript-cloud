@@ -24,8 +24,8 @@ describe("nsCloudOperationFactory", () => {
 		return testInjector;
 	};
 	beforeEach(() => {
-		const injector = createTestInjector();
-		factory = injector.resolve("nsCloudOperationFactory");
+		const testInjector = createTestInjector();
+		factory = testInjector.resolve("nsCloudOperationFactory");
 	});
 
 	describe("create", () => {
