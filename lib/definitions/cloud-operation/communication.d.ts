@@ -15,7 +15,7 @@ interface ICloudCommunicationChannelData<T> extends ICloudOperationId {
 	config: T;
 }
 
-interface IWebsocketCloudChannelConfigProperties {
+interface IWebSocketCloudChannelConfigProperties {
 	url: string;
 }
 

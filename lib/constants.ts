@@ -137,7 +137,7 @@ export class Policies {
 	public static readonly CLOUD_SERVICES_POLICY_NAME: string = "cloud-services-policy";
 }
 
-export class CloudOperationWebsocketMessageActions {
+export class CloudOperationWebSocketMessageActions {
 	public static readonly SEND_MESSAGE: string = "sendMessage";
 }
 
@@ -155,7 +155,7 @@ export class CloudOperationMessageTypes {
 }
 
 export class CloudCommunicationChannelTypes {
-	public static readonly WEBSOCKET: string = "Websocket";
+	public static readonly WEBSOCKET: string = "WebSocket";
 }
 
 export class CloudCommunicationEvents {

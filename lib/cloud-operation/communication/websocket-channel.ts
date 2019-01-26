@@ -1,13 +1,13 @@
 import { v4 } from "uuid";
 
 import { CommunicationChannelBase } from "./communication-channel-base";
-import { CloudOperationWebsocketMessageActions, CloudCommunicationEvents, CloudCommunicationChannelExitCodes } from "../../constants";
+import { CloudOperationWebSocketMessageActions, CloudCommunicationEvents, CloudCommunicationChannelExitCodes } from "../../constants";
 
-export class WebsocketCommunicationChannel extends CommunicationChannelBase {
+export class WebSocketCommunicationChannel extends CommunicationChannelBase {
 	private ws: IWebSocket;
 
 	constructor(protected cloudOperationId: string,
-		protected data: ICloudCommunicationChannelData<IWebsocketCloudChannelConfigProperties>,
+		protected data: ICloudCommunicationChannelData<IWebSocketCloudChannelConfigProperties>,
 		protected $logger: ILogger,
 		private $nsCloudWebSocketFactory: IWebSocketFactory) {
 		super(cloudOperationId, data, $logger);
@@ -24,7 +24,7 @@ export class WebsocketCommunicationChannel extends CommunicationChannelBase {
 		return new Promise((resolve, reject) => {
 			try {
 				const id = v4();
-				const wsMsg: ICloudOperationWebsocketMessage<T> = { id, action: CloudOperationWebsocketMessageActions.SEND_MESSAGE, cloudOperationId: this.cloudOperationId, body: message };
+				const wsMsg: ICloudOperationWebSocketMessage<T> = { id, action: CloudOperationWebSocketMessageActions.SEND_MESSAGE, cloudOperationId: this.cloudOperationId, body: message };
 				this.$logger.trace(wsMsg);
 				this.ws.send(JSON.stringify(wsMsg), err => {
 					if (err) {
