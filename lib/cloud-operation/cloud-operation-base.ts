@@ -43,10 +43,9 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 	protected abstract waitForResultCore(): Promise<ICloudOperationResult>;
 	protected abstract initCore(): Promise<void>;
 
-	private isInitialized() {
+	protected isInitialized() {
 		if (!this.initialized) {
 			throw new Error("Not initialized");
 		}
-
 	}
 }

@@ -17,6 +17,7 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 	}
 
 	public async sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
+		this.isInitialized();
 		await this.communicationChannel.sendMessage(message);
 	}
 
