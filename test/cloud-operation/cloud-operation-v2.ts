@@ -4,7 +4,7 @@ import { Yok } from "nativescript/lib/common/yok";
 import { CloudOperationFactory } from "../../lib/cloud-operation/cloud-operation-factory";
 import { CommunicationChannelMock } from "./mocks/communication-channel-mock";
 
-describe("Cloud operation v2", () => {
+describe.only("Cloud operation v2", () => {
 	const createTestInjector = (communicationChannel: ICloudCommunicationChannel): IInjector => {
 		const testInjector = new Yok();
 
@@ -107,6 +107,30 @@ describe("Cloud operation v2", () => {
 				assert.deepEqual(err.message, failedToConnectMessage);
 			}
 		});
+		it("should subscribe for messages from the communication channel.", async () => {
+			const communicationChannel = new CommunicationChannelMock();
+			const cloudOperation = createCloudOperation(communicationChannel);
+			const expected = {
+				type: "serverHello",
+				body: {
+					test: "value"
+				}
+			};
+
+			let actual: any;
+
+			await cloudOperation.init();
+			const promise = new Promise((resolve) => {
+				cloudOperation.on("message", msg => {
+					actual = msg;
+					resolve();
+				});
+			});
+			communicationChannel.emit("message", expected);
+			await promise;
+
+			assert.deepEqual(actual, expected);
+		});
 	});
 
 	describe("sendMessage", () => {
@@ -136,6 +160,104 @@ describe("Cloud operation v2", () => {
 				await cloudOperation.sendMessage(null);
 			} catch (err) {
 				assert.deepEqual(err.message, "Not initialized");
+				return;
+			}
+
+			assert.fail();
+		});
+	});
+
+	describe("waitForResult", () => {
+		it("should fail if the cloud operation is not initialized.", async () => {
+			const cloudOperation = createCloudOperation();
+
+			try {
+				await cloudOperation.waitForResult();
+			} catch (err) {
+				assert.deepEqual(err.message, "Not initialized");
+				return;
+			}
+
+			assert.fail();
+		});
+
+		const successTestCases = [
+			{
+				description: "should return correct result if the cloud operation has code 0.",
+				expectedResult: {
+					code: 0,
+					stdout: "test"
+				}
+			},
+			{
+				description: "should return correct result if the cloud operation return data.",
+				expectedResult: {
+					stdout: "test",
+					data: {
+						test: "value"
+					}
+				}
+			}
+		];
+
+		successTestCases.forEach(c => {
+			it(c.description, async () => {
+				const communicationChannel = new CommunicationChannelMock();
+				const cloudOperation = createCloudOperation(communicationChannel);
+
+				await cloudOperation.init();
+				communicationChannel.emit("message", { type: "result", body: c.expectedResult });
+				const result = await cloudOperation.waitForResult();
+
+				assert.deepEqual(result, <any>c.expectedResult);
+			});
+		});
+
+		const failTestCases = [
+			{
+				description: "should throw error if the cloud operation has exit code different than 0.",
+				expectedResult: {
+					code: 127,
+					stdout: "test"
+				}
+			},
+			{
+				description: "should throw error if the cloud operation has no exit code and no data.",
+				expectedResult: {
+					stdout: "test"
+				}
+			}
+		];
+
+		failTestCases.forEach(c => {
+			it(c.description, async () => {
+				const communicationChannel = new CommunicationChannelMock();
+				const cloudOperation = createCloudOperation(communicationChannel);
+
+				await cloudOperation.init();
+				communicationChannel.emit("message", { type: "result", body: c.expectedResult });
+				try {
+					await cloudOperation.waitForResult();
+				} catch (err) {
+					assert.deepEqual(err, <any>c.expectedResult);
+					return;
+				}
+
+				assert.fail();
+			});
+		});
+
+		it("should fail if the communication channel closes before any result is sent.", async () => {
+			const communicationChannel = new CommunicationChannelMock();
+			const cloudOperation = createCloudOperation(communicationChannel);
+			const exitCode = 15;
+
+			await cloudOperation.init();
+			communicationChannel.emit("close", exitCode);
+			try {
+				await cloudOperation.waitForResult();
+			} catch (err) {
+				assert.deepEqual(err.message, `Communication channel closed with code ${exitCode}`);
 				return;
 			}
 
