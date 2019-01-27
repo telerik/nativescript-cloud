@@ -23,7 +23,7 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 			await this.connectCore();
 			this.isConnected = true;
 			await this.handshake();
-			await this.startPing();
+			this.startPing();
 		}
 	}
 
@@ -89,10 +89,11 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 	}
 
 	private async handshake(): Promise<void> {
-		await this.sendMessageCore({ type: CloudOperationMessageTypes.CLOUD_OPERATION_CLIENT_HELLO, cloudOperationId: this.cloudOperationId });
-		await new Promise<void>((resolve, reject) => {
+		const handshakePromise = new Promise<void>((resolve) => {
 			this.handshakeCompleteResolve = resolve;
 		});
+		await this.sendMessageCore({ type: CloudOperationMessageTypes.CLOUD_OPERATION_CLIENT_HELLO, cloudOperationId: this.cloudOperationId });
+		await handshakePromise;
 	}
 
 	private startPing(): void {
