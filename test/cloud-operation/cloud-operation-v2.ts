@@ -4,7 +4,7 @@ import { Yok } from "nativescript/lib/common/yok";
 import { CloudOperationFactory } from "../../lib/cloud-operation/cloud-operation-factory";
 import { CommunicationChannelMock } from "./mocks/communication-channel-mock";
 
-describe.only("Cloud operation v2", () => {
+describe("Cloud operation v2", () => {
 	const createTestInjector = (communicationChannel: ICloudCommunicationChannel): IInjector => {
 		const testInjector = new Yok();
 
@@ -258,6 +258,35 @@ describe.only("Cloud operation v2", () => {
 				await cloudOperation.waitForResult();
 			} catch (err) {
 				assert.deepEqual(err.message, `Communication channel closed with code ${exitCode}`);
+				return;
+			}
+
+			assert.fail();
+		});
+	});
+
+	describe("getResult", () => {
+		it("should return the result if the cloud operation is finished.", async () => {
+			const communicationChannel = new CommunicationChannelMock();
+			const cloudOperation = createCloudOperation(communicationChannel);
+			const expected = {
+				code: 0,
+				stdout: "test"
+			};
+
+			await cloudOperation.init();
+			communicationChannel.emit("message", { type: "result", body: expected });
+			await cloudOperation.waitForResult();
+
+			assert.deepEqual(cloudOperation.getResult(), <any>expected);
+		});
+		it("should fail if the cloud operation is not initialized.", async () => {
+			const cloudOperation = createCloudOperation();
+
+			try {
+				await cloudOperation.getResult();
+			} catch (err) {
+				assert.deepEqual(err.message, "Not initialized");
 				return;
 			}
 

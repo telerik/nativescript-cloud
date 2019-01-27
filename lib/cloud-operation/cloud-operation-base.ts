@@ -37,6 +37,7 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 	}
 
 	public getResult(): ICloudOperationResult {
+		this.isInitialized();
 		return this.result;
 	}
 
