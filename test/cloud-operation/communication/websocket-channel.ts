@@ -6,7 +6,7 @@ import { CommunicationChannelBase } from "../../../lib/cloud-operation/communica
 import { WebSocketMock } from "../mocks/websocket-mock";
 import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../../../lib/constants";
 
-describe.only("WebSocket communication channel", () => {
+describe("WebSocket communication channel", () => {
 	const createTestInjector = (ws: IWebSocket): IInjector => {
 		const testInjector = new Yok();
 
@@ -96,12 +96,50 @@ describe.only("WebSocket communication channel", () => {
 			await pingPromise;
 			assert.isTrue(echoSent);
 		});
+
+		const expectedWebsocketCloseCode = 15;
+		const websocketErrorOnConnectTestCases = [
+			{
+				description: "should reject if the websocket closes during the handshake.",
+				errorEvent: "close",
+				expectedErrorMessage: `Connection closed with code: ${expectedWebsocketCloseCode}`,
+				emitArgs: [expectedWebsocketCloseCode]
+			},
+			{
+				description: "should reject if the websocket emits unexpected response during the handshake.",
+				errorEvent: "unexpected-response",
+				expectedErrorMessage: "Unexpected response received.",
+				emitArgs: []
+			}
+		];
+
+		websocketErrorOnConnectTestCases.forEach(c => {
+			it(c.description, async () => {
+				const { channel, ws } = createWebSocketCommunicationChannel();
+				ws.send = <any>(((msg: string, cb: Function): any => cb(null)));
+
+				const promise = channel.connect();
+				ws.emit.apply(ws, [c.errorEvent].concat(<any>c.emitArgs));
+				ws.emit(c.errorEvent);
+
+				await assert.isRejected(promise, c.expectedErrorMessage);
+			});
+		});
+
+		it("should reject if the creation of the websocket fails.", async () => {
+			const { channel, ws } = createWebSocketCommunicationChannel();
+			ws.send = <any>(((msg: string, cb: Function): any => cb(null)));
+			const expectedErrorMessage = "Failed to create WebSocket";
+			(<any>channel).$nsCloudWebSocketFactory.create = () => { throw new Error(expectedErrorMessage) };
+
+			await assert.isRejected(channel.connect(), expectedErrorMessage);
+		});
 	});
 
 	describe("ping", () => {
 		const expectedEchoesMissing = 6;
 		const pingInterval = 1;
-		const missingPingsExitCode = 129;
+		const missingPingsCloseCode = 129;
 		beforeEach(() => {
 			(<any>CommunicationChannelBase).PING_INTERVAL = pingInterval;
 		});
@@ -133,7 +171,7 @@ describe.only("WebSocket communication channel", () => {
 			});
 
 			assert.deepEqual(echosSent, expectedEchoesMissing);
-			assert.deepEqual(actualCode, 129);
+			assert.deepEqual(actualCode, missingPingsCloseCode);
 			assert.deepEqual(actualReason, "Communication channel did not receive echo replies.");
 		});
 		it("should not close the channel if some of the echo messages are missing.", async () => {
@@ -167,7 +205,133 @@ describe.only("WebSocket communication channel", () => {
 			});
 
 			assert.isAbove(echosSent, expectedEchoesMissing);
-			assert.notDeepEqual(actualCode, missingPingsExitCode);
+			assert.notDeepEqual(actualCode, missingPingsCloseCode);
+		});
+	});
+
+	describe("sendMessage", () => {
+		it("should send the message to the websocket if the communication channel is connected.", async () => {
+			const { channel, ws } = createWebSocketCommunicationChannel();
+			const promise = channel.connect();
+
+			ws.emit("open");
+			await promise;
+
+			const message: ICloudOperationMessage<any> = {
+				type: "test",
+				cloudOperationId: "test",
+				body: {
+					test: "value"
+				}
+			};
+
+			let actualMessage: ICloudOperationWebSocketMessage<any>;
+			const sendMessagePromise = new Promise((resolve) => {
+				ws.sendCore = (msg: ICloudOperationWebSocketMessage<any>): Error => {
+					actualMessage = msg;
+					resolve();
+					return null;
+				};
+			});
+
+			await channel.sendMessage(message);
+			await sendMessagePromise;
+
+			assert.deepEqual(actualMessage.body, message);
+			assert.deepEqual(actualMessage.cloudOperationId, message.cloudOperationId);
+		});
+
+		const expectedSendMessageErrorMessage = "Failed to send message";
+		const sendMessageRejectTestCases = [
+			{
+				description: "should reject if the websocket returns error in the send message callback.",
+				sendCore: (msg: ICloudOperationWebSocketMessage<any>): Error => {
+					return new Error(expectedSendMessageErrorMessage);
+				}
+			},
+			{
+				description: "should reject if the websocket throws error in the send method.",
+				sendCore: (msg: ICloudOperationWebSocketMessage<any>): Error => {
+					throw new Error(expectedSendMessageErrorMessage);
+				}
+			}
+		];
+		sendMessageRejectTestCases.forEach(c => {
+			it(c.description, async () => {
+				const { channel, ws } = createWebSocketCommunicationChannel();
+				const promise = channel.connect();
+
+				ws.emit("open");
+				await promise;
+
+				ws.sendCore = c.sendCore;
+				await assert.isRejected(channel.sendMessage(<any>{}), expectedSendMessageErrorMessage);
+			});
+		});
+
+		it("should reject if the communication channel is not connected.", async () => {
+			const { channel } = createWebSocketCommunicationChannel();
+
+			await assert.isRejected(channel.sendMessage(<any>{}), "Communication channel not connected");
+		});
+	});
+
+	describe("WebSocket events", () => {
+		const webSocketEvents = ["error", "close", "message"];
+		webSocketEvents.forEach(event => {
+			it(`should proxy the ${event} event.`, async () => {
+				const { channel, ws } = createWebSocketCommunicationChannel();
+				const promise = channel.connect();
+
+				ws.emit("open");
+				await promise;
+
+				let handlerCalled = false;
+				const eventPromise = new Promise((resolve) => {
+					channel.on(event, () => {
+						handlerCalled = true;
+						resolve();
+					});
+				});
+
+				ws.emit(event, {});
+				await eventPromise;
+
+				assert.isTrue(handlerCalled);
+			});
+		});
+	});
+
+	describe("WebSocket messages", () => {
+		const serverHello = { type: "serverHello", cloudOperationId: "test", body: {} };
+
+		const webSocketMessagesTestCases = [
+			{
+				messageType: "Object",
+				data: serverHello
+			},
+			{
+				messageType: "JSON string",
+				data: JSON.stringify(serverHello)
+			},
+			{
+				messageType: "Buffer",
+				data: Buffer.from(JSON.stringify(serverHello))
+			}
+		];
+
+		webSocketMessagesTestCases.forEach(c => {
+			it(`should handle message with type ${c.messageType}.`, async () => {
+				const { channel, ws } = createWebSocketCommunicationChannel();
+				ws.send = (data: any, options?: any, cb?: any) => {
+					ws.emit("message", c.data);
+					(cb || options)(null);
+				};
+				const promise = channel.connect();
+
+				ws.emit("open");
+				await promise;
+			});
 		});
 	});
 });

@@ -52,14 +52,7 @@ describe("Cloud operation v2", () => {
 			const cloudOperation = createCloudOperation(communicationChannel);
 			(<any>cloudOperation.constructor).WAIT_TO_START_TIMEOUT = 1;
 
-			try {
-				await cloudOperation.init();
-			} catch (err) {
-				assert.deepEqual(err.message, "Communication channel init timed out.");
-				return;
-			}
-
-			assert.fail();
+			await assert.isRejected(cloudOperation.init(), "Communication channel init timed out.");
 		});
 		it("should cleanup when the communication channel is closed after the init.", async () => {
 			const communicationChannel = new CommunicationChannelMock();
@@ -100,12 +93,8 @@ describe("Cloud operation v2", () => {
 				cloudOperationCleanupCalledCount++;
 			};
 
-			try {
-				await cloudOperation.init();
-			} catch (err) {
-				assert.deepEqual(cloudOperationCleanupCalledCount, 1);
-				assert.deepEqual(err.message, failedToConnectMessage);
-			}
+			await assert.isRejected(cloudOperation.init(), failedToConnectMessage);
+			assert.deepEqual(cloudOperationCleanupCalledCount, 1);
 		});
 		it("should subscribe for messages from the communication channel.", async () => {
 			const communicationChannel = new CommunicationChannelMock();
@@ -155,30 +144,14 @@ describe("Cloud operation v2", () => {
 		});
 		it("should fail if the cloud operation is not initialized.", async () => {
 			const cloudOperation = createCloudOperation();
-
-			try {
-				await cloudOperation.sendMessage(null);
-			} catch (err) {
-				assert.deepEqual(err.message, "Not initialized");
-				return;
-			}
-
-			assert.fail();
+			await assert.isRejected(cloudOperation.sendMessage(null), "Not initialized");
 		});
 	});
 
 	describe("waitForResult", () => {
 		it("should fail if the cloud operation is not initialized.", async () => {
 			const cloudOperation = createCloudOperation();
-
-			try {
-				await cloudOperation.waitForResult();
-			} catch (err) {
-				assert.deepEqual(err.message, "Not initialized");
-				return;
-			}
-
-			assert.fail();
+			await assert.isRejected(cloudOperation.waitForResult(), "Not initialized");
 		});
 
 		const successTestCases = [
@@ -236,14 +209,7 @@ describe("Cloud operation v2", () => {
 
 				await cloudOperation.init();
 				communicationChannel.emit("message", { type: "result", body: c.expectedResult });
-				try {
-					await cloudOperation.waitForResult();
-				} catch (err) {
-					assert.deepEqual(err, <any>c.expectedResult);
-					return;
-				}
-
-				assert.fail();
+				await assert.isRejected(cloudOperation.waitForResult(), c.expectedResult);
 			});
 		});
 
@@ -254,14 +220,7 @@ describe("Cloud operation v2", () => {
 
 			await cloudOperation.init();
 			communicationChannel.emit("close", exitCode);
-			try {
-				await cloudOperation.waitForResult();
-			} catch (err) {
-				assert.deepEqual(err.message, `Communication channel closed with code ${exitCode}`);
-				return;
-			}
-
-			assert.fail();
+			await assert.isRejected(cloudOperation.waitForResult(), `Communication channel closed with code ${exitCode}`);
 		});
 	});
 
@@ -280,17 +239,9 @@ describe("Cloud operation v2", () => {
 
 			assert.deepEqual(cloudOperation.getResult(), <any>expected);
 		});
-		it("should fail if the cloud operation is not initialized.", async () => {
+		it("should fail if the cloud operation is not initialized.", () => {
 			const cloudOperation = createCloudOperation();
-
-			try {
-				await cloudOperation.getResult();
-			} catch (err) {
-				assert.deepEqual(err.message, "Not initialized");
-				return;
-			}
-
-			assert.fail();
+			assert.throws(() => cloudOperation.getResult(), "Not initialized");
 		});
 	});
 });

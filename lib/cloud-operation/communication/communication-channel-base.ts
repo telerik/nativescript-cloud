@@ -31,6 +31,8 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 		if (this.isConnected) {
 			return await this.sendMessageCore(message);
 		}
+
+		throw new Error("Communication channel not connected");
 	}
 
 	public async close(code: number, reason?: string): Promise<void> {

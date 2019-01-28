@@ -39,26 +39,28 @@ export class WebSocketCommunicationChannel extends CommunicationChannelBase {
 		});
 	}
 
-	protected connectCore(): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			try {
-				this.ws = this.$nsCloudWebSocketFactory.create(this.data.config.url);
-				this.ws.once("close", (c, r) => {
-					reject(new Error(`Connection closed with code: ${c}`));
-					this.close(c, r);
-				});
+	protected async connectCore(): Promise<void> {
+		this.ws = this.$nsCloudWebSocketFactory.create(this.data.config.url);
+		await new Promise<void>((resolve, reject) => {
+			const closeHandler = (c: number, r: string) => {
+				reject(new Error(`Connection closed with code: ${c}`));
+				this.close(c, r);
+			};
+			const unexpectedResponseHandler = () => {
+				const errMsg = "Unexpected response received.";
+				reject(new Error(errMsg));
+				this.close(CloudCommunicationChannelExitCodes.UNEXPECTED_RESPONSE, errMsg);
+			};
 
-				this.ws.once("unexpected-response", () => {
-					const errMsg = "Unexpected response received.";
-					reject(new Error(errMsg));
-					this.close(CloudCommunicationChannelExitCodes.UNEXPECTED_RESPONSE, errMsg);
-				});
-			} catch (err) {
-				return reject(err);
-			}
+			this.ws.once("close", closeHandler);
+			this.ws.once("unexpected-response", unexpectedResponseHandler);
+			this.ws.once("open", () => {
+				this.ws.removeListener("close", closeHandler);
+				this.ws.removeListener("unexpected-response", unexpectedResponseHandler);
+				resolve();
+			});
 
 			this.addChannelListeners();
-			this.ws.once("open", resolve);
 		});
 	}
 
@@ -69,6 +71,6 @@ export class WebSocketCommunicationChannel extends CommunicationChannelBase {
 		});
 
 		this.ws.once("error", err => this.emit("error", err));
-		this.ws.once("close", (code, reason) => this.emit("close", code, reason));
+		this.ws.once("close", this.close.bind(this));
 	}
 }
