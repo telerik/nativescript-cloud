@@ -1,7 +1,5 @@
 import * as path from "path";
 
-$injector.overrideAlreadyRequiredModule = true;
-$injector.require("httpClient", path.join(__dirname, "http-client"));
 $injector.require("nsCloudHttpServer", path.join(__dirname, "http-server"));
 $injector.require("nsCloudItmsServicesPlistHelper", path.join(__dirname, "itms-services-plist-helper"));
 $injector.require("nsCloudServerConfigManager", path.join(__dirname, "server-config-manager"));
