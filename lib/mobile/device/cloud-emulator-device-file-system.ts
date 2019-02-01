@@ -15,5 +15,7 @@ export class CloudEmulatorDeviceFileSystem implements Mobile.IDeviceFileSystem {
 
 	public async deleteFile(deviceFilePath: string, appIdentifier: string): Promise<void> { /* currently empty */ }
 
-	public async updateHashesOnDevice(hashes: IStringDictionary, appIdentifier: string): Promise<void>  { /* currently empty */ }
+	public async updateHashesOnDevice(hashes: IStringDictionary, appIdentifier: string): Promise<void> { /* currently empty */ }
+
+	public async getFileContent(deviceFilePath: string, appIdentifier: string): Promise<string> { return null; }
 }
