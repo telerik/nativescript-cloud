@@ -31,7 +31,6 @@ interface ICleanupProjectDataBase extends IProjectNameComposition {
 /**
  * Describes data used for project cleaning passed to server.
  */
-interface ICleanupProjectData extends ICleanupProjectDataBase {
+interface ICleanupProjectData extends ICleanupProjectDataBase, ICloudOperationId {
 	templateAppName: string;
-	projectCleanupId: string;
 }

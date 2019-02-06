@@ -62,10 +62,10 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectName);
 		const cleanupProjectData: ICleanupProjectData = {
+			cloudOperationId: cloudOperationId,
 			appIdentifier: appIdentifier,
 			projectName: sanitizedProjectName,
-			templateAppName: sanitizedProjectName,
-			projectCleanupId: cloudOperationId
+			templateAppName: sanitizedProjectName
 		};
 
 		const cleanupResponse = await this.$nsCloudServerProjectService.cleanupProjectData(cleanupProjectData);
@@ -85,24 +85,26 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 
 		const tasksResults: IDictionary<IServerResult> = {};
 		this.$logger.info(`${EOL}### Build machines cleanup${EOL}`);
+		console.log(JSON.stringify(cleanupResponse, null, 2));
 		for (let i = 0; i < cleanupResponse.buildMachineResponse.length; i++) {
-			const taskId = `Cloud Cleanup Task #${i + 1}`;
 			const task = cleanupResponse.buildMachineResponse[i];
+			const childCloudOperationId = task.cloudOperationId;
+			this.$logger.info(`Child cloud operation id: ${childCloudOperationId}`);
 			try {
-				const taskResult = await this.waitForServerOperationToFinish(taskId, task);
+				const taskResult = await this.waitForServerOperationToFinish(childCloudOperationId, task);
 				const output = await this.getCollectedLogs(task);
 				if (this.hasContent(output)) {
 					this.$logger.info(output);
 				}
 
-				tasksResults[taskId] = taskResult;
+				tasksResults[childCloudOperationId] = taskResult;
 			} catch (err) {
-				if (this.getResult(taskId)) {
-					tasksResults[taskId] = this.getResult(taskId);
+				if (this.getResult(childCloudOperationId)) {
+					tasksResults[childCloudOperationId] = this.getResult(childCloudOperationId);
 				}
 
 				// We don't want to stop the execution if one of the tasks fails.
-				this.$logger.error(`${taskId} error: ${err}`);
+				this.$logger.error(`${childCloudOperationId} error: ${err}`);
 			}
 		}
 

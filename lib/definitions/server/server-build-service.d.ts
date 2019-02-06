@@ -7,7 +7,7 @@ interface IServerBuildService {
 	appleLogin(appleLoginRequestData: IAppleLoginRequestData): Promise<IServerResponse>;
 }
 
-interface IServerResponse {
+interface IServerResponse extends ICloudOperationId {
 	cloudOperationVersion: string;
 	statusUrl: string;
 	resultUrl: string;
