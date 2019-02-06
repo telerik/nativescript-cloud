@@ -62,7 +62,6 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectName);
 		const cleanupProjectData: ICleanupProjectData = {
-			cloudOperationId: cloudOperationId,
 			appIdentifier: appIdentifier,
 			projectName: sanitizedProjectName,
 			templateAppName: sanitizedProjectName
@@ -85,7 +84,6 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 
 		const tasksResults: IDictionary<IServerResult> = {};
 		this.$logger.info(`${EOL}### Build machines cleanup${EOL}`);
-		console.log(JSON.stringify(cleanupResponse, null, 2));
 		for (let i = 0; i < cleanupResponse.buildMachineResponse.length; i++) {
 			const task = cleanupResponse.buildMachineResponse[i];
 			const childCloudOperationId = task.cloudOperationId;
