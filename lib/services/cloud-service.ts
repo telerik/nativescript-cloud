@@ -1,10 +1,11 @@
 import * as path from "path";
 import { EventEmitter } from "events";
-import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
 import { v4 } from "uuid";
 
+import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
+
 export abstract class CloudService extends EventEmitter implements ICloudOperationService {
-	private static readonly DEFAULT_SERVER_REQUEST_VERSION: string = "v1";
+	private static readonly CLOUD_OPERATION_VERSION_1: string = "v1";
 	protected abstract failedToStartError: string;
 	protected abstract failedError: string;
 
@@ -50,19 +51,24 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 	}
 
 	protected async waitForServerOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse): Promise<ICloudOperationResult> {
-		const cloudOperationVersion = serverResponse.cloudOperationVersion || CloudService.DEFAULT_SERVER_REQUEST_VERSION;
+		const cloudOperationVersion = serverResponse.cloudOperationVersion || CloudService.CLOUD_OPERATION_VERSION_1;
 		const cloudOperation: ICloudOperation = this.$nsCloudOperationFactory.create(cloudOperationVersion, cloudOperationId, serverResponse);
 		this.cloudOperations[cloudOperationId] = cloudOperation;
 
 		cloudOperation.on(CloudCommunicationEvents.MESSAGE, (m: ICloudOperationMessage<any>) => {
 			if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !this.silent) {
 				const body: ICloudOperationOutput = m.body;
+				let log = body.data;
+				if (cloudOperationVersion !== CloudService.CLOUD_OPERATION_VERSION_1) {
+					log = this.$nsCloudOutputFilter.filterBpcMetadata(log);
+				}
+
 				if (body.pipe === "stdout") {
 					// Print the output on the same line to have cool effects like loading indicators.
 					// The cloud process will take care of the new lines.
-					this.$logger.printInfoMessageOnSameLine(body.data);
+					this.$logger.printInfoMessageOnSameLine(log);
 				} else if (body.pipe === "stderr") {
-					this.$logger.error(body.data);
+					this.$logger.error(log);
 				}
 			}
 

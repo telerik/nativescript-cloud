@@ -1,3 +1,4 @@
+import { EOL } from "os";
 import promiseRetry = require("promise-retry");
 
 import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
@@ -104,7 +105,14 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 			// The logs variable will contain the full server log and we need to log only the logs that we don't have.
 			const contentToLog = this.$nsCloudOutputFilter.filter(logs.substr(this.outputCursorPosition));
 			if (contentToLog) {
-				const data: ICloudOperationMessage<ICloudOperationOutput> = { type: CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT, cloudOperationId: this.id, body: { data: contentToLog, pipe: "stdout" } };
+				const data: ICloudOperationMessage<ICloudOperationOutput> = {
+					type: CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT,
+					cloudOperationId: this.id,
+					body: {
+						data: contentToLog + EOL,
+						pipe: "stdout"
+					}
+				};
 				this.emit(CloudCommunicationEvents.MESSAGE, data);
 			}
 

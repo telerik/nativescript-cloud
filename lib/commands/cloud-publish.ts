@@ -112,14 +112,14 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 	protected async executeCore(args: string[]): Promise<void> {
 		const credentials: IPublishCredentials = await this.$nsCloudBuildCommandHelper.getExtendedAppleCredentials(args, this.$options);
 		const packagePath = await this.$nsCloudBuildCommandHelper.buildForPublishingPlatform(this.$devicePlatformsConstants.iOS);
-		const itunesPublishdata: IItunesConnectPublishData = {
+		const itunesPublishData: IItunesConnectPublishData = {
 			credentials,
 			packagePaths: [packagePath],
 			sharedCloud: this.$options.sharedCloud,
 			projectDir: this.$projectData.projectDir
 		};
 
-		await this.$nsCloudPublishService.publishToItunesConnect(itunesPublishdata);
+		await this.$nsCloudPublishService.publishToItunesConnect(itunesPublishData);
 	}
 }
 
