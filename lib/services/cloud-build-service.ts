@@ -14,8 +14,6 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return "Failed to start cloud build.";
 	}
 
-	protected silent: boolean = false;
-
 	constructor($errors: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
@@ -69,13 +67,15 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		accountId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
-		return await this.executeCloudOperation("Cloud build", async (cloudOperationId: string): Promise<IBuildResultData> => {
+		const result = await this.executeCloudOperation("Cloud build", async (cloudOperationId: string): Promise<IBuildResultData> => {
 			this.$logger.info("Getting accounts information...");
 			const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
 			this.$logger.info("Using account %s.", account.id);
 			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, cloudOperationId, account.id, androidBuildData, iOSBuildData);
 			return buildResult;
 		});
+
+		return result;
 	}
 
 	public async executeBuild(projectSettings: INSCloudProjectSettings,
@@ -150,7 +150,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const buildResponse: IServerResponse = await this.$nsCloudServerBuildService.startBuild(buildProps);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
-		const buildResult: ICloudOperationResult = await this.waitForServerOperationToFinish(cloudOperationId, buildResponse);
+		const buildResult: ICloudOperationResult = await this.waitForServerOperationToFinish(cloudOperationId, buildResponse, { silent: false });
 		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.END);
 
 		this.$logger.trace("Build result:");

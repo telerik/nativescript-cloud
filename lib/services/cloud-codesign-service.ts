@@ -28,12 +28,14 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 
 	public async generateCodesignFiles(codesignData: ICodesignData,
 		projectDir: string): Promise<ICodesignResultData> {
-		return await this.executeCloudOperation("Cloud code sign", async (cloudOperationId: string): Promise<ICodesignResultData> => {
+		const result = await this.executeCloudOperation("Cloud code sign", async (cloudOperationId: string): Promise<ICodesignResultData> => {
 			this.validateParameters(codesignData, projectDir);
 			codesignData.clean = codesignData.clean === undefined ? true : codesignData.clean;
 			const serverResult = await this.executeGeneration(codesignData, projectDir, cloudOperationId);
 			return serverResult;
 		});
+
+		return result;
 	}
 
 	protected getServerResults(codesignResult: ICloudOperationResult): IServerItem[] {
@@ -75,7 +77,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		this.$logger.trace(`Codesign response: ${JSON.stringify(codesignResponse)}`);
 		let codesignResult;
 		try {
-			codesignResult = await this.waitForServerOperationToFinish(cloudOperationId, codesignResponse);
+			codesignResult = await this.waitForServerOperationToFinish(cloudOperationId, codesignResponse, { silent: false });
 		} catch (ex) {
 			codesignResult = this.getResult(cloudOperationId);
 			if (!codesignResult) {

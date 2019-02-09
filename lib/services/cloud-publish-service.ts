@@ -8,7 +8,6 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	// Taken from: https://github.com/fastlane/fastlane/blob/master/fastlane_core/lib/fastlane_core/itunes_transporter.rb#L100
 	private static ITMS_ERROR_REGEX = /\[Transporter Error Output\]:.*/g;
 	private static GENERAL_ERROR_REGEX = /\[!\].*/g;
-	protected silent = false;
 	protected get failedError() {
 		return "Publishing failed.";
 	}
@@ -37,7 +36,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 
 	public async publishToItunesConnect(publishData: IItunesConnectPublishData): Promise<void> {
-		return await this.executeCloudOperation("Cloud publish iOS", async (cloudOperationId: string): Promise<void> => {
+		await this.executeCloudOperation("Cloud publish iOS", async (cloudOperationId: string): Promise<void> => {
 			this.validatePublishData(publishData);
 
 			if (!publishData.credentials || !publishData.credentials.username || !publishData.credentials.password) {
@@ -60,7 +59,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 
 	public async publishToGooglePlay(publishData: IGooglePlayPublishData): Promise<void> {
-		return await this.executeCloudOperation("Cloud publish Android", async (cloudOperationId: string): Promise<void> => {
+		await this.executeCloudOperation("Cloud publish Android", async (cloudOperationId: string): Promise<void> => {
 			this.validatePublishData(publishData);
 
 			if (!publishData.pathToAuthJson || !this.$fs.exists(publishData.pathToAuthJson)) {
@@ -111,7 +110,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		this.$logger.trace("Publish response", response);
 		let publishResult: ICloudOperationResult;
 		try {
-			publishResult = await this.waitForServerOperationToFinish(publishRequestData.cloudOperationId, response);
+			publishResult = await this.waitForServerOperationToFinish(publishRequestData.cloudOperationId, response, { silent: false });
 		} catch (ex) {
 			publishResult = this.getResult(publishRequestData.cloudOperationId);
 			if (!publishResult) {

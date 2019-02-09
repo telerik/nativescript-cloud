@@ -29,7 +29,9 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 	public async waitForResult(): Promise<ICloudOperationResult> {
 		this.isInitialized();
 		try {
-			return await this.waitForResultCore();
+			const result = await this.waitForResultCore();
+
+			return result;
 		} catch (err) {
 			await this.cleanup();
 			throw err;

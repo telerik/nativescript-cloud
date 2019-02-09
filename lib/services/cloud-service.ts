@@ -9,7 +9,6 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 	protected abstract failedToStartError: string;
 	protected abstract failedError: string;
 
-	protected silent: boolean = true;
 	private cloudOperations: IDictionary<ICloudOperation>;
 
 	constructor(protected $errors: IErrors,
@@ -50,13 +49,13 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		}
 	}
 
-	protected async waitForServerOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse): Promise<ICloudOperationResult> {
+	protected async waitForServerOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse, options: ICloudOperationExecutionOptions): Promise<ICloudOperationResult> {
 		const cloudOperationVersion = serverResponse.cloudOperationVersion || CloudService.CLOUD_OPERATION_VERSION_1;
 		const cloudOperation: ICloudOperation = this.$nsCloudOperationFactory.create(cloudOperationVersion, cloudOperationId, serverResponse);
 		this.cloudOperations[cloudOperationId] = cloudOperation;
 
 		cloudOperation.on(CloudCommunicationEvents.MESSAGE, (m: ICloudOperationMessage<any>) => {
-			if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !this.silent) {
+			if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !options.silent) {
 				const body: ICloudOperationOutput = m.body;
 				let log = body.data;
 				if (cloudOperationVersion !== CloudService.CLOUD_OPERATION_VERSION_1) {
@@ -126,7 +125,13 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 	}
 
 	protected getResult(cloudOperationId: string): ICloudOperationResult {
-		return this.cloudOperations[cloudOperationId].getResult();
+		try {
+			return this.cloudOperations[cloudOperationId].getResult();
+		} catch (err) {
+			this.$logger.trace(err);
+		}
+
+		return null;
 	}
 
 	private async cleanup(): Promise<void> {

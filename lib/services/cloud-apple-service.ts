@@ -1,7 +1,6 @@
 import { CloudService } from "./cloud-service";
 
 export class CloudAppleService extends CloudService implements ICloudAppleService {
-	protected silent = false;
 	protected get failedError() {
 		return "Apple login failed.";
 	}
@@ -23,14 +22,16 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 	}
 
 	public async appleLogin(credentials: ICredentials): Promise<string> {
-		return await this.executeCloudOperation("Apple login", async (cloudOperationId: string): Promise<string> => {
+		const result = await this.executeCloudOperation("Apple login", async (cloudOperationId: string): Promise<string> => {
 			const appleLoginData: IAppleLoginRequestData = { cloudOperationId, credentials };
 			const response = await this.$nsCloudServerBuildService.appleLogin(appleLoginData);
 
 			this.$logger.trace("Apple login response", response);
-			let appleLoginResult = await this.waitForServerOperationToFinish(appleLoginData.cloudOperationId, response);
+			let appleLoginResult = await this.waitForServerOperationToFinish(appleLoginData.cloudOperationId, response, { silent: true });
 			return appleLoginResult.data.appleSessionBase64;
 		});
+
+		return result;
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {

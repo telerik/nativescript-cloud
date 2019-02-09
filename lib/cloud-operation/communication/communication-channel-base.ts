@@ -29,7 +29,9 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 
 	public async sendMessage<T>(message: ICloudOperationMessage<T>): Promise<string> {
 		if (this.isConnected) {
-			return await this.sendMessageCore(message);
+			const result = await this.sendMessageCore(message);
+
+			return result;
 		}
 
 		throw new Error("Communication channel not connected");

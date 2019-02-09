@@ -72,3 +72,7 @@ interface ICloudOperationService extends NodeJS.EventEmitter {
 	 */
 	sendCloudMessage(message: ICloudOperationMessage<any>): Promise<void>;
 }
+
+interface ICloudOperationExecutionOptions {
+	silent: boolean;
+}
