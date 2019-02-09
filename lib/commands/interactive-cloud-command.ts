@@ -16,6 +16,8 @@ export abstract class InteractiveCloudCommand implements ICommand {
 					this.$errors.failWithoutHelp(`Input is required but the process is not interactive. "${msg.body.message}"`);
 				}
 
+				// Print one new line because we print the cloud operation output on the same line.
+				this.$logger.info();
 				let input = "";
 				if (msg.body.inputType === "password") {
 					input = await this.$prompter.getPassword(msg.body.message);

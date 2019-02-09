@@ -80,6 +80,7 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 						return resolve(this.result);
 					} else {
 						this.status = CloudOperationV2.OPERATION_FAILED_STATUS;
+						isResolved = true;
 						return reject(this.result);
 					}
 				}
