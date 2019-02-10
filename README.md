@@ -117,7 +117,6 @@ Detailed description of each parameter can be found [here](./lib/definitions/clo
 ```TypeScript
 interface IBuildLog {
 	cloudOperationId: string;
-	buildId: string;
 	data: string;
 	pipe: string;
 }
@@ -133,11 +132,6 @@ interface IBuildStep {
 	* The ID of the cloud operation.
 	*/
 	cloudOperationId: string;
-
-	/**
-	* The ID of the build.
-	*/
-	buildId: string;
 
 	/**
 	* The name of the step - prepare, upload, build or download.
@@ -183,7 +177,6 @@ tns.nsCloudBuildService.on("buildOutput", (data) => {
 		Sample data object:
 		{
 			"cloudOperationId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
-			"buildId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
 			"pipe": "stdout",
 			"data": "Add platform ios with runtime version 2.5.*"
 		}
@@ -196,7 +189,6 @@ tns.nsCloudBuildService.on("stepChanged", (data) => {
 		Sample data object:
 		{
 			"cloudOperationId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
-			"buildId": "2fb2e19c-3720-4fd1-9446-1df98f5e3531",
 			"step": "build";
 			"progress": 100;
 		}

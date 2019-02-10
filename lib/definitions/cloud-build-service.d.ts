@@ -16,7 +16,7 @@ interface IBuildResultData extends IServerResultData {
 /**
  * Describes build step.
  */
-interface IBuildStep extends IBuildId, ICloudOperationId {
+interface IBuildStep extends ICloudOperationId {
 	/**
 	 * The name of the step - prepare, upload, build or download.
 	 */
@@ -28,14 +28,7 @@ interface IBuildStep extends IBuildId, ICloudOperationId {
 	progress: number;
 }
 
-interface IBuildError extends Error, IBuildId, ICloudOperationId { }
-
-interface IBuildId {
-	/**
-	 * The ID of the build.
-	 */
-	buildId: string;
-}
+interface IBuildError extends Error, ICloudOperationId { }
 
 interface ICloudOperationId {
 	/**
@@ -44,7 +37,7 @@ interface ICloudOperationId {
 	cloudOperationId: string;
 }
 
-interface IBuildLog extends IBuildId, ICloudOperationId {
+interface IBuildLog extends ICloudOperationId {
 	data: string;
 	pipe: string;
 }

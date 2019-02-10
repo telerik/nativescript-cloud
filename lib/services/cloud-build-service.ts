@@ -181,7 +181,6 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		const result = {
 			cloudOperationId: cloudOperationId,
-			buildId: cloudOperationId,
 			stderr: buildResult.stderr,
 			stdout: buildResult.stdout,
 			outputFilePath: localBuildResult,
@@ -410,7 +409,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	}
 
 	private emitStepChanged(cloudOperationId: string, step: string, progress: number): void {
-		const buildStep: IBuildStep = { cloudOperationId: cloudOperationId, buildId: cloudOperationId, step, progress };
+		const buildStep: IBuildStep = { cloudOperationId: cloudOperationId, step, progress };
 		this.emit(constants.CLOUD_BUILD_EVENT_NAMES.STEP_CHANGED, buildStep);
 	}
 }
