@@ -4,6 +4,7 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 	protected static OPERATION_COMPLETE_STATUS = "Success";
 	protected static OPERATION_FAILED_STATUS = "Failed";
 	protected static OPERATION_IN_PROGRESS_STATUS = "InProgress";
+	protected static BUILDING_STATUS = "Building";
 
 	protected result: ICloudOperationResult;
 	protected status: string;

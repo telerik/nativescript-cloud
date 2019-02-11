@@ -70,7 +70,7 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 	protected abstract closeCore(code: number, reason?: string): Promise<void>;
 	protected abstract sendMessageCore<T>(message: ICloudOperationMessage<T>): Promise<string>;
 
-	protected _handleMessage(m: any): ICloudOperationMessage<any> {
+	protected handleMessage(m: any): ICloudOperationMessage<any> {
 		let msg: ICloudOperationMessage<any>;
 		if (_.isBuffer(m)) {
 			msg = JSON.parse(m.toString("utf8"));

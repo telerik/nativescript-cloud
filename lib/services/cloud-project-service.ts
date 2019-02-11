@@ -51,9 +51,9 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 
 	private async startCleanProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
 		const result = await this.executeCloudOperation("Cloud cleanup", async (cloudOperationId: string): Promise<ICleanupTaskResult> => {
-			const result = await this.executeCleanupProject(cloudOperationId, cleanupProjectData);
-			this.$logger.trace(`Cleanup [${cloudOperationId}] result: `, result);
-			return result;
+			const res = await this.executeCleanupProject(cloudOperationId, cleanupProjectData);
+			this.$logger.trace(`Cleanup [${cloudOperationId}] result: `, res);
+			return res;
 		});
 
 		return result;
@@ -110,11 +110,11 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		}
 
 		for (let task of childTasks) {
-			const result = await task;
-			this.$logger.info(result.output);
+			const taskResult = await task;
+			this.$logger.info(taskResult.output);
 
-			if (this.hasContent(result.err)) {
-				this.$logger.error(result.err);
+			if (this.hasContent(taskResult.err)) {
+				this.$logger.error(taskResult.err);
 			}
 		}
 

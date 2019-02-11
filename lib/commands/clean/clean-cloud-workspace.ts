@@ -7,13 +7,14 @@ export class CleanCloudWorkspace extends InteractiveCloudCommand implements ICom
 
 	public allowedParameters: ICommandParameter[] = [];
 
-	constructor(protected $errors: IErrors,
+	constructor($processService: IProcessService,
+		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudProjectService: ICloudProjectService,
 		private $projectData: IProjectData) {
-		super($nsCloudProjectService, $errors, $logger, $prompter);
+		super($nsCloudProjectService, $processService, $errors, $logger, $prompter);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {

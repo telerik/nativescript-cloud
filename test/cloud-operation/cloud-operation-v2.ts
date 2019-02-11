@@ -38,7 +38,7 @@ describe("Cloud operation v2", () => {
 			};
 
 			const communicationChannel = new CommunicationChannelMock();
-			communicationChannel.connect = async () => { communicationChannelConnectCalled = true };
+			communicationChannel.connect = async () => { communicationChannelConnectCalled = true; };
 			communicationChannel.once = <any>onEvent;
 			const cloudOperation = createCloudOperation(communicationChannel);
 
@@ -126,7 +126,7 @@ describe("Cloud operation v2", () => {
 		it("should send the message to the communication channel.", async () => {
 			let receivedMessage: ICloudOperationMessage<any>;
 			const communicationChannel = new CommunicationChannelMock();
-			communicationChannel.sendMessage = async (msg: any) => receivedMessage = msg;
+			communicationChannel.sendMessage = async (m: any) => receivedMessage = m;
 			const cloudOperation = createCloudOperation(communicationChannel);
 
 			const msg: ICloudOperationMessage<any> = {

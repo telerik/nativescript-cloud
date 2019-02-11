@@ -66,7 +66,7 @@ export class WebSocketCommunicationChannel extends CommunicationChannelBase {
 
 	private addChannelListeners() {
 		this.ws.on(CloudCommunicationEvents.MESSAGE, m => {
-			const msg = super._handleMessage(m);
+			const msg = super.handleMessage(m);
 			this.emit(CloudCommunicationEvents.MESSAGE, msg);
 		});
 

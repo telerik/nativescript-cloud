@@ -5,12 +5,15 @@ export abstract class InteractiveCloudCommand implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
 	constructor(private interactiveService: ICloudOperationService,
+		private $processService: IProcessService,
 		protected $errors: IErrors,
 		protected $logger: ILogger,
-		protected $prompter: IPrompter) { }
+		protected $prompter: IPrompter) {
+
+	}
 
 	public async execute(args: string[]): Promise<void> {
-		this.interactiveService.on(CloudCommunicationEvents.MESSAGE, async (msg: ICloudOperationMessage<any>) => {
+		const messageHandler = async (msg: ICloudOperationMessage<any>) => {
 			if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
 				if (!isInteractive()) {
 					this.$errors.failWithoutHelp(`Input is required but the process is not interactive. "${msg.body.message}"`);
@@ -33,6 +36,12 @@ export abstract class InteractiveCloudCommand implements ICommand {
 					this.$logger.trace(`Can't send input to cloud operation ${msg.cloudOperationId}. Error is ${err}.`);
 				}
 			}
+		};
+
+		this.interactiveService.on(CloudCommunicationEvents.MESSAGE, messageHandler);
+
+		this.$processService.attachToProcessExitSignals(this, () => {
+			this.interactiveService.removeListener(CloudCommunicationEvents.MESSAGE, messageHandler);
 		});
 
 		await this.executeCore(args);

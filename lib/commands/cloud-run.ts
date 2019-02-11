@@ -8,7 +8,8 @@ export class CloudRunCommand extends InteractiveCloudCommand implements ICommand
 	}
 
 	public platform: string;
-	constructor(protected $errors: IErrors,
+	constructor($processService: IProcessService,
+		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $liveSyncCommandHelper: ILiveSyncCommandHelper,
@@ -18,7 +19,7 @@ export class CloudRunCommand extends InteractiveCloudCommand implements ICommand
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $projectData: IProjectData,
 		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudBuildService, $errors, $logger, $prompter);
+		super($nsCloudBuildService, $processService, $errors, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 
@@ -55,13 +56,14 @@ export class CloudRunIosCommand extends CloudRunCommand implements ICommand {
 		$nsCloudBuildCommandHelper: IBuildCommandHelper,
 		$nsCloudBuildService: ICloudBuildService,
 		$nsCloudOptionsProvider: ICloudOptionsProvider,
+		$processService: IProcessService,
 		$projectData: IProjectData,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
 		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($errors, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
+		super($processService, $errors, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
 	}
 }
 
@@ -78,13 +80,14 @@ export class CloudRunAndroidCommand extends CloudRunCommand implements ICommand 
 		$nsCloudBuildCommandHelper: IBuildCommandHelper,
 		$nsCloudBuildService: ICloudBuildService,
 		$nsCloudOptionsProvider: ICloudOptionsProvider,
+		$processService: IProcessService,
 		$projectData: IProjectData,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
 		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($errors, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
+		super($processService, $errors, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $projectData, $nsCloudAndroidBundleValidatorHelper);
 	}
 }
 

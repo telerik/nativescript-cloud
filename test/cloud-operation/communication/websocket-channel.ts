@@ -130,7 +130,7 @@ describe("WebSocket communication channel", () => {
 			const { channel, ws } = createWebSocketCommunicationChannel();
 			ws.send = <any>(((msg: string, cb: Function): any => cb(null)));
 			const expectedErrorMessage = "Failed to create WebSocket";
-			(<any>channel).$nsCloudWebSocketFactory.create = () => { throw new Error(expectedErrorMessage) };
+			(<any>channel).$nsCloudWebSocketFactory.create = () => { throw new Error(expectedErrorMessage); };
 
 			await assert.isRejected(channel.connect(), expectedErrorMessage);
 		});

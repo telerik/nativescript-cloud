@@ -42,7 +42,8 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		try {
 			this.$logger.info(`Starting ${cloudOperationName}. Cloud operation id: ${cloudOperationId}`);
 			const result = await action(cloudOperationId);
-			return result
+
+			return result;
 		} catch (err) {
 			err.cloudOperationId = cloudOperationId;
 			throw err;
