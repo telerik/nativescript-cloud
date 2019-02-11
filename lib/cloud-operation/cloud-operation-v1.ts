@@ -92,8 +92,7 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 				return;
 			}
 
-			// Keep the CloudOperationBase.BUILDING_STATUS because the private cloud is still using it.
-			if (this.serverStatus.status === CloudOperationBase.OPERATION_IN_PROGRESS_STATUS || this.serverStatus.status === CloudOperationBase.BUILDING_STATUS) {
+			if (this.serverStatus.status === CloudOperationBase.OPERATION_IN_PROGRESS_STATUS) {
 				await this.getServerLogs(this.serverResponse.outputUrl);
 			}
 
