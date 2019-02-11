@@ -92,7 +92,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 				const childCloudOperationId = task.cloudOperationId;
 				let output = `Child cloud operation id: ${childCloudOperationId}`;
 				try {
-					const taskResult = await this.waitForServerOperationToFinish(childCloudOperationId, task, { silent: true });
+					const taskResult = await this.waitForCloudOperationToFinish(childCloudOperationId, task, { silent: true, hideBuildMachineMetadata: true });
 					tasksResults[childCloudOperationId] = taskResult;
 					output += await this.getCollectedLogs(task);
 					return { output };

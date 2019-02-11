@@ -49,6 +49,10 @@ interface ICloudOperationEcho {
 	sequenceNumber: number;
 }
 
+interface ICloudOperationServerHello {
+	hostName?: string;
+}
+
 interface ICloudOperationFactory {
 	create(cloudOperationVersion: string, cloudOperationId: string, serverResponse: IServerResponse): ICloudOperation;
 }

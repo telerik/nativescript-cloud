@@ -46,13 +46,15 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 			};
 			try {
 				this.communicationChannel.once(CloudCommunicationEvents.CLOSE, closeHandler);
+				// Subscribe here for messages to proxy serverHello.
+				this.communicationChannel.on(CloudCommunicationEvents.MESSAGE, (m) => this.emit(CloudCommunicationEvents.MESSAGE, m));
 				await this.communicationChannel.connect();
 				this.status = CloudOperationV2.OPERATION_IN_PROGRESS_STATUS;
 			} catch (err) {
 				return reject(err);
 			}
 
-			this.waitResultPromise = this.subscribeForMessages();
+			this.waitResultPromise = this.subscribeForResultMessage();
 			this.communicationChannel.removeListener(CloudCommunicationEvents.CLOSE, closeHandler);
 			resolve();
 		});
@@ -62,7 +64,7 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 		return this.waitResultPromise;
 	}
 
-	private subscribeForMessages(): Promise<ICloudOperationResult> {
+	private subscribeForResultMessage(): Promise<ICloudOperationResult> {
 		let isResolved = false;
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
 			this.communicationChannel.once(CloudCommunicationEvents.CLOSE, code => {
@@ -84,8 +86,6 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 						return reject(this.result);
 					}
 				}
-
-				this.emit(CloudCommunicationEvents.MESSAGE, m);
 			});
 		});
 	}

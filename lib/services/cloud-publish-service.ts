@@ -110,7 +110,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		this.$logger.trace("Publish response", response);
 		let publishResult: ICloudOperationResult;
 		try {
-			publishResult = await this.waitForServerOperationToFinish(publishRequestData.cloudOperationId, response, { silent: false });
+			publishResult = await this.waitForCloudOperationToFinish(publishRequestData.cloudOperationId, response, { silent: false });
 		} catch (ex) {
 			publishResult = this.getResult(publishRequestData.cloudOperationId);
 			if (!publishResult) {

@@ -50,7 +50,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		}
 	}
 
-	protected async waitForServerOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse, options: ICloudOperationExecutionOptions): Promise<ICloudOperationResult> {
+	protected async waitForCloudOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse, options: ICloudOperationExecutionOptions): Promise<ICloudOperationResult> {
 		const cloudOperationVersion = serverResponse.cloudOperationVersion || CloudService.CLOUD_OPERATION_VERSION_1;
 		const cloudOperation: ICloudOperation = this.$nsCloudOperationFactory.create(cloudOperationVersion, cloudOperationId, serverResponse);
 		this.cloudOperations[cloudOperationId] = cloudOperation;
@@ -69,6 +69,12 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 					this.$logger.printInfoMessageOnSameLine(log);
 				} else if (body.pipe === "stderr") {
 					this.$logger.error(log);
+				}
+			} else if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_SERVER_HELLO && !options.hideBuildMachineMetadata) {
+				const body: ICloudOperationServerHello = m.body;
+
+				if (body.hostName) {
+					this.$logger.info(`Build machine host name: ${body.hostName}`);
 				}
 			}
 

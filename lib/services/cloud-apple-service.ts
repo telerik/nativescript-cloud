@@ -27,7 +27,7 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 			const response = await this.$nsCloudServerBuildService.appleLogin(appleLoginData);
 
 			this.$logger.trace("Apple login response", response);
-			let appleLoginResult = await this.waitForServerOperationToFinish(appleLoginData.cloudOperationId, response, { silent: true });
+			let appleLoginResult = await this.waitForCloudOperationToFinish(appleLoginData.cloudOperationId, response, { silent: true });
 			return appleLoginResult.data.appleSessionBase64;
 		});
 

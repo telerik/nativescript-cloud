@@ -150,7 +150,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const buildResponse: IServerResponse = await this.$nsCloudServerBuildService.startBuild(buildProps);
 		this.$logger.trace("Build response:");
 		this.$logger.trace(buildResponse);
-		const buildResult: ICloudOperationResult = await this.waitForServerOperationToFinish(cloudOperationId, buildResponse, { silent: false });
+		const buildResult: ICloudOperationResult = await this.waitForCloudOperationToFinish(cloudOperationId, buildResponse, { silent: false });
 		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.BUILD, constants.BUILD_STEP_PROGRESS.END);
 
 		this.$logger.trace("Build result:");

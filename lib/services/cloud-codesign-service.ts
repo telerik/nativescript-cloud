@@ -77,7 +77,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		this.$logger.trace(`Codesign response: ${JSON.stringify(codesignResponse)}`);
 		let codesignResult;
 		try {
-			codesignResult = await this.waitForServerOperationToFinish(cloudOperationId, codesignResponse, { silent: false });
+			codesignResult = await this.waitForCloudOperationToFinish(cloudOperationId, codesignResponse, { silent: false });
 		} catch (ex) {
 			codesignResult = this.getResult(cloudOperationId);
 			if (!codesignResult) {
