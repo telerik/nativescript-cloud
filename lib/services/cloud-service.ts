@@ -25,7 +25,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
 		return "";
-	};
+	}
 
 	public async sendCloudMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
 		const cloudOperation = this.cloudOperations[message.cloudOperationId];
