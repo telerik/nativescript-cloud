@@ -9,12 +9,15 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 	protected status: string;
 	protected initialized: boolean;
 
-	constructor(protected id: string, protected serverResponse: IServerResponse) {
+	constructor(protected id: string,
+		protected serverResponse: IServerResponse,
+		protected $logger: ILogger,
+		protected $nsCloudOutputFilter: ICloudOutputFilter,
+		protected $nsCloudS3Helper: IS3Service) {
 		super();
 	}
 
 	public abstract sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void>;
-	public abstract cleanup(exitCode?: number): Promise<void>;
 
 	public async init(): Promise<void> {
 		try {
@@ -28,19 +31,28 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 
 	public async waitForResult(): Promise<ICloudOperationResult> {
 		this.isInitialized();
-		try {
-			const result = await this.waitForResultCore();
+		const result = await this.waitForResultCore();
 
-			return result;
-		} catch (err) {
-			await this.cleanup();
-			throw err;
-		}
+		return result;
+	}
+
+	public async cleanup(exitCode?: number): Promise<void> {
+		this.removeAllListeners();
 	}
 
 	public getResult(): ICloudOperationResult {
 		this.isInitialized();
 		return this.result;
+	}
+
+	public async getCollectedLogs(): Promise<string> {
+		try {
+			return this.$nsCloudOutputFilter.filter(await this.$nsCloudS3Helper.getContentOfS3File(this.serverResponse.outputUrl));
+		} catch (err) {
+			this.$logger.warn(`Unable to get cloud operation output. Error is: ${err}`);
+		}
+
+		return "";
 	}
 
 	protected abstract waitForResultCore(): Promise<ICloudOperationResult>;

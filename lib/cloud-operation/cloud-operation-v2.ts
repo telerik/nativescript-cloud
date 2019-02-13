@@ -10,8 +10,11 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 
 	constructor(protected id: string,
 		protected serverResponse: IServerResponse,
+		protected $logger: ILogger,
+		protected $nsCloudOutputFilter: ICloudOutputFilter,
+		protected $nsCloudS3Helper: IS3Service,
 		private $nsCloudCommunicationChannelFactory: ICloudCommunicationChannelFactory) {
-		super(id, serverResponse);
+		super(id, serverResponse, $logger, $nsCloudOutputFilter, $nsCloudS3Helper);
 
 		this.communicationChannel = this.$nsCloudCommunicationChannelFactory.create(serverResponse.communicationChannel, this.id);
 	}
@@ -22,11 +25,13 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 	}
 
 	public async cleanup(exitCode?: number): Promise<void> {
+		await super.cleanup();
 		if (this.waitToStartTimeout) {
 			clearTimeout(this.waitToStartTimeout);
 			this.waitToStartTimeout = null;
 		}
 
+		this.communicationChannel.removeAllListeners();
 		await this.communicationChannel.close(exitCode);
 	}
 
@@ -41,7 +46,6 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 			}, CloudOperationV2.WAIT_TO_START_TIMEOUT);
 
 			const closeHandler = (code: number) => {
-				this.cleanup(code);
 				reject(new Error(`Communication channel closed with code ${code}`));
 			};
 			try {
@@ -50,13 +54,13 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 				this.communicationChannel.on(CloudCommunicationEvents.MESSAGE, (m) => this.emit(CloudCommunicationEvents.MESSAGE, m));
 				await this.communicationChannel.connect();
 				this.status = CloudOperationV2.OPERATION_IN_PROGRESS_STATUS;
+				this.waitResultPromise = this.getResultPromise();
+				this.communicationChannel.removeListener(CloudCommunicationEvents.CLOSE, closeHandler);
+				resolve();
 			} catch (err) {
 				return reject(err);
 			}
 
-			this.waitResultPromise = this.subscribeForResultMessage();
-			this.communicationChannel.removeListener(CloudCommunicationEvents.CLOSE, closeHandler);
-			resolve();
 		});
 	}
 
@@ -64,12 +68,10 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 		return this.waitResultPromise;
 	}
 
-	private subscribeForResultMessage(): Promise<ICloudOperationResult> {
-		let isResolved = false;
+	private getResultPromise(): Promise<ICloudOperationResult> {
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
 			this.communicationChannel.once(CloudCommunicationEvents.CLOSE, code => {
-				this.cleanup(code);
-				if (!isResolved) {
+				if (this.status && (this.status !== CloudOperationBase.OPERATION_COMPLETE_STATUS && this.status !== CloudOperationBase.OPERATION_FAILED_STATUS)) {
 					reject(new Error(`Communication channel closed with code ${code}`));
 				}
 			});
@@ -78,13 +80,11 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 					this.result = <ICloudOperationResult>m.body;
 					if (this.result.code === 0 || this.result.data) {
 						this.status = CloudOperationV2.OPERATION_COMPLETE_STATUS;
-						isResolved = true;
-						return resolve(this.result);
 					} else {
 						this.status = CloudOperationV2.OPERATION_FAILED_STATUS;
-						isResolved = true;
-						return reject(this.result);
 					}
+
+					resolve(this.result);
 				}
 			});
 		});

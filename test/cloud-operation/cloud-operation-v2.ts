@@ -15,7 +15,7 @@ describe("Cloud operation v2", () => {
 			create: (): any => communicationChannel
 		});
 		testInjector.register("nsCloudOutputFilter", {});
-		testInjector.register("nsCloudS3Service", {});
+		testInjector.register("nsCloudS3Helper", {});
 		testInjector.register("nsCloudOperationFactory", CloudOperationFactory);
 		testInjector.register("injector", testInjector);
 

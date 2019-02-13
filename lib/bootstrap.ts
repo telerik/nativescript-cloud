@@ -13,6 +13,7 @@ $injector.require("nsCloudAndroidBundleValidatorHelper", path.join(__dirname, "c
 $injector.require("nsCloudKinveyUserService", path.join(__dirname, "services", "kinvey-user-service"));
 $injector.require("nsCloudLockService", path.join(__dirname, "services", "lock-service"));
 $injector.require("nsCloudTelerikUserService", path.join(__dirname, "services", "telerik-user-service"));
+$injector.require("nsCloudS3Helper", path.join(__dirname, "s3-helper"));
 
 // Cloud operation.
 $injector.require("nsCloudOperationFactory", path.join(__dirname, "cloud-operation", "cloud-operation-factory"));
@@ -61,7 +62,6 @@ $injector.require("nsCloudBuildPropertiesService", path.join(__dirname, "service
 $injector.require("nsCloudHashService", path.join(__dirname, "services", "hash-service"));
 $injector.require("nsCloudConfigurationService", path.join(__dirname, "services", "cloud-configuration-service"));
 $injector.require("nsCloudEncryptionService", path.join(__dirname, "services", "cloud-encryption-service"));
-$injector.require("nsCloudS3Service", path.join(__dirname, "services", "s3-service"));
 $injector.require("nsCloudAppleService", path.join(__dirname, "services", "cloud-apple-service"));
 
 // Commands.

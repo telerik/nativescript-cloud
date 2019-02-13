@@ -21,18 +21,13 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
 		$nsCloudOperationFactory: ICloudOperationFactory,
-		$nsCloudS3Service: IS3Service,
 		$nsCloudOutputFilter: ICloudOutputFilter,
 		$processService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $nsCloudUploadService: IUploadService,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
-	}
-
-	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
-		return "";
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $processService);
 	}
 
 	public async publishToItunesConnect(publishData: IItunesConnectPublishData): Promise<void> {
@@ -108,17 +103,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		const response = await this.$nsCloudServerBuildService.publish(publishRequestData);
 
 		this.$logger.trace("Publish response", response);
-		let publishResult: ICloudOperationResult;
-		try {
-			publishResult = await this.waitForCloudOperationToFinish(publishRequestData.cloudOperationId, response, { silent: false });
-		} catch (ex) {
-			publishResult = this.getResult(publishRequestData.cloudOperationId);
-			if (!publishResult) {
-				throw ex;
-			}
-
-			this.$logger.error("Publish failed with err: ", ex);
-		}
+		const publishResult = await this.waitForCloudOperationToFinish(publishRequestData.cloudOperationId, response, { silent: true });
 
 		this.$logger.trace("Publish result:", publishResult);
 
@@ -131,14 +116,6 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		}
 
 		this.$logger.info("Publishing finished successfully.");
-	}
-
-	protected getServerResults(codesignResult: ICloudOperationResult): IServerItem[] {
-		return [];
-	}
-
-	protected async getServerLogs(logsUrl: string, cloudOperationId: string): Promise<void> {
-		// no specific implementation needed.
 	}
 
 	private async getPreparePackagePaths(publishData: IPackagePaths): Promise<string[]> {

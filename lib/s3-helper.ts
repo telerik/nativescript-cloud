@@ -1,4 +1,4 @@
-export class S3Service implements IS3Service {
+export class S3Helper implements IS3Service {
 	constructor(private $httpClient: Server.IHttpClient) { }
 
 	public async getJsonObjectFromS3File<T>(pathToFile: string): Promise<T> {
@@ -10,4 +10,4 @@ export class S3Service implements IS3Service {
 	}
 }
 
-$injector.register("nsCloudS3Service", S3Service);
+$injector.register("nsCloudS3Helper", S3Helper);

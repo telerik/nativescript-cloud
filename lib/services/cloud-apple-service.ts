@@ -14,11 +14,10 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
 		$nsCloudOperationFactory: ICloudOperationFactory,
-		$nsCloudS3Service: IS3Service,
 		$nsCloudOutputFilter: ICloudOutputFilter,
 		$processService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $processService);
 	}
 
 	public async appleLogin(credentials: ICredentials): Promise<string> {
@@ -28,18 +27,14 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 
 			this.$logger.trace("Apple login response", response);
 			let appleLoginResult = await this.waitForCloudOperationToFinish(appleLoginData.cloudOperationId, response, { silent: true });
+			if (!appleLoginResult.data.appleSessionBase64) {
+				this.$errors.failWithoutHelp(`Apple login failed. Reason is: ${appleLoginResult.errors}. Additional information: ${appleLoginResult.stderr}.`);
+			}
+
 			return appleLoginResult.data.appleSessionBase64;
 		});
 
 		return result;
-	}
-
-	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
-		return "";
-	}
-
-	protected getServerResults(serverResult: ICloudOperationResult): IServerItem[] {
-		return [];
 	}
 }
 

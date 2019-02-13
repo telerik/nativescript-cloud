@@ -4,7 +4,7 @@ import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constan
 export abstract class InteractiveCloudCommand implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
-	constructor(private interactiveService: ICloudOperationService,
+	constructor(private interactiveService: ICloudService,
 		private $processService: IProcessService,
 		protected $errors: IErrors,
 		protected $logger: ILogger,

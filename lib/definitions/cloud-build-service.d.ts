@@ -96,7 +96,7 @@ interface ISharedCloud {
 /**
  * Defines operations for building a project in the cloud.
  */
-interface ICloudBuildService extends ICloudOperationService {
+interface ICloudBuildService extends ICloudService {
 	/**
 	 * Builds the specified application in the cloud and returns information about the whole build process.
 	 * @param {INSCloudProjectSettings} projectSettings Describes the current project - project dir, application identifier, name and nativescript data.

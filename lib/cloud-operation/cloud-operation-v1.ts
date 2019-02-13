@@ -15,19 +15,20 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 
 	constructor(protected id: string,
 		protected serverResponse: IServerResponse,
-		private $logger: ILogger,
-		private $nsCloudOutputFilter: ICloudOutputFilter,
-		private $nsCloudS3Service: IS3Service) {
-		super(id, serverResponse);
+		protected $logger: ILogger,
+		protected $nsCloudOutputFilter: ICloudOutputFilter,
+		protected $nsCloudS3Helper: IS3Service) {
+		super(id, serverResponse, $logger, $nsCloudOutputFilter, $nsCloudS3Helper);
 
 		this.outputCursorPosition = 0;
 	}
 
 	public async sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
-		this.$logger.warn("This version of the cloud operation does not support sending messages to the cloud services.");
+		throw new Error("This version of the cloud operation does not support sending messages to the cloud services.");
 	}
 
-	public async cleanup(): Promise<void> {
+	public async cleanup(exitCode?: number): Promise<void> {
+		await super.cleanup(exitCode);
 		clearInterval(this.statusCheckInterval);
 		clearInterval(this.logsCheckInterval);
 	}
@@ -37,18 +38,18 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 			retries: CloudOperationV1.OPERATION_STATUS_CHECK_RETRY_COUNT,
 			minTimeout: CloudOperationV1.OPERATION_STATUS_CHECK_INTERVAL
 		};
-		await promiseRetry((retry, attempt) => {
-			return new Promise<IServerStatus>((resolve, reject) => {
-				this.$nsCloudS3Service.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl)
-					.then(serverStatus => {
-						this.serverStatus = serverStatus;
-						resolve(this.serverStatus);
-					})
-					.catch(err => {
-						this.$logger.trace(err);
-						reject(new Error("Failed to start."));
-					});
-			}).catch(retry);
+		await promiseRetry(async (retry, attempt) => {
+			try {
+				try {
+					this.serverStatus = await this.$nsCloudS3Helper.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
+					return this.serverStatus;
+				} catch (err) {
+					this.$logger.trace(err);
+					throw new Error("Failed to start.");
+				}
+			} catch (err) {
+				retry(err);
+			}
 		}, promiseRetryOptions);
 
 		this.pollForLogs();
@@ -57,22 +58,23 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 	protected async waitForResultCore(): Promise<ICloudOperationResult> {
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
 			this.statusCheckInterval = setInterval(async () => {
-				this.serverStatus = await this.$nsCloudS3Service.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
+				this.serverStatus = await this.$nsCloudS3Helper.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
 				if (this.serverStatus.status === CloudOperationV1.OPERATION_COMPLETE_STATUS) {
 					clearInterval(this.statusCheckInterval);
-					this.result = await this.$nsCloudS3Service.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl);
+					this.result = await this.$nsCloudS3Helper.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl);
 					return resolve(this.result);
 				}
 
 				if (this.serverStatus.status === CloudOperationV1.OPERATION_FAILED_STATUS) {
 					try {
-						this.result = await this.$nsCloudS3Service.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl);
+						this.result = await this.$nsCloudS3Helper.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl);
+						clearInterval(this.statusCheckInterval);
+						resolve(this.result);
 					} catch (err) {
+						clearInterval(this.statusCheckInterval);
 						this.$logger.trace(err);
+						return reject(new Error("Cloud operation failed"));
 					}
-
-					clearInterval(this.statusCheckInterval);
-					return reject(new Error("Cloud operation failed"));
 				}
 
 			}, CloudOperationV1.OPERATION_STATUS_CHECK_INTERVAL);
@@ -81,27 +83,19 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 
 	private pollForLogs(): void {
 		this.logsCheckInterval = setInterval(async () => {
-			if (this.serverStatus.status === CloudOperationBase.OPERATION_COMPLETE_STATUS) {
-				await this.getServerLogs(this.serverResponse.outputUrl);
+			await this.getCloudOperationLogs();
+
+			const status = this.serverStatus.status;
+			if (status === CloudOperationBase.OPERATION_COMPLETE_STATUS || status === CloudOperationBase.OPERATION_FAILED_STATUS) {
 				clearInterval(this.logsCheckInterval);
 				return;
 			}
-
-			if (this.serverStatus.status === CloudOperationBase.OPERATION_FAILED_STATUS) {
-				await this.getServerLogs(this.serverResponse.outputUrl);
-				return;
-			}
-
-			if (this.serverStatus.status === CloudOperationBase.OPERATION_IN_PROGRESS_STATUS) {
-				await this.getServerLogs(this.serverResponse.outputUrl);
-			}
-
 		}, CloudOperationV1.OPERATION_STATUS_CHECK_INTERVAL);
 	}
 
-	private async getServerLogs(logsUrl: string): Promise<void> {
+	private async getCloudOperationLogs(): Promise<void> {
 		try {
-			const logs = await this.$nsCloudS3Service.getContentOfS3File(logsUrl);
+			const logs = await this.$nsCloudS3Helper.getContentOfS3File(this.serverResponse.outputUrl);
 			// The logs variable will contain the full server log and we need to log only the logs that we don't have.
 			const contentToLog = this.$nsCloudOutputFilter.filter(logs.substr(this.outputCursorPosition));
 			if (contentToLog) {

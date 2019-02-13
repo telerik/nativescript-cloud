@@ -97,12 +97,18 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 	}
 
 	public async getExtendedAppleCredentials(args: string[], options: ICloudOptions): Promise<IPublishCredentials> {
-		const credentials = await this.getAppleCredentials(args);
 		const extendedCredentials = {
 			appleApplicationSpecificPassword: options.appleApplicationSpecificPassword,
 			appleSession: options.appleSessionBase64 ? Buffer.from(options.appleSessionBase64, "base64").toString() : undefined
 		};
-		return _.merge(credentials, extendedCredentials);
+
+
+		if (options.appleSessionBase64) {
+			const credentials = await this.getAppleCredentials(args);
+			return _.merge(credentials, extendedCredentials);
+		}
+
+		return extendedCredentials;
 	}
 
 	public async buildForPublishingPlatform(platformArg: string): Promise<string> {

@@ -4,7 +4,7 @@ import { v4 } from "uuid";
 
 import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
 
-export abstract class CloudService extends EventEmitter implements ICloudOperationService {
+export abstract class CloudService extends EventEmitter implements ICloudService {
 	private static readonly CLOUD_OPERATION_VERSION_1: string = "v1";
 	protected abstract failedToStartError: string;
 	protected abstract failedError: string;
@@ -16,7 +16,6 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		protected $httpClient: Server.IHttpClient,
 		protected $logger: ILogger,
 		private $nsCloudOperationFactory: ICloudOperationFactory,
-		private $nsCloudS3Service: IS3Service,
 		private $nsCloudOutputFilter: ICloudOutputFilter,
 		private $processService: IProcessService) {
 		super();
@@ -24,7 +23,9 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		this.$processService.attachToProcessExitSignals(this, this.cleanup.bind(this));
 	}
 
-	public abstract getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;
+	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
+		return "";
+	};
 
 	public async sendCloudMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
 		const cloudOperation = this.cloudOperations[message.cloudOperationId];
@@ -35,7 +36,9 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		await cloudOperation.sendMessage(message);
 	}
 
-	protected abstract getServerResults(serverResult: ICloudOperationResult): IServerItem[];
+	protected getServerResults(serverResult: ICloudOperationResult): IServerItem[] {
+		return [];
+	}
 
 	protected async executeCloudOperation<T>(cloudOperationName: string, action: (cloudOperationId: string) => Promise<T>): Promise<T> {
 		const cloudOperationId: string = v4();
@@ -92,6 +95,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		try {
 			const result = await cloudOperation.waitForResult();
 			await cloudOperation.cleanup();
+			delete this.cloudOperations[cloudOperationId];
 			return result;
 		} catch (err) {
 			this.$logger.trace(err);
@@ -123,22 +127,8 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 		return targetFileNames;
 	}
 
-	protected async getCollectedLogs(serverResponse: IServerResponse): Promise<string> {
-		try {
-			return this.$nsCloudOutputFilter.filter(await this.$nsCloudS3Service.getContentOfS3File(serverResponse.outputUrl));
-		} catch (err) {
-			this.$logger.warn(`Unable to get cloud operation output. Error is: ${err}`);
-		}
-	}
-
-	protected getResult(cloudOperationId: string): ICloudOperationResult {
-		try {
-			return this.cloudOperations[cloudOperationId].getResult();
-		} catch (err) {
-			this.$logger.trace(err);
-		}
-
-		return null;
+	protected getCollectedLogs(cloudOperationId: string): Promise<string> {
+		return this.cloudOperations[cloudOperationId].getCollectedLogs();
 	}
 
 	private async cleanup(): Promise<void> {
@@ -147,5 +137,7 @@ export abstract class CloudService extends EventEmitter implements ICloudOperati
 			.map(op => op.cleanup())
 			.value()
 		);
+
+		this.cloudOperations = {};
 	}
 }

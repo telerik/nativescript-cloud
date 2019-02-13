@@ -16,12 +16,11 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
 		$nsCloudOperationFactory: ICloudOperationFactory,
-		$nsCloudS3Service: IS3Service,
 		$nsCloudOutputFilter: ICloudOutputFilter,
 		$processService: IProcessService,
 		private $nsCloudServerProjectService: IServerProjectService,
 		private $projectHelper: IProjectHelper) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $processService);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
@@ -84,39 +83,8 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 			this.$logger.info("No AWS CodeCommit data to clean.");
 		}
 
-		const tasksResults: IDictionary<IServerResult> = {};
 		this.$logger.info(`${EOL}### Build machines cleanup${EOL}`);
-		const childTasks: Promise<IChildTaskExecutionResult>[] = [];
-		for (let task of cleanupResponse.buildMachineResponse) {
-			const executeChildTask = async (): Promise<IChildTaskExecutionResult> => {
-				const childCloudOperationId = task.cloudOperationId;
-				let output = `Child cloud operation id: ${childCloudOperationId}`;
-				try {
-					const taskResult = await this.waitForCloudOperationToFinish(childCloudOperationId, task, { silent: true, hideBuildMachineMetadata: true });
-					tasksResults[childCloudOperationId] = taskResult;
-					output += await this.getCollectedLogs(task);
-					return { output };
-				} catch (err) {
-					if (this.getResult(childCloudOperationId)) {
-						tasksResults[childCloudOperationId] = this.getResult(childCloudOperationId);
-					}
-
-					// We don't want to stop the execution if one of the tasks fails.
-					return { output, err: `${childCloudOperationId} error: ${err}` };
-				}
-			};
-
-			childTasks.push(executeChildTask());
-		}
-
-		for (let task of childTasks) {
-			const taskResult = await task;
-			this.$logger.info(taskResult.output);
-
-			if (this.hasContent(taskResult.err)) {
-				this.$logger.error(taskResult.err);
-			}
-		}
+		const tasksResults = await this.waitForAllCleanOperationsToFinish(cleanupResponse.buildMachineResponse);
 
 		const result: ICleanupTaskResult = {
 			cloudOperationId,
@@ -128,19 +96,43 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		return result;
 	}
 
-	protected getServerResults(result: ICloudOperationResult): IServerItem[] {
-		return [];
+	private async waitForAllCleanOperationsToFinish(serverResponses: IServerResponse[]): Promise<IDictionary<IServerResult>> {
+		const childTasks = _.map(serverResponses, task => this.waitForChildTaskToFinish(task));
+
+		const tasksResults: IDictionary<IServerResult> = {};
+		for (let task of childTasks) {
+			const result = await task;
+			if (result.taskResult) {
+				tasksResults[result.cloudOperationId] = result.taskResult;
+			}
+
+			this.$logger.info(result.output);
+
+			if (result.err && result.err.trim().length > 0) {
+				this.$logger.error(result.err);
+			}
+		}
+
+		return tasksResults;
 	}
 
-	protected async getServerLogs(logsUrl: string, cloudTaskId: string): Promise<void> { /* no need for implementation */ }
+	private async waitForChildTaskToFinish(task: IServerResponse): Promise<IChildTaskExecutionResult> {
+		const childCloudOperationId = task.cloudOperationId;
+		let output = `Child cloud operation id: ${childCloudOperationId}`;
+		const taskResult = await this.waitForCloudOperationToFinish(childCloudOperationId, task, { silent: true, hideBuildMachineMetadata: true });
+		output += await this.getCollectedLogs(task.cloudOperationId);
+		const result: IChildTaskExecutionResult = { taskResult, output, cloudOperationId: task.cloudOperationId };
+		if (taskResult.code !== 0) {
+			result.err = `${childCloudOperationId} error: ${taskResult.errors}`;
+		}
 
-	private hasContent(input: string): boolean {
-		return input && input.trim().length > 0;
+		return result;
 	}
 }
 
-interface IChildTaskExecutionResult {
+interface IChildTaskExecutionResult extends ICloudOperationId {
 	output: string;
+	taskResult?: IServerResult;
 	err?: string;
 }
 

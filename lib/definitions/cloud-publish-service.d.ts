@@ -71,7 +71,7 @@ interface IGooglePlayPublishData extends IPublishDataCore, IOptionalAndroidTrack
 /**
  * Describes methods for publishing builds to each platform's respective application store through the cloud.
  */
-interface ICloudPublishService extends ICloudOperationService {
+interface ICloudPublishService extends ICloudService {
 	/**
 	 * Publishes the given .ipa packages to iTunes Connect.
 	 * @param {IItunesConnectPublishData} publishData Data needed to publish to iTunes Connect.
@@ -90,7 +90,7 @@ interface ICloudPublishService extends ICloudOperationService {
 /**
  * Describes methods for working with Apple Id in the cloud.
  */
-interface ICloudAppleService extends ICloudOperationService {
+interface ICloudAppleService extends ICloudService {
 	/**
 	 * Uses the provided Apple credentials to generate fastlane session.
 	 * @param {ICredentials} credentials The Apple credentials.

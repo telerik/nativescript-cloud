@@ -18,7 +18,7 @@ interface ICleanupTaskResult {
 /**
  * Defines operations for managing cloud projects.
  */
-interface ICloudProjectService extends ICloudOperationService {
+interface ICloudProjectService extends ICloudService {
 	/**
 	 * Cleans all AWS CodeCommit data and build machines artefacts if they exist.
 	 * @param {ICleanupRequestDataBase} cleanupProjectData Data needed for project cleaning.

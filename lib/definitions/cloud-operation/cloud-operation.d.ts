@@ -4,6 +4,7 @@ interface ICloudOperation extends NodeJS.EventEmitter {
 	sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void>;
 	cleanup(exitCode?: number): Promise<void>;
 	getResult(): ICloudOperationResult;
+	getCollectedLogs(): Promise<string>;
 }
 
 interface ICloudOperationWebSocketMessage<T> extends ICloudOperationId {

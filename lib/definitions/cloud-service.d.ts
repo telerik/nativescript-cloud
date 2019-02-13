@@ -58,7 +58,7 @@ interface IServerItem extends IServerItemBase, IPlatform {
 /**
  * Defines common operations for server operation in the cloud.
  */
-interface ICloudOperationService extends NodeJS.EventEmitter {
+interface ICloudService extends NodeJS.EventEmitter {
 	/**
 	 * Returns the path to the directory where the server request output may be found.
 	 * @param {IOutputDirectoryOptions} options Options that are used to determine the build output directory.

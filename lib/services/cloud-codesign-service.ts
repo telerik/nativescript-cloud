@@ -17,13 +17,12 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
 		$nsCloudOperationFactory: ICloudOperationFactory,
-		$nsCloudS3Service: IS3Service,
 		$nsCloudOutputFilter: ICloudOutputFilter,
 		$processService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudS3Service, $nsCloudOutputFilter, $processService);
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $processService);
 	}
 
 	public async generateCodesignFiles(codesignData: ICodesignData,
@@ -75,17 +74,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		const codesignRequest = await this.prepareCodesignRequest(cloudOperationId, codesignData, projectData);
 		const codesignResponse: IServerResponse = await this.$nsCloudServerBuildService.generateCodesignFiles(codesignRequest);
 		this.$logger.trace(`Codesign response: ${JSON.stringify(codesignResponse)}`);
-		let codesignResult;
-		try {
-			codesignResult = await this.waitForCloudOperationToFinish(cloudOperationId, codesignResponse, { silent: false });
-		} catch (ex) {
-			codesignResult = this.getResult(cloudOperationId);
-			if (!codesignResult) {
-				throw ex;
-			}
-
-			this.$logger.trace("Codesign generation failed with err: ", ex);
-		}
+		const codesignResult = await this.waitForCloudOperationToFinish(cloudOperationId, codesignResponse, { silent: true });
 
 		this.$logger.trace("Codesign result:");
 		this.$logger.trace(codesignResult);
@@ -121,10 +110,6 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		};
 
 		return result;
-	}
-
-	protected async getServerLogs(logsUrl: string, cloudOperationId: string): Promise<void> {
-		// no specific implementation needed.
 	}
 
 	private async prepareCodesignRequest(cloudOperationId: string,
