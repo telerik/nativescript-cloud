@@ -4,13 +4,15 @@ import { CloudOperationMessageTypes, CloudCommunicationChannelExitCodes, CloudCo
 export abstract class CommunicationChannelBase extends EventEmitter implements ICloudCommunicationChannel {
 	private static readonly PING_INTERVAL: number = 10000;
 	private static readonly MISSING_PING_REPLIES_COUNT: number = 6;
+	private static readonly CONNECT_TIMEOUT: number = 60000;
 
 	protected isConnected: boolean;
 	private pingInterval: NodeJS.Timer;
+	private connectTimeout: NodeJS.Timer;
 	private echoSequenceNumber: number = 0;
 	private echoReplySequenceNumber: number = 0;
 
-	private handshakeCompleteResolve: (value?: PromiseLike<void>) => void;
+	private handshakeResolve: (value?: PromiseLike<void>) => void;
 
 	constructor(protected cloudOperationId: string,
 		protected data: ICloudCommunicationChannelData<any>,
@@ -20,9 +22,20 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 
 	public async connect(): Promise<void> {
 		if (!this.isConnected) {
-			await this.connectCore();
-			this.isConnected = true;
-			await this.handshake();
+			const connect = new Promise(async (resolve, reject) => {
+				this.connectTimeout = setTimeout(() => {
+					clearTimeout(this.connectTimeout);
+					reject(new Error("Failed to connect to the communication channel."));
+				}, CommunicationChannelBase.CONNECT_TIMEOUT);
+
+				await this.connectCore();
+				await this.handshake();
+				this.isConnected = true;
+				clearTimeout(this.connectTimeout);
+				resolve();
+			});
+
+			await connect;
 			this.startPing();
 		}
 	}
@@ -43,6 +56,8 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 		}
 
 		try {
+			clearTimeout(this.connectTimeout);
+
 			if (this.pingInterval) {
 				clearInterval(this.pingInterval);
 				this.pingInterval = null;
@@ -81,7 +96,7 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 		}
 
 		if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_SERVER_HELLO) {
-			this.handshakeCompleteResolve();
+			this.handshakeResolve();
 		} else if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_ECHO_REPLY) {
 			const body: ICloudOperationEcho = msg.body;
 			if (body.identifier === this.cloudOperationId) {
@@ -89,12 +104,13 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 			}
 		}
 
+		this.emit(CloudCommunicationEvents.MESSAGE, msg);
 		return msg;
 	}
 
 	private async handshake(): Promise<void> {
 		const handshakePromise = new Promise<void>((resolve) => {
-			this.handshakeCompleteResolve = resolve;
+			this.handshakeResolve = resolve;
 		});
 		await this.sendMessageCore({ type: CloudOperationMessageTypes.CLOUD_OPERATION_CLIENT_HELLO, cloudOperationId: this.cloudOperationId });
 		await handshakePromise;

@@ -12,7 +12,7 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 		protected serverResponse: IServerResponse,
 		protected $logger: ILogger,
 		protected $nsCloudOutputFilter: ICloudOutputFilter,
-		protected $nsCloudS3Helper: IS3Service,
+		protected $nsCloudS3Helper: IS3Helper,
 		private $nsCloudCommunicationChannelFactory: ICloudCommunicationChannelFactory) {
 		super(id, serverResponse, $logger, $nsCloudOutputFilter, $nsCloudS3Helper);
 

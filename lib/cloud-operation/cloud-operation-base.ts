@@ -13,7 +13,7 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 		protected serverResponse: IServerResponse,
 		protected $logger: ILogger,
 		protected $nsCloudOutputFilter: ICloudOutputFilter,
-		protected $nsCloudS3Helper: IS3Service) {
+		protected $nsCloudS3Helper: IS3Helper) {
 		super();
 	}
 

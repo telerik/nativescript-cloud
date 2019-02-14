@@ -17,7 +17,7 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 		protected serverResponse: IServerResponse,
 		protected $logger: ILogger,
 		protected $nsCloudOutputFilter: ICloudOutputFilter,
-		protected $nsCloudS3Helper: IS3Service) {
+		protected $nsCloudS3Helper: IS3Helper) {
 		super(id, serverResponse, $logger, $nsCloudOutputFilter, $nsCloudS3Helper);
 
 		this.outputCursorPosition = 0;
@@ -40,15 +40,11 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 		};
 		await promiseRetry(async (retry, attempt) => {
 			try {
-				try {
-					this.serverStatus = await this.$nsCloudS3Helper.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
-					return this.serverStatus;
-				} catch (err) {
-					this.$logger.trace(err);
-					throw new Error("Failed to start.");
-				}
+				this.serverStatus = await this.$nsCloudS3Helper.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
+				return this.serverStatus;
 			} catch (err) {
-				retry(err);
+				this.$logger.trace(err);
+				retry(new Error("Failed to start."));
 			}
 		}, promiseRetryOptions);
 

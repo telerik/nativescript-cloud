@@ -95,7 +95,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 		try {
 			const result = await cloudOperation.waitForResult();
 			await cloudOperation.cleanup();
-			delete this.cloudOperations[cloudOperationId];
+			// delete this.cloudOperations[cloudOperationId];
 			return result;
 		} catch (err) {
 			this.$logger.trace(err);

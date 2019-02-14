@@ -14,8 +14,8 @@ export class WebSocketCommunicationChannel extends CommunicationChannelBase {
 	}
 
 	protected async closeCore(code: number, reason?: string): Promise<void> {
+		this.ws.removeAllListeners();
 		if (this.ws.readyState === this.ws.OPEN) {
-			this.ws.removeAllListeners();
 			this.ws.close();
 		}
 	}
@@ -57,20 +57,16 @@ export class WebSocketCommunicationChannel extends CommunicationChannelBase {
 			this.ws.once("open", () => {
 				this.ws.removeListener("close", closeHandler);
 				this.ws.removeListener("unexpected-response", unexpectedResponseHandler);
+				this.addChannelListeners();
 				resolve();
 			});
-
-			this.addChannelListeners();
 		});
 	}
 
 	private addChannelListeners() {
-		this.ws.on(CloudCommunicationEvents.MESSAGE, m => {
-			const msg = super.handleMessage(m);
-			this.emit(CloudCommunicationEvents.MESSAGE, msg);
-		});
+		this.ws.on(CloudCommunicationEvents.MESSAGE, m => super.handleMessage(m));
+		this.ws.on(CloudCommunicationEvents.ERROR, err => this.emit("error", err));
 
-		this.ws.once("error", err => this.emit("error", err));
-		this.ws.once("close", this.close.bind(this));
+		this.ws.once(CloudCommunicationEvents.CLOSE, this.close.bind(this));
 	}
 }

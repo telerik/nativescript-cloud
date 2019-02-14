@@ -160,6 +160,7 @@ export class CloudCommunicationChannelTypes {
 export class CloudCommunicationEvents {
 	public static readonly MESSAGE: string = "message";
 	public static readonly CLOSE: string = "close";
+	public static readonly ERROR: string = "error";
 }
 
 export class CloudCommunicationChannelExitCodes {

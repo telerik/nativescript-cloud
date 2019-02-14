@@ -102,14 +102,8 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		const tasksResults: IDictionary<IServerResult> = {};
 		for (let task of childTasks) {
 			const result = await task;
-			if (result.taskResult) {
+			if (result) {
 				tasksResults[result.cloudOperationId] = result.taskResult;
-			}
-
-			this.$logger.info(result.output);
-
-			if (result.err && result.err.trim().length > 0) {
-				this.$logger.error(result.err);
 			}
 		}
 
@@ -119,21 +113,21 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 	private async waitForChildTaskToFinish(task: IServerResponse): Promise<IChildTaskExecutionResult> {
 		const childCloudOperationId = task.cloudOperationId;
 		let output = `Child cloud operation id: ${childCloudOperationId}`;
+
 		const taskResult = await this.waitForCloudOperationToFinish(childCloudOperationId, task, { silent: true, hideBuildMachineMetadata: true });
 		output += await this.getCollectedLogs(task.cloudOperationId);
-		const result: IChildTaskExecutionResult = { taskResult, output, cloudOperationId: task.cloudOperationId };
+
+		this.$logger.info(output);
 		if (taskResult.code !== 0) {
-			result.err = `${childCloudOperationId} error: ${taskResult.errors}`;
+			this.$logger.error(`${childCloudOperationId} error: ${taskResult.errors}`);
 		}
 
-		return result;
+		return { taskResult, cloudOperationId: task.cloudOperationId };
 	}
 }
 
 interface IChildTaskExecutionResult extends ICloudOperationId {
-	output: string;
 	taskResult?: IServerResult;
-	err?: string;
 }
 
 $injector.register("nsCloudProjectService", CloudProjectService);
