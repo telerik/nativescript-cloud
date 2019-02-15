@@ -75,5 +75,6 @@ interface ICloudService extends NodeJS.EventEmitter {
 
 interface ICloudOperationExecutionOptions {
 	silent: boolean;
+	parentCloudOperationId?: string;
 	hideBuildMachineMetadata?: boolean;
 }

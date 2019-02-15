@@ -13,7 +13,7 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 	private statusCheckInterval: NodeJS.Timer;
 	private logsCheckInterval: NodeJS.Timer;
 
-	constructor(protected id: string,
+	constructor(public id: string,
 		protected serverResponse: IServerResponse,
 		protected $logger: ILogger,
 		protected $nsCloudOutputFilter: ICloudOutputFilter,

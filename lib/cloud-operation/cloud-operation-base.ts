@@ -9,7 +9,7 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 	protected status: string;
 	protected initialized: boolean;
 
-	constructor(protected id: string,
+	constructor(public id: string,
 		protected serverResponse: IServerResponse,
 		protected $logger: ILogger,
 		protected $nsCloudOutputFilter: ICloudOutputFilter,
@@ -24,7 +24,6 @@ export abstract class CloudOperationBase extends EventEmitter implements ICloudO
 			await this.initCore();
 			this.initialized = true;
 		} catch (err) {
-			await this.cleanup();
 			throw err;
 		}
 	}

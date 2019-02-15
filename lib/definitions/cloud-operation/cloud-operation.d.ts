@@ -1,4 +1,6 @@
 interface ICloudOperation extends NodeJS.EventEmitter {
+	id: string;
+
 	init(): Promise<void>;
 	waitForResult(): Promise<ICloudOperationResult>;
 	sendMessage<T>(message: ICloudOperationMessage<T>): Promise<void>;

@@ -54,48 +54,6 @@ describe("Cloud operation v2", () => {
 
 			await assert.isRejected(cloudOperation.init(), "Communication channel init timed out.");
 		});
-		it("should cleanup when the communication channel is closed after the init.", async () => {
-			const communicationChannel = new CommunicationChannelMock();
-			const cloudOperation = createCloudOperation(communicationChannel);
-			let cloudOperationCleanupCalledCount = 0;
-			cloudOperation.cleanup = async () => {
-				cloudOperationCleanupCalledCount++;
-			};
-
-			await cloudOperation.init();
-			cloudOperation.waitForResult().catch(err => { /* no need to do anything */ });
-			await communicationChannel.emit("close", 15);
-
-			// After successful init, the cloud operation should remove the cloud close listener attached in the init.
-			// The cleanup method should be called from the close listener in the wait for result promise.
-			assert.deepEqual(cloudOperationCleanupCalledCount, 1);
-		});
-		it("should cleanup when the communication channel is closed during the init.", async () => {
-			const communicationChannel = new CommunicationChannelMock();
-			communicationChannel.connect = () => new Promise(() => { /* never resolve this promise */ });
-			const cloudOperation = createCloudOperation(communicationChannel);
-			let cloudOperationCleanupCalledCount = 0;
-			cloudOperation.cleanup = async () => {
-				cloudOperationCleanupCalledCount++;
-			};
-
-			cloudOperation.init().catch(err => { /* no need to do anything */ });
-			await communicationChannel.emit("close", 15);
-			assert.deepEqual(cloudOperationCleanupCalledCount, 1);
-		});
-		it("should cleanup when the communication channel is closed during the init.", async () => {
-			const failedToConnectMessage = "failed to connect";
-			const communicationChannel = new CommunicationChannelMock();
-			communicationChannel.connect = () => Promise.reject(new Error(failedToConnectMessage));
-			const cloudOperation = createCloudOperation(communicationChannel);
-			let cloudOperationCleanupCalledCount = 0;
-			cloudOperation.cleanup = async () => {
-				cloudOperationCleanupCalledCount++;
-			};
-
-			await assert.isRejected(cloudOperation.init(), failedToConnectMessage);
-			assert.deepEqual(cloudOperationCleanupCalledCount, 1);
-		});
 		it("should subscribe for messages from the communication channel.", async () => {
 			const communicationChannel = new CommunicationChannelMock();
 			const cloudOperation = createCloudOperation(communicationChannel);
@@ -188,14 +146,14 @@ describe("Cloud operation v2", () => {
 
 		const failTestCases = [
 			{
-				description: "should throw error if the cloud operation has exit code different than 0.",
+				description: "should not fail if the cloud operation has exit code different than 0.",
 				expectedResult: {
 					code: 127,
 					stdout: "test"
 				}
 			},
 			{
-				description: "should throw error if the cloud operation has no exit code and no data.",
+				description: "should not fail if the cloud operation has no exit code and no data.",
 				expectedResult: {
 					stdout: "test"
 				}
@@ -209,7 +167,8 @@ describe("Cloud operation v2", () => {
 
 				await cloudOperation.init();
 				communicationChannel.emit("message", { type: "result", body: c.expectedResult });
-				await assert.isRejected(cloudOperation.waitForResult(), c.expectedResult);
+				const result = await cloudOperation.waitForResult();
+				await assert.deepEqual(result, c.expectedResult);
 			});
 		});
 

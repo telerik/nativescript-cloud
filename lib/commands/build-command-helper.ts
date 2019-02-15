@@ -102,7 +102,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			appleSession: options.appleSessionBase64 ? Buffer.from(options.appleSessionBase64, "base64").toString() : undefined
 		};
 
-		if (options.appleSessionBase64) {
+		if (!options.appleSessionBase64) {
 			const credentials = await this.getAppleCredentials(args);
 			return _.merge(credentials, extendedCredentials);
 		}

@@ -8,7 +8,7 @@ class CloudOperationV2 extends CloudOperationBase implements ICloudOperation {
 	private waitToStartTimeout: NodeJS.Timer;
 	private waitResultPromise: Promise<ICloudOperationResult>;
 
-	constructor(protected id: string,
+	constructor(public id: string,
 		protected serverResponse: IServerResponse,
 		protected $logger: ILogger,
 		protected $nsCloudOutputFilter: ICloudOutputFilter,

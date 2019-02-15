@@ -28,9 +28,17 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 					reject(new Error("Failed to connect to the communication channel."));
 				}, CommunicationChannelBase.CONNECT_TIMEOUT);
 
-				await this.connectCore();
-				await this.handshake();
-				this.isConnected = true;
+				try {
+					await this.connectCore();
+					await this.handshake();
+					this.isConnected = true;
+				} catch (err) {
+					clearTimeout(this.connectTimeout);
+
+					reject(err);
+					return;
+				}
+
 				clearTimeout(this.connectTimeout);
 				resolve();
 			});

@@ -9,7 +9,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 	protected abstract failedToStartError: string;
 	protected abstract failedError: string;
 
-	private cloudOperations: IDictionary<ICloudOperation>;
+	private cloudOperations: IDictionary<{ cloudOperation: ICloudOperation, children: ICloudOperation[] }>;
 
 	constructor(protected $errors: IErrors,
 		protected $fs: IFileSystem,
@@ -33,7 +33,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 			this.$errors.failWithoutHelp(`Cloud operation with id: ${message.cloudOperationId} not found.`);
 		}
 
-		await cloudOperation.sendMessage(message);
+		await cloudOperation.cloudOperation.sendMessage(message);
 	}
 
 	protected getServerResults(serverResult: ICloudOperationResult): IServerItem[] {
@@ -45,9 +45,12 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 		try {
 			this.$logger.info(`Starting ${cloudOperationName}. Cloud operation id: ${cloudOperationId}`);
 			const result = await action(cloudOperationId);
+			await this.cleanCloudOperation(cloudOperationId);
 
 			return result;
 		} catch (err) {
+			await this.cleanCloudOperation(cloudOperationId);
+
 			err.cloudOperationId = cloudOperationId;
 			throw err;
 		}
@@ -56,7 +59,11 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 	protected async waitForCloudOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse, options: ICloudOperationExecutionOptions): Promise<ICloudOperationResult> {
 		const cloudOperationVersion = serverResponse.cloudOperationVersion || CloudService.CLOUD_OPERATION_VERSION_1;
 		const cloudOperation: ICloudOperation = this.$nsCloudOperationFactory.create(cloudOperationVersion, cloudOperationId, serverResponse);
-		this.cloudOperations[cloudOperationId] = cloudOperation;
+		if (options.parentCloudOperationId) {
+			this.cloudOperations[options.parentCloudOperationId].children.push(cloudOperation);
+		}
+
+		this.cloudOperations[cloudOperationId] = { cloudOperation, children: [] };
 
 		cloudOperation.on(CloudCommunicationEvents.MESSAGE, (m: ICloudOperationMessage<any>) => {
 			if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !options.silent) {
@@ -95,7 +102,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 		try {
 			const result = await cloudOperation.waitForResult();
 			await cloudOperation.cleanup();
-			// delete this.cloudOperations[cloudOperationId];
+
 			return result;
 		} catch (err) {
 			this.$logger.trace(err);
@@ -128,16 +135,30 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 	}
 
 	protected getCollectedLogs(cloudOperationId: string): Promise<string> {
-		return this.cloudOperations[cloudOperationId].getCollectedLogs();
+		return this.cloudOperations[cloudOperationId].cloudOperation.getCollectedLogs();
 	}
 
 	private async cleanup(): Promise<void> {
-		await Promise.all(_(this.cloudOperations)
-			.values<ICloudOperation>()
-			.map(op => op.cleanup())
-			.value()
-		);
-
+		await Promise.all(_(this.cloudOperations).keys().map(id => this.cleanCloudOperation(id)).value());
 		this.cloudOperations = {};
+	}
+
+	private async cleanCloudOperation(cloudOperationId: string): Promise<void> {
+		try {
+			const cloudOperation = this.cloudOperations[cloudOperationId];
+			if (!cloudOperation) {
+				return;
+			}
+
+			for (let child of cloudOperation.children) {
+				await child.cleanup();
+				delete this.cloudOperations[child.id];
+			}
+
+			await cloudOperation.cloudOperation.cleanup();
+			delete this.cloudOperations[cloudOperationId];
+		} catch (err) {
+			this.$logger.error(`Cloud operation ${cloudOperationId} failed with error: ${err.message}`);
+		}
 	}
 }
