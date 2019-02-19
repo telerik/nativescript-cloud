@@ -34,10 +34,6 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		await this.executeCloudOperation("Cloud publish iOS", async (cloudOperationId: string): Promise<void> => {
 			this.validatePublishData(publishData);
 
-			if (!publishData.credentials || !publishData.credentials.username || !publishData.credentials.password) {
-				this.$errors.failWithoutHelp("Cannot perform publish - credentials are required.");
-			}
-
 			const projectData = this.$projectDataService.getProjectData(publishData.projectDir);
 			const appIdentifier = getProjectId(projectData, this.$devicePlatformsConstants.iOS.toLowerCase());
 
@@ -85,13 +81,13 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 
 	private getiOSError(publishResult: ICloudOperationResult, publishRequestData: IPublishRequestData) {
-		const itmsMessage = this.getFormattedError(publishResult.stdout, CloudPublishService.ITMS_ERROR_REGEX);
+		const itmsMessage = this.getFormattedError(publishResult, CloudPublishService.ITMS_ERROR_REGEX);
 		const err = new Error(`${publishResult.errors}${EOL}${itmsMessage}${EOL}${publishResult.stderr}`);
 		return err;
 	}
 
 	private getAndroidError(publishResult: ICloudOperationResult, publishRequestData: IPublishRequestData) {
-		const generalMessage = this.getFormattedError(publishResult.stderr, CloudPublishService.GENERAL_ERROR_REGEX);
+		const generalMessage = this.getFormattedError(publishResult, CloudPublishService.GENERAL_ERROR_REGEX);
 		return new Error(`${publishResult.errors}${EOL}${generalMessage}`);
 	}
 
@@ -137,8 +133,9 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		}
 	}
 
-	private getFormattedError(message: string, regex: RegExp) {
-		return _.uniq(message.match(regex)).join(EOL);
+	private getFormattedError(publishResult: ICloudOperationResult, regex: RegExp) {
+		const log = publishResult.stdout || publishResult.stderr || "";
+		return _.uniq(log.match(regex)).join(EOL);
 	}
 }
 

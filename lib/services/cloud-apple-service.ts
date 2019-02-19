@@ -27,8 +27,8 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 
 			this.$logger.trace("Apple login response", response);
 			let appleLoginResult = await this.waitForCloudOperationToFinish(appleLoginData.cloudOperationId, response, { silent: true });
-			if (!appleLoginResult.data.appleSessionBase64) {
-				this.$errors.failWithoutHelp(`Apple login failed. Reason is: ${appleLoginResult.errors}. Additional information: ${appleLoginResult.stderr}.`);
+			if (!appleLoginResult.data || !appleLoginResult.data.appleSessionBase64) {
+				this.$errors.failWithoutHelp(`Apple login failed. Reason is: ${appleLoginResult.errors}. Additional information: ${appleLoginResult.stderr || appleLoginResult.stdout}.`);
 			}
 
 			return appleLoginResult.data.appleSessionBase64;
