@@ -5,7 +5,6 @@ interface IRequestBodyElement {
 }
 
 interface IServerServicesProxy extends IServerRequestService {
-	getServiceAddress(serviceName: string): string;
 	getServiceProto(serviceName: string): string;
 	getUrlPath(serviceName: string, urlPath: string): string;
 }

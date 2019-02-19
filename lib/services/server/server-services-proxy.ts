@@ -7,13 +7,13 @@ export class ServerServicesProxy implements IServerServicesProxy {
 	constructor(private $errors: IErrors,
 		private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
-		private $nsCloudServerConfigManager: IServerConfigManager,
+		private $nsCloudConfigManager: ICloudConfigManager,
 		private $nsCloudUserService: IUserService) {
-		this.serverConfig = this.$nsCloudServerConfigManager.getCurrentConfigData();
+		this.serverConfig = this.$nsCloudConfigManager.getCurrentConfigData();
 	}
 
 	public async call<T>(options: ICloudRequestOptions): Promise<T> {
-		const host = this.getServiceAddress(options.serviceName);
+		const host = this.getServiceDomainName(options.serviceName);
 		const finalUrlPath = this.getUrlPath(options.serviceName, options.urlPath);
 
 		const headers = options.headers || Object.create(null);
@@ -22,7 +22,7 @@ export class ServerServicesProxy implements IServerServicesProxy {
 			headers[HTTP_HEADERS.AUTHORIZATION] = `${authScheme} ${this.$nsCloudUserService.getUserData().accessToken}`;
 		}
 
-		const namespace = this.getServiceValueOrDefault(options.serviceName, "namespace");
+		const namespace = this.$nsCloudConfigManager.getServiceValueOrDefault(options.serviceName, "namespace");
 		if (namespace) {
 			headers[HTTP_HEADERS.X_NS_NAMESPACE] = namespace;
 			if (this.$nsCloudUserService.hasUser()) {
@@ -77,24 +77,12 @@ export class ServerServicesProxy implements IServerServicesProxy {
 		}
 	}
 
-	public getServiceAddress(serviceName: string): string {
-		const serviceConfig = this.serverConfig.cloudServices[serviceName];
-		// When we want to use localhost or PR builds for cloud services
-		// we need to return the specified full domain name.
-		if (serviceConfig.fullHostName) {
-			return serviceConfig.fullHostName;
-		}
-
-		// If we want to use the official domains we need the domain name and the subdomain for the service.
-		return `${serviceConfig.subdomain}.${this.serverConfig.domainName}`;
-	}
-
 	public getServiceProto(serviceName: string): string {
-		return this.getServiceValueOrDefault(serviceName, "serverProto");
+		return this.$nsCloudConfigManager.getServiceValueOrDefault(serviceName, "serverProto");
 	}
 
 	public getUrlPath(serviceName: string, urlPath: string): string {
-		const apiVersion = this.getServiceValueOrDefault(serviceName, "apiVersion");
+		const apiVersion = this.$nsCloudConfigManager.getServiceValueOrDefault(serviceName, "apiVersion");
 		let result: string;
 		// When we use localhost we don't have api version and we use the url path as is.
 		if (!apiVersion) {
@@ -111,13 +99,8 @@ export class ServerServicesProxy implements IServerServicesProxy {
 		return BEARER_AUTH_SCHEME;
 	}
 
-	private getServiceValueOrDefault(serviceName: string, valueName: string): string {
-		const serviceConfig = this.serverConfig.cloudServices[serviceName];
-		if (_.has(serviceConfig, valueName)) {
-			return serviceConfig[valueName];
-		}
-
-		return <string>this.serverConfig[valueName];
+	protected getServiceDomainName(serviceName: string): string {
+		return this.$nsCloudConfigManager.getServiceDomainName(serviceName);
 	}
 }
 

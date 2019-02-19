@@ -4,7 +4,8 @@ import { ServerServiceBase } from "./server-service-base";
 export class ServerAuthService extends ServerServiceBase implements IServerAuthService {
 	protected serviceName: string = AUTH_SERVICE_NAME;
 
-	constructor(protected $nsCloudServerServicesProxy: IServerServicesProxy,
+	constructor(protected $nsCloudConfigManager: ICloudConfigManager,
+		protected $nsCloudServerServicesProxy: IServerServicesProxy,
 		private $nsAccountUtils: IAccountUtils,
 		private $nsCloudUserService: IUserService,
 		$injector: IInjector) {
@@ -40,7 +41,7 @@ export class ServerAuthService extends ServerServiceBase implements IServerAuthS
 
 	private getAuthUrl(urlPath: string): string {
 		const proto = this.$nsCloudServerServicesProxy.getServiceProto(AUTH_SERVICE_NAME);
-		const host = this.$nsCloudServerServicesProxy.getServiceAddress(AUTH_SERVICE_NAME);
+		const host = this.$nsCloudConfigManager.getServiceDomainName(AUTH_SERVICE_NAME);
 		const url = this.$nsCloudServerServicesProxy.getUrlPath(AUTH_SERVICE_NAME, urlPath);
 		return `${proto}://${host}${url}`;
 	}

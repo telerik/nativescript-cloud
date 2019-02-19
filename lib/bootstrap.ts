@@ -2,7 +2,6 @@ import * as path from "path";
 
 $injector.require("nsCloudHttpServer", path.join(__dirname, "http-server"));
 $injector.require("nsCloudItmsServicesPlistHelper", path.join(__dirname, "itms-services-plist-helper"));
-$injector.require("nsCloudServerConfigManager", path.join(__dirname, "server-config-manager"));
 $injector.require("nsCloudOutputFilter", path.join(__dirname, "cloud-output-filter"));
 $injector.require("nsCloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
 $injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
@@ -32,6 +31,7 @@ $injector.requirePublicClass("nsCloudEulaService", path.join(__dirname, "service
 $injector.requirePublicClass("nsCloudKinveyService", path.join(__dirname, "services", "kinvey-service"));
 $injector.requirePublicClass("nsCloudPolicyService", path.join(__dirname, "services", "policy-service"));
 $injector.requirePublicClass("nsCloudServicesPolicyService", path.join(__dirname, "services", "cloud-services-policy-service"));
+$injector.requirePublicClass("nsCloudConfigManager", path.join(__dirname, "cloud-config-manager"));
 // TODO: Remove in 2.0.0 - currently this service is not used, but it has been publicly exposed, so we cannot remove it without bumping the major version.
 $injector.requirePublicClass("nsCloudKinveyEulaService", path.join(__dirname, "services", "kinvey-eula-service"));
 

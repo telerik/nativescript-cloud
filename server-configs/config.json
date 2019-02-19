@@ -10,12 +10,6 @@
 		"build-service": {
 			"subdomain": "build"
 		},
-		"emulators-service": {
-			"subdomain": "emulators"
-		},
-		"code-commit-service": {
-			"subdomain": "code-commit"
-		},
 		"misc-service": {
 			"subdomain": "misc"
 		},

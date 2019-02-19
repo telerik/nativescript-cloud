@@ -8,12 +8,6 @@
 		"build-service": {
 			"fullHostName": "localhost:8001"
 		},
-		"emulators-service": {
-			"fullHostName": "localhost:8002"
-		},
-		"code-commit-service": {
-			"fullHostName": "localhost:8003"
-		},
 		"misc-service": {
 			"fullHostName": "localhost:8004"
 		},

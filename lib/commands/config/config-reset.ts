@@ -1,11 +1,11 @@
 export class ConfigResetCommand implements ICommand {
-	constructor(private $nsCloudServerConfigManager: IServerConfigManager,
+	constructor(private $nsCloudConfigManager: ICloudConfigManager,
 		private $logger: ILogger) { }
 
 	public allowedParameters: ICommandParameter[] = [];
 
 	public async execute(args: string[]): Promise<void> {
-		this.$nsCloudServerConfigManager.reset();
+		this.$nsCloudConfigManager.reset();
 		this.$logger.info("Server configuration successfully reset.");
 	}
 }
