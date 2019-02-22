@@ -13,6 +13,8 @@ interface ICloudOptions extends IOptions, ISharedCloud {
 	vmTemplateName: string;
 	appleSessionBase64: string;
 	appleApplicationSpecificPassword: string;
+	otp: string;
+	outputPath: string;
 }
 
 /**

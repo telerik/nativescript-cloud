@@ -11,7 +11,9 @@ export class CloudDevAppleLogin extends InteractiveCloudCommand {
 	constructor($processService: IProcessService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
+		private $options: ICloudOptions,
 		protected $errors: IErrors,
+		protected $fs: IFileSystem,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		protected $nsCloudAppleService: ICloudAppleService,
@@ -30,9 +32,21 @@ export class CloudDevAppleLogin extends InteractiveCloudCommand {
 	}
 
 	protected async executeCore(args: string[]): Promise<void> {
+		const otp = this.$options.otp;
+		if (otp) {
+			this.predefinedAnswers.push({ searchString: "6 digit code", answer: otp }, { searchString: "4 digit code", answer: otp });
+		}
+
 		const credentials = await this.$nsCloudBuildCommandHelper.getAppleCredentials(args);
 		const result = await this.$nsCloudAppleService.appleLogin(credentials);
-		this.$logger.info(result);
+
+		const outputPath = this.$options.outputPath;
+		if (outputPath) {
+			this.$fs.writeFile(outputPath, result);
+			this.$logger.info(`Apple session saved in ${outputPath}`);
+		} else {
+			this.$logger.info(result);
+		}
 	}
 }
 

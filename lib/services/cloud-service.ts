@@ -139,7 +139,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 	}
 
 	private async cleanup(): Promise<void> {
-		await Promise.all(_(this.cloudOperations).keys().map(id => this.cleanCloudOperation(id)).value());
+		await Promise.all(_(this.cloudOperations).keys().map((id: string) => this.cleanCloudOperation(id)).value());
 		this.cloudOperations = {};
 	}
 
