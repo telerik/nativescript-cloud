@@ -82,7 +82,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 
 	private getiOSError(publishResult: ICloudOperationResult, publishRequestData: IPublishRequestData) {
 		const itmsMessage = this.getFormattedError(publishResult, CloudPublishService.ITMS_ERROR_REGEX);
-		const err = new Error(`${publishResult.errors}${EOL}${itmsMessage}${EOL}${publishResult.stderr}`);
+		const err = new Error(`${publishResult.errors}${EOL}${itmsMessage}`);
 		return err;
 	}
 
