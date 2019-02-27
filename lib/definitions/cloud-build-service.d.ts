@@ -16,7 +16,7 @@ interface IBuildResultData extends IServerResultData {
 /**
  * Describes build step.
  */
-interface IBuildStep extends IBuildId {
+interface IBuildStep extends ICloudOperationId {
 	/**
 	 * The name of the step - prepare, upload, build or download.
 	 */
@@ -28,16 +28,16 @@ interface IBuildStep extends IBuildId {
 	progress: number;
 }
 
-interface IBuildError extends Error, IBuildId { }
+interface IBuildError extends Error, ICloudOperationId { }
 
-interface IBuildId {
+interface ICloudOperationId {
 	/**
-	 * The ID of the build.
+	 * The ID of the cloud operation.
 	 */
-	buildId: string;
+	cloudOperationId: string;
 }
 
-interface IBuildLog extends IBuildId {
+interface IBuildLog extends ICloudOperationId {
 	data: string;
 	pipe: string;
 }
@@ -96,7 +96,7 @@ interface ISharedCloud {
 /**
  * Defines operations for building a project in the cloud.
  */
-interface ICloudBuildService extends ICloudOperationService {
+interface ICloudBuildService extends ICloudService {
 	/**
 	 * Builds the specified application in the cloud and returns information about the whole build process.
 	 * @param {INSCloudProjectSettings} projectSettings Describes the current project - project dir, application identifier, name and nativescript data.
@@ -134,11 +134,7 @@ interface ICloudBuildService extends ICloudOperationService {
 /**
  * Defines properties passed to prepareBuildRequest method.
  */
-interface IPrepareBuildRequestInfo {
-	/**
-	 * The build's id.
-	 */
-	buildId: string;
+interface IPrepareBuildRequestInfo extends ICloudOperationId, IAccountId {
 
 	/**
 	 * Settings used to control the build workflow.
@@ -164,11 +160,6 @@ interface IPrepareBuildRequestInfo {
 	 * Files to upload prior to build.
 	 */
 	filesToUpload: IAmazonStorageEntryData[];
-
-	/**
-	 * Account from which to subtract successful builds.
-	 */
-	accountId: string;
 
 	/**
 	 * Additional flags that can be passed to CLI in the cloud (e.g. `--env.uglify` or `--bundle`)

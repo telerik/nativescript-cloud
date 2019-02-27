@@ -1,5 +1,5 @@
 {
-	"apiVersion": "v3",
+	"apiVersion": "v4",
 	"domainName": "nativescript.cloud",
 	"serverProto": "https",
 	"stage": "production",
@@ -9,6 +9,12 @@
 		},
 		"build-service": {
 			"subdomain": "build"
+		},
+		"emulators-service": {
+			"subdomain": "emulators"
+		},
+		"code-commit-service": {
+			"subdomain": "code-commit"
 		},
 		"misc-service": {
 			"subdomain": "misc"

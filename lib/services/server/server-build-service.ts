@@ -29,6 +29,10 @@ export class ServerBuildService extends ServerServiceBase implements IServerBuil
 	public publish(publishRequestData: IPublishRequestData): Promise<IServerResponse> {
 		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/publish", publishRequestData);
 	}
+
+	public appleLogin(appleLoginRequestData: IAppleLoginRequestData): Promise<IServerResponse> {
+		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/apple-login", appleLoginRequestData);
+	}
 }
 
 $injector.register("nsCloudServerBuildService", ServerBuildService);

@@ -1,7 +1,8 @@
 import { isInteractive } from "../helpers";
 import { ERROR_MESSAGES } from "../constants";
+import { InteractiveCloudCommand } from "./interactive-cloud-command";
 
-export class CloudCodesignCommand implements ICommand {
+export class CloudCodesignCommand extends InteractiveCloudCommand implements ICommand {
 	public get dashedOptions() {
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
@@ -11,20 +12,40 @@ export class CloudCodesignCommand implements ICommand {
 	private devices: Mobile.IDeviceInfo[];
 	public allowedParameters: ICommandParameter[];
 
-	constructor(private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		private $logger: ILogger,
+	constructor($processService: IProcessService,
+		protected $errors: IErrors,
+		protected $logger: ILogger,
+		protected $prompter: IPrompter,
+		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $devicesService: Mobile.IDevicesService,
-		private $errors: IErrors,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
 		private $projectData: IProjectData,
-		private $prompter: IPrompter,
 		private $nsCloudCodesignService: ICloudCodesignService) {
+		super($nsCloudCodesignService, $processService, $errors, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 
-	public async execute(args: string[]): Promise<void> {
+	public async canExecute(args: string[]): Promise<boolean> {
+		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
+
+		if (args.length > 2 || (!isInteractive() && args.length < 2)) {
+			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
+		}
+
+		await this.$devicesService.initialize({ shouldReturnImmediateResult: false, platform: this.platform, skipEmulatorStart: true });
+		this.devices = this.$devicesService.getDeviceInstances()
+			.filter(d => !d.isEmulator && d.deviceInfo.platform.toLowerCase() === this.platform.toLowerCase())
+			.map(d => d.deviceInfo);
+		if (!this.devices || this.devices.length === 0) {
+			this.$errors.fail("Please attach iOS devices for which to generate codesign files.");
+		}
+
+		return true;
+	}
+
+	protected async executeCore(args: string[]): Promise<void> {
 		let username = args[0];
 		let password = args[1];
 
@@ -47,24 +68,6 @@ export class CloudCodesignCommand implements ICommand {
 		};
 
 		await this.$nsCloudCodesignService.generateCodesignFiles(codesignData, this.$projectData.projectDir);
-	}
-
-	public async canExecute(args: string[]): Promise<boolean> {
-		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
-
-		if (args.length > 2 || (!isInteractive() && args.length < 2)) {
-			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
-		}
-
-		await this.$devicesService.initialize({ shouldReturnImmediateResult: false, platform: this.platform, skipEmulatorStart: true });
-		this.devices = this.$devicesService.getDeviceInstances()
-			.filter(d => !d.isEmulator && d.deviceInfo.platform.toLowerCase() === this.platform.toLowerCase())
-			.map(d => d.deviceInfo);
-		if (!this.devices || this.devices.length === 0) {
-			this.$errors.fail("Please attach iOS devices for which to generate codesign files.");
-		}
-
-		return true;
 	}
 }
 

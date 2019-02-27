@@ -32,7 +32,6 @@ export const NAMESPACE_LOWER_CASE = "namespace";
 export const KINVEY_LOWER_CASE = "kinvey";
 
 export const CLOUD_BUILD_EVENT_NAMES = {
-	BUILD_OUTPUT: "buildOutput",
 	STEP_CHANGED: "stepChanged"
 };
 
@@ -136,4 +135,35 @@ export class Authentication {
 export class Policies {
 	public static readonly PRIVACY_POLICY_NAME: string = "Progress Software Privacy Policy";
 	public static readonly CLOUD_SERVICES_POLICY_NAME: string = "cloud-services-policy";
+}
+
+export class CloudOperationWebSocketMessageActions {
+	public static readonly SEND_MESSAGE: string = "sendMessage";
+}
+
+export class CloudOperationMessageTypes {
+	public static readonly CLOUD_OPERATION_OUTPUT: string = "output";
+	public static readonly CLOUD_OPERATION_INPUT_REQUEST: string = "inputRequest";
+	public static readonly CLOUD_OPERATION_INPUT: string = "input";
+	public static readonly CLOUD_OPERATION_CLIENT_HELLO: string = "clientHello";
+	public static readonly CLOUD_OPERATION_SERVER_HELLO: string = "serverHello";
+	public static readonly CLOUD_OPERATION_STOP: string = "stop";
+	public static readonly CLOUD_OPERATION_RESULT: string = "result";
+	public static readonly CLOUD_OPERATION_ECHO: string = "echo";
+	public static readonly CLOUD_OPERATION_ECHO_REPLY: string = "echoReply";
+}
+
+export class CloudCommunicationChannelTypes {
+	public static readonly WEBSOCKET: string = "WebSocket";
+}
+
+export class CloudCommunicationEvents {
+	public static readonly MESSAGE: string = "message";
+	public static readonly CLOSE: string = "close";
+	public static readonly ERROR: string = "error";
+}
+
+export class CloudCommunicationChannelExitCodes {
+	public static readonly UNEXPECTED_RESPONSE: number = 128;
+	public static readonly MISSING_ECHO_REPLIES: number = 129;
 }

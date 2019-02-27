@@ -1,82 +1,117 @@
 import * as path from "path";
 import { EventEmitter } from "events";
-import promiseRetry = require("promise-retry");
+import { v4 } from "uuid";
 
-export abstract class CloudService extends EventEmitter {
-	private static OPERATION_STATUS_CHECK_INTERVAL = 1500;
-	private static OPERATION_STATUS_CHECK_RETRY_COUNT = 8;
-	private static OPERATION_COMPLETE_STATUS = "Success";
-	private static OPERATION_FAILED_STATUS = "Failed";
-	// TODO: Remove after 10.05.2018
-	private static OPERATION_IN_PROGRESS_STATUS_OLD = "Building";
-	private static OPERATION_IN_PROGRESS_STATUS = "InProgress";
+import { CloudOperationMessageTypes, CloudCommunicationEvents } from "../constants";
 
-	protected outputCursorPosition: number;
+export abstract class CloudService extends EventEmitter implements ICloudService {
+	private static readonly CLOUD_OPERATION_VERSION_1: string = "v1";
 	protected abstract failedToStartError: string;
 	protected abstract failedError: string;
-	protected abstract getServerResults(serverResult: IBuildServerResult): IServerItem[];
-	protected abstract getServerLogs(logsUrl: string, buildId: string): Promise<void>;
 
-	public abstract getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string;
+	private cloudOperations: IDictionary<{ cloudOperation: ICloudOperation, children: ICloudOperation[] }>;
 
-	constructor(protected $fs: IFileSystem,
+	constructor(protected $errors: IErrors,
+		protected $fs: IFileSystem,
 		protected $httpClient: Server.IHttpClient,
-		protected $logger: ILogger) {
+		protected $logger: ILogger,
+		private $nsCloudOperationFactory: ICloudOperationFactory,
+		private $nsCloudOutputFilter: ICloudOutputFilter,
+		private $processService: IProcessService) {
 		super();
+		this.cloudOperations = Object.create(null);
+		this.$processService.attachToProcessExitSignals(this, this.cleanup.bind(this));
 	}
 
-	protected async getObjectFromS3File<T>(pathToFile: string): Promise<T> {
-		return JSON.parse(await this.getContentOfS3File(pathToFile));
+	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
+		return "";
 	}
 
-	protected async getContentOfS3File(pathToFile: string): Promise<string> {
-		return (await this.$httpClient.httpRequest(pathToFile)).body;
+	public async sendCloudMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
+		const cloudOperation = this.cloudOperations[message.cloudOperationId];
+		if (!cloudOperation) {
+			this.$errors.failWithoutHelp(`Cloud operation with id: ${message.cloudOperationId} not found.`);
+		}
+
+		await cloudOperation.cloudOperation.sendMessage(message);
 	}
 
-	protected async waitForServerOperationToFinish(operationId: string, serverInformation: IServerResponse): Promise<void> {
-		const promiseRetryOptions = {
-			retries: CloudService.OPERATION_STATUS_CHECK_RETRY_COUNT,
-			minTimeout: CloudService.OPERATION_STATUS_CHECK_INTERVAL
-		};
-		return promiseRetry((retry, attempt) => {
-			return new Promise<IServerStatus>(async (resolve, reject) => {
-				try {
-					resolve(await this.getObjectFromS3File<IServerStatus>(serverInformation.statusUrl));
-				} catch (err) {
-					this.$logger.trace(err);
-					reject(new Error(this.failedToStartError));
+	protected getServerResults(serverResult: ICloudOperationResult): IServerItem[] {
+		return [];
+	}
+
+	protected async executeCloudOperation<T>(cloudOperationName: string, action: (cloudOperationId: string) => Promise<T>): Promise<T> {
+		const cloudOperationId: string = v4();
+		try {
+			this.$logger.info(`Starting ${cloudOperationName}. Cloud operation id: ${cloudOperationId}`);
+			const result = await action(cloudOperationId);
+			await this.cleanCloudOperation(cloudOperationId);
+
+			return result;
+		} catch (err) {
+			await this.cleanCloudOperation(cloudOperationId);
+
+			err.cloudOperationId = cloudOperationId;
+			throw err;
+		}
+	}
+
+	protected async waitForCloudOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse, options: ICloudOperationExecutionOptions): Promise<ICloudOperationResult> {
+		const cloudOperationVersion = serverResponse.cloudOperationVersion || CloudService.CLOUD_OPERATION_VERSION_1;
+		const cloudOperation: ICloudOperation = this.$nsCloudOperationFactory.create(cloudOperationVersion, cloudOperationId, serverResponse);
+		if (options.parentCloudOperationId) {
+			this.cloudOperations[options.parentCloudOperationId].children.push(cloudOperation);
+		}
+
+		this.cloudOperations[cloudOperationId] = { cloudOperation, children: [] };
+
+		cloudOperation.on(CloudCommunicationEvents.MESSAGE, (m: ICloudOperationMessage<any>) => {
+			if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_OUTPUT && !options.silent) {
+				const body: ICloudOperationOutput = m.body;
+				let log = body.data;
+				if (cloudOperationVersion !== CloudService.CLOUD_OPERATION_VERSION_1) {
+					log = this.$nsCloudOutputFilter.filterBpcMetadata(log);
 				}
 
-			}).catch(retry);
-		}, promiseRetryOptions)
-			.then((serverStatus: IServerStatus) => {
-				return new Promise<void>((resolve, reject) => {
-					this.outputCursorPosition = 0;
-					const serverIntervalId = setInterval(async () => {
-						if (serverStatus.status === CloudService.OPERATION_COMPLETE_STATUS) {
-							await this.getServerLogs(serverInformation.outputUrl, operationId);
-							clearInterval(serverIntervalId);
-							return resolve();
-						}
+				if (body.pipe === "stdout") {
+					// Print the output on the same line to have cool effects like loading indicators.
+					// The cloud process will take care of the new lines.
+					this.$logger.printInfoMessageOnSameLine(log);
+				} else if (body.pipe === "stderr") {
+					this.$logger.error(log);
+				}
+			} else if (m.type === CloudOperationMessageTypes.CLOUD_OPERATION_SERVER_HELLO && !options.hideBuildMachineMetadata) {
+				const body: ICloudOperationServerHello = m.body;
 
-						if (serverStatus.status === CloudService.OPERATION_FAILED_STATUS) {
-							await this.getServerLogs(serverInformation.outputUrl, operationId);
-							clearInterval(serverIntervalId);
-							return reject(new Error(this.failedError));
-						}
+				if (body.hostName) {
+					this.$logger.info(`Build machine host name: ${body.hostName}`);
+				}
+			}
 
-						if (serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS_OLD ||
-							serverStatus.status === CloudService.OPERATION_IN_PROGRESS_STATUS) {
-							await this.getServerLogs(serverInformation.outputUrl, operationId);
-						}
+			this.emit(CloudCommunicationEvents.MESSAGE, m);
+		});
 
-						serverStatus = await this.getObjectFromS3File<IServerStatus>(serverInformation.statusUrl);
-					}, CloudService.OPERATION_STATUS_CHECK_INTERVAL);
-				});
-			});
+		try {
+			await cloudOperation.init();
+		} catch (err) {
+			this.$logger.trace(err);
+			await cloudOperation.cleanup();
+			throw new Error(this.failedToStartError);
+		}
+
+		try {
+			const result = await cloudOperation.waitForResult();
+			await cloudOperation.cleanup();
+
+			return result;
+		} catch (err) {
+			this.$logger.trace(err);
+			await cloudOperation.cleanup();
+			throw new Error(this.failedError);
+		}
 	}
 
-	protected async downloadServerResults(serverResult: IBuildServerResult, serverOutputOptions: IOutputDirectoryOptions): Promise<string[]> {
+	protected async downloadServerResults(serverResult: ICloudOperationResult, serverOutputOptions: IOutputDirectoryOptions): Promise<string[]> {
 		const destinationDir = this.getServerOperationOutputDirectory(serverOutputOptions);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
@@ -84,6 +119,7 @@ export abstract class CloudService extends EventEmitter {
 
 		let targetFileNames: string[] = [];
 		for (const serverResultObj of serverResultObjs) {
+			this.$logger.info(`Result url: ${serverResultObj.fullPath}`);
 			const targetFileName = path.join(destinationDir, serverResultObj.filename);
 			targetFileNames.push(targetFileName);
 			const targetFile = this.$fs.createWriteStream(targetFileName);
@@ -96,5 +132,33 @@ export abstract class CloudService extends EventEmitter {
 		}
 
 		return targetFileNames;
+	}
+
+	protected getCollectedLogs(cloudOperationId: string): Promise<string> {
+		return this.cloudOperations[cloudOperationId].cloudOperation.getCollectedLogs();
+	}
+
+	private async cleanup(): Promise<void> {
+		await Promise.all(_(this.cloudOperations).keys().map((id: string) => this.cleanCloudOperation(id)).value());
+		this.cloudOperations = {};
+	}
+
+	private async cleanCloudOperation(cloudOperationId: string): Promise<void> {
+		try {
+			const cloudOperation = this.cloudOperations[cloudOperationId];
+			if (!cloudOperation) {
+				return;
+			}
+
+			for (let child of cloudOperation.children) {
+				await child.cleanup();
+				delete this.cloudOperations[child.id];
+			}
+
+			await cloudOperation.cloudOperation.cleanup();
+			delete this.cloudOperations[cloudOperationId];
+		} catch (err) {
+			this.$logger.error(`Cloud operation ${cloudOperationId} failed with error: ${err.message}`);
+		}
 	}
 }

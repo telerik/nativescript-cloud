@@ -4,12 +4,15 @@ interface IServerBuildService {
 	getBuildCredentials(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse>;
 	generateCodesignFiles(codesignRequestData: ICodeSignRequestData): Promise<IServerResponse>;
 	publish(publishRequestData: IPublishRequestData): Promise<IServerResponse>;
+	appleLogin(appleLoginRequestData: IAppleLoginRequestData): Promise<IServerResponse>;
 }
 
-interface IServerResponse {
+interface IServerResponse extends ICloudOperationId {
+	cloudOperationVersion: string;
 	statusUrl: string;
 	resultUrl: string;
 	outputUrl: string;
+	communicationChannel: ICloudCommunicationChannelData<any>;
 }
 
 interface IBuildFile {
@@ -32,7 +35,7 @@ interface IWorkflowRequestData {
 	workflowName: string;
 }
 
-interface ICodeSignRequestData extends IBuildId, IAppId, IClean, ICredentials, ISharedCloud {
+interface ICodeSignRequestData extends IAppId, IClean, ICredentials, ISharedCloud, ICloudOperationId {
 	appName: string;
 	devices: Mobile.IDeviceInfo[];
 }
@@ -41,7 +44,7 @@ interface IAccountId {
 	accountId: string
 }
 
-interface IBuildRequestData extends IAccountId, IServerRequestData, IOptionalMachineId {
+interface IBuildRequestData extends IAccountId, IServerRequestData, IOptionalMachineId, ICloudOperationId {
 	targets: string[];
 	buildFiles: IBuildFile[];
 	workflow?: IWorkflowRequestData;
@@ -68,13 +71,13 @@ interface IAmazonStorageEntry {
 	fileName: string;
 }
 
-interface IPublishCredentials {
+interface IPublishCredentials extends IApple2FAOptions {
 	username?: string;
 	password?: string;
 	authJson?: string;
 }
 
-interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroidTrack, IOptionalTeamIdentifier {
+interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroidTrack, IOptionalTeamIdentifier, ICloudOperationId {
 	credentials: IPublishCredentials;
 	appIdentifier?: string;
 	sharedCloud?: boolean;
@@ -82,4 +85,8 @@ interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroid
 
 interface IServerRequestData {
 	properties: IDictionary<any>;
+}
+
+interface IAppleLoginRequestData extends ICloudOperationId {
+	credentials: ICredentials;
 }

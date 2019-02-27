@@ -1,5 +1,4 @@
 import * as path from "path";
-import * as uuid from "uuid";
 import { EOL } from "os";
 import { CloudService } from "./cloud-service";
 
@@ -12,13 +11,16 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		return "Failed to start cloud cleanup.";
 	}
 
-	constructor($fs: IFileSystem,
+	constructor($errors: IErrors,
+		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
-		private $nsCloudOutputFilter: ICloudOutputFilter,
+		$nsCloudOperationFactory: ICloudOperationFactory,
+		$nsCloudOutputFilter: ICloudOutputFilter,
+		$processService: IProcessService,
 		private $nsCloudServerProjectService: IServerProjectService,
 		private $projectHelper: IProjectHelper) {
-		super($fs, $httpClient, $logger);
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $processService);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
@@ -32,12 +34,12 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		if (typeof cleanupRequestData.appIdentifier === "string") {
 			identifiers = [cleanupRequestData.appIdentifier];
 		} else {
-			identifiers =  _.uniq(_.values(cleanupRequestData.appIdentifier));
+			identifiers = _.uniq(_.values(cleanupRequestData.appIdentifier));
 		}
 
 		for (let index = 0; index < identifiers.length; index++) {
 			const appIdentifier = identifiers[index];
-			const taskResult = await this.startCleanProject({appIdentifier, projectName: cleanupRequestData.projectName});
+			const taskResult = await this.startCleanProject({ appIdentifier, projectName: cleanupRequestData.projectName });
 			cleanupTaskResults.push(taskResult);
 		}
 
@@ -47,27 +49,23 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 	}
 
 	private async startCleanProject(cleanupProjectData: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
-		const cleanupTaskId = uuid.v4();
-		try {
-			const result = await this.executeCleanupProject(cleanupTaskId, cleanupProjectData);
-			this.$logger.trace(`Cleanup [${cleanupTaskId}] result: `, result);
-			return result;
-		} catch (err) {
-			err.cleanupTaskId = cleanupTaskId;
-			throw err;
-		}
+		const result = await this.executeCloudOperation("Cloud cleanup", async (cloudOperationId: string): Promise<ICleanupTaskResult> => {
+			const res = await this.executeCleanupProject(cloudOperationId, cleanupProjectData);
+			this.$logger.trace(`Cleanup [${cloudOperationId}] result: `, res);
+			return res;
+		});
+
+		return result;
 	}
 
-	private async executeCleanupProject(cleanupTaskId: string, { appIdentifier, projectName }: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
-		const cleanupInfoMessage = `Application Id: ${appIdentifier}, Project Name: ${projectName}, Cleanup Task Id: ${cleanupTaskId}`;
-		this.$logger.info(`Starting cloud cleanup: ${cleanupInfoMessage}.`);
+	private async executeCleanupProject(cloudOperationId: string, { appIdentifier, projectName }: ICleanupProjectDataBase): Promise<ICleanupTaskResult> {
+		this.$logger.info(`Cloud cleanup: Application Id: ${appIdentifier}, Project Name: ${projectName}.`);
 
 		const sanitizedProjectName = this.$projectHelper.sanitizeName(projectName);
 		const cleanupProjectData: ICleanupProjectData = {
 			appIdentifier: appIdentifier,
 			projectName: sanitizedProjectName,
-			templateAppName: sanitizedProjectName,
-			projectCleanupId: cleanupTaskId
+			templateAppName: sanitizedProjectName
 		};
 
 		const cleanupResponse = await this.$nsCloudServerProjectService.cleanupProjectData(cleanupProjectData);
@@ -85,28 +83,11 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 			this.$logger.info("No AWS CodeCommit data to clean.");
 		}
 
-		const tasksResults: IDictionary<IServerResult> = {};
 		this.$logger.info(`${EOL}### Build machines cleanup${EOL}`);
-		for (let i = 0; i < cleanupResponse.buildMachineResponse.length; i++) {
-			const taskId = `Cloud Cleanup Task #${i + 1}`;
-			const task = cleanupResponse.buildMachineResponse[i];
-			try {
-				await this.waitForServerOperationToFinish(taskId, task);
-				const taskResult = await this.getObjectFromS3File<IServerResult>(task.resultUrl);
-				const output = this.$nsCloudOutputFilter.filter(await this.getContentOfS3File(task.outputUrl));
-				if (this.hasContent(output)) {
-					this.$logger.info(output);
-				}
-
-				tasksResults[taskId] = taskResult;
-			} catch (err) {
-				// We don't want to stop the execution if one of the tasks fails.
-				this.$logger.error(`${taskId} error: ${err}`);
-			}
-		}
+		const tasksResults = await this.waitForAllCleanOperationsToFinish(cleanupResponse.buildMachineResponse);
 
 		const result: ICleanupTaskResult = {
-			cleanupTaskId,
+			cloudOperationId,
 			warnings: cleanupResponse.warnings,
 			codeCommitResponse: cleanupResponse.codeCommitResponse,
 			cloudTasksResults: tasksResults
@@ -115,15 +96,38 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		return result;
 	}
 
-	protected getServerResults(result: IBuildServerResult): IServerItem[] {
-		return [];
+	private async waitForAllCleanOperationsToFinish(serverResponses: IServerResponse[]): Promise<IDictionary<IServerResult>> {
+		const childTasks = _.map(serverResponses, task => this.waitForChildTaskToFinish(task));
+
+		const tasksResults: IDictionary<IServerResult> = {};
+		for (let task of childTasks) {
+			const result = await task;
+			if (result) {
+				tasksResults[result.cloudOperationId] = result.taskResult;
+			}
+		}
+
+		return tasksResults;
 	}
 
-	protected async getServerLogs(logsUrl: string, cloudTaskId: string): Promise<void> { /* no need for implementation */ }
+	private async waitForChildTaskToFinish(task: IServerResponse): Promise<IChildTaskExecutionResult> {
+		const childCloudOperationId = task.cloudOperationId;
+		let output = `Child cloud operation id: ${childCloudOperationId}`;
 
-	private hasContent(input: string): boolean {
-		return input && input.trim().length > 0;
+		const taskResult = await this.waitForCloudOperationToFinish(childCloudOperationId, task, { silent: true, hideBuildMachineMetadata: true });
+		output += await this.getCollectedLogs(task.cloudOperationId);
+
+		this.$logger.info(output);
+		if (taskResult.code !== 0) {
+			this.$logger.error(`${childCloudOperationId} error: ${taskResult.errors}`);
+		}
+
+		return { taskResult, cloudOperationId: task.cloudOperationId };
 	}
+}
+
+interface IChildTaskExecutionResult extends ICloudOperationId {
+	taskResult?: IServerResult;
 }
 
 $injector.register("nsCloudProjectService", CloudProjectService);

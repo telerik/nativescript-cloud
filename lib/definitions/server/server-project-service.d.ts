@@ -33,5 +33,4 @@ interface ICleanupProjectDataBase extends IProjectNameComposition {
  */
 interface ICleanupProjectData extends ICleanupProjectDataBase {
 	templateAppName: string;
-	projectCleanupId: string;
 }

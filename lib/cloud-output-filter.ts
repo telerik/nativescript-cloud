@@ -2,10 +2,10 @@ import { EOL } from "os";
 
 export class CloudOutputFilter implements ICloudOutputFilter {
 	public filter(logs: string): string {
-		let result = logs.replace(new RegExp("(\\\\r\\\\n)|(\\\\n)", "gm"), EOL) // Unescape new lines.
+		let result = this.filterBpcMetadata(logs)
+			.replace(new RegExp("(\\\\r\\\\n)|(\\\\n)", "gm"), EOL) // Unescape new lines.
 			.replace(/(\\\\t)/g, "\t") // Unescape tabs.
 			.replace(/((\n)|(\r\n)){1,}/gm, EOL) // Replace consecutive blank lines.
-			.replace(/\[(([0-9]){2,2}:){2,2}[0-9].\.[0-9]*\]\W\[.*\]\W/g, "") // Replace the log timestamp and lgo level.
 			.replace(/\\u001b\[0G/g, "\u001b") // Unescape the escape character.
 			.trim();
 
@@ -21,6 +21,10 @@ export class CloudOutputFilter implements ICloudOutputFilter {
 		}
 
 		return result;
+	}
+
+	public filterBpcMetadata(logs: string): string {
+		return logs.replace(/\[(([0-9]){2,2}:){2,2}[0-9].\.[0-9]*\]\W*?\[.*?\] {0,3}/g, ""); // Replace the log timestamp and log level.
 	}
 }
 

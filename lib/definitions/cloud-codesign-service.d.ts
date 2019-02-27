@@ -26,7 +26,7 @@ interface ICodesignData extends ICredentials, IPlatform, ISharedCloud {
 /**
  * Defines operations for generation codesign files in the cloud.
  */
-interface ICloudCodesignService extends ICloudOperationService {
+interface ICloudCodesignService extends ICloudService {
 	/**
 	 * Generates codesign files in the cloud and returns s3 urls to certificate or/and provision.
 	 * @param {ICodesignData} codesignData Apple specific information.

@@ -13,6 +13,12 @@ $injector.require("nsCloudAndroidBundleValidatorHelper", path.join(__dirname, "c
 $injector.require("nsCloudKinveyUserService", path.join(__dirname, "services", "kinvey-user-service"));
 $injector.require("nsCloudLockService", path.join(__dirname, "services", "lock-service"));
 $injector.require("nsCloudTelerikUserService", path.join(__dirname, "services", "telerik-user-service"));
+$injector.require("nsCloudS3Helper", path.join(__dirname, "s3-helper"));
+
+// Cloud operation.
+$injector.require("nsCloudOperationFactory", path.join(__dirname, "cloud-operation", "cloud-operation-factory"));
+$injector.require("nsCloudCommunicationChannelFactory", path.join(__dirname, "cloud-operation", "communication", "communication-channel-factory"));
+$injector.require("nsCloudWebSocketFactory", path.join(__dirname, "cloud-operation", "communication", "websocket-factory"));
 
 // Mobile.
 $injector.require("nsCloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
@@ -56,6 +62,7 @@ $injector.require("nsCloudBuildPropertiesService", path.join(__dirname, "service
 $injector.require("nsCloudHashService", path.join(__dirname, "services", "hash-service"));
 $injector.require("nsCloudConfigurationService", path.join(__dirname, "services", "cloud-configuration-service"));
 $injector.require("nsCloudEncryptionService", path.join(__dirname, "services", "cloud-encryption-service"));
+$injector.require("nsCloudAppleService", path.join(__dirname, "services", "cloud-apple-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));
@@ -66,6 +73,8 @@ $injector.requireCommand("config|set", path.join(__dirname, "commands", "config"
 $injector.requireCommand("dev-login", path.join(__dirname, "commands", "dev-login"));
 $injector.requireCommand("login", path.join(__dirname, "commands", "login"));
 $injector.requireCommand("logout", path.join(__dirname, "commands", "logout"));
+
+$injector.requireCommand("cloud|dev-apple-login", path.join(__dirname, "commands", "cloud-dev-apple-login"));
 
 $injector.requireCommand("user", path.join(__dirname, "commands", "user"));
 $injector.requireCommand("kill-server", path.join(__dirname, "commands", "kill-server"));

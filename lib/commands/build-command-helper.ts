@@ -1,6 +1,7 @@
 import * as path from "path";
 import { CLOUD_BUILD_CONFIGURATIONS } from "../constants";
 import { getProjectId } from "../helpers";
+import { isInteractive } from "../helpers";
 
 export class BuildCommandHelper implements IBuildCommandHelper {
 	private get $localBuildService(): ILocalBuildService {
@@ -79,8 +80,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 	}
 
 	public async getAppleCredentials(args: string[]): Promise<ICredentials> {
-		let username = args[0];
-		let password = args[1];
+		let { username, password } = this.getUsernameAndPasswordFromArgs(args);
 
 		if (!username) {
 			username = await this.$prompter.getString("Apple ID", { allowEmpty: false });
@@ -90,7 +90,30 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			password = await this.$prompter.getPassword("Apple ID password");
 		}
 
-		return { username, password };
+		return {
+			username,
+			password
+		};
+	}
+
+	public async getExtendedAppleCredentials(args: string[], options: ICloudOptions): Promise<IPublishCredentials> {
+		const extendedCredentials = {
+			appleApplicationSpecificPassword: options.appleApplicationSpecificPassword,
+			appleSession: options.appleSessionBase64 ? Buffer.from(options.appleSessionBase64, "base64").toString() : undefined
+		};
+
+		let credentials: ICredentials;
+		if (!options.appleSessionBase64) {
+			credentials = await this.getAppleCredentials(args);
+		} else {
+			credentials = this.getUsernameAndPasswordFromArgs(args);
+			if (!isInteractive() && (!credentials.username || !credentials.password)) {
+				// We are in the CI/CD scenario but we don't have all credentials.
+				this.$errors.failWithoutHelp("Please provide Apple ID and Apple ID password");
+			}
+		}
+
+		return _.merge(credentials, extendedCredentials);
 	}
 
 	public async buildForPublishingPlatform(platformArg: string): Promise<string> {
@@ -124,6 +147,10 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		}
 
 		return packagePath;
+	}
+
+	private getUsernameAndPasswordFromArgs(args: string[]): ICredentials {
+		return { username: args[0], password: args[1] };
 	}
 }
 
