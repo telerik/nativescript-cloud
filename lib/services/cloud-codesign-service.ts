@@ -106,6 +106,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 			cloudOperationId: cloudOperationId,
 			stderr: codesignResult.stderr,
 			stdout: codesignResult.stdout,
+			fullOutput: codesignResult,
 			outputFilesPaths: localCodesignResults
 		};
 
