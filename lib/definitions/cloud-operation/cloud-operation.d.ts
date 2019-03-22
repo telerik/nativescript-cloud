@@ -52,8 +52,17 @@ interface ICloudOperationEcho {
 	sequenceNumber: number;
 }
 
+interface ICloudOperationClientHello {
+	communicationProtocolVersion: string;
+}
+
 interface ICloudOperationServerHello {
 	hostName?: string;
+}
+
+interface ICloudOperationHandshakeError {
+	message: string;
+	code: number;
 }
 
 interface ICloudOperationFactory {

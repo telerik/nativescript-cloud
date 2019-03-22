@@ -1,29 +1,23 @@
 {
-	"apiVersion": "v4",
+	"apiVersion": "pr179",
 	"domainName": "nativescript.cloud",
 	"serverProto": "https",
-	"stage": "production",
+	"stage": "test",
 	"cloudServices": {
 		"auth-service": {
-			"subdomain": "authentication"
+			"subdomain": "test-authentication"
 		},
 		"build-service": {
-			"subdomain": "build"
-		},
-		"emulators-service": {
-			"subdomain": "emulators"
-		},
-		"code-commit-service": {
-			"subdomain": "code-commit"
+			"subdomain": "test-build"
 		},
 		"misc-service": {
-			"subdomain": "misc"
+			"subdomain": "test-misc"
 		},
 		"accounts-service": {
-			"subdomain": "accounts"
+			"subdomain": "test-accounts"
 		},
 		"project-service": {
-			"subdomain": "project"
+			"subdomain": "test-project"
 		}
 	},
 	"mBaaS": {
