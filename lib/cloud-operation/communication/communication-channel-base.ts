@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 import { CloudOperationMessageTypes, CloudCommunicationChannelExitCodes, CloudCommunicationEvents } from "../../constants";
 
 export abstract class CommunicationChannelBase extends EventEmitter implements ICloudCommunicationChannel {
+	protected static readonly COMMUNICATION_PROTOCOL_VERSION: string = "v2";
 	private static readonly PING_INTERVAL: number = 10000;
 	private static readonly MISSING_PING_REPLIES_COUNT: number = 6;
 	private static readonly CONNECT_TIMEOUT: number = 60000;
@@ -13,6 +14,7 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 	private echoReplySequenceNumber: number = 0;
 
 	private handshakeResolve: (value?: PromiseLike<void>) => void;
+	private handshakeReject: (reason?: any) => void;
 
 	constructor(protected cloudOperationId: string,
 		protected data: ICloudCommunicationChannelData<any>,
@@ -93,7 +95,7 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 	protected abstract closeCore(code: number, reason?: string): Promise<void>;
 	protected abstract sendMessageCore<T>(message: ICloudOperationMessage<T>): Promise<string>;
 
-	protected handleMessage(m: any): ICloudOperationMessage<any> {
+	protected async handleMessage(m: any): Promise<void> {
 		let msg: ICloudOperationMessage<any>;
 		if (_.isBuffer(m)) {
 			msg = JSON.parse(m.toString("utf8"));
@@ -105,6 +107,20 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 
 		if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_SERVER_HELLO) {
 			this.handshakeResolve();
+		} if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_HANDSHAKE_ERROR) {
+			const body: ICloudOperationHandshakeError = msg.body;
+
+			this.handshakeReject(new Error(body.message));
+
+			return;
+		} else if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_ECHO) {
+			const body: ICloudOperationEcho = msg.body;
+			const echoReply: ICloudOperationMessage<ICloudOperationEcho> = {
+				type: CloudOperationMessageTypes.CLOUD_OPERATION_ECHO_REPLY,
+				cloudOperationId: this.cloudOperationId,
+				body
+			};
+			await this.sendMessage(echoReply);
 		} else if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_ECHO_REPLY) {
 			const body: ICloudOperationEcho = msg.body;
 			if (body.identifier === this.cloudOperationId) {
@@ -113,14 +129,23 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 		}
 
 		this.emit(CloudCommunicationEvents.MESSAGE, msg);
-		return msg;
+
+		return;
 	}
 
 	private async handshake(): Promise<void> {
-		const handshakePromise = new Promise<void>((resolve) => {
+		const handshakePromise = new Promise<void>((resolve, reject) => {
 			this.handshakeResolve = resolve;
+			this.handshakeReject = reject;
 		});
-		await this.sendMessageCore({ type: CloudOperationMessageTypes.CLOUD_OPERATION_CLIENT_HELLO, cloudOperationId: this.cloudOperationId });
+		const clientHello: ICloudOperationMessage<ICloudOperationClientHello> = {
+			type: CloudOperationMessageTypes.CLOUD_OPERATION_CLIENT_HELLO,
+			cloudOperationId: this.cloudOperationId,
+			body: {
+				communicationProtocolVersion: CommunicationChannelBase.COMMUNICATION_PROTOCOL_VERSION
+			}
+		};
+		await this.sendMessageCore(clientHello);
 		await handshakePromise;
 	}
 

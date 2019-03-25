@@ -147,6 +147,7 @@ export class CloudOperationMessageTypes {
 	public static readonly CLOUD_OPERATION_INPUT: string = "input";
 	public static readonly CLOUD_OPERATION_CLIENT_HELLO: string = "clientHello";
 	public static readonly CLOUD_OPERATION_SERVER_HELLO: string = "serverHello";
+	public static readonly CLOUD_OPERATION_HANDSHAKE_ERROR: string = "handshakeError";
 	public static readonly CLOUD_OPERATION_STOP: string = "stop";
 	public static readonly CLOUD_OPERATION_RESULT: string = "result";
 	public static readonly CLOUD_OPERATION_ECHO: string = "echo";
