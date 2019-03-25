@@ -1,3 +1,5 @@
+// This service is here only for backwards compatibility.
+// We can delete it when we require at least {N} CLI 5.4.0.
 export class NsCouldLockService implements ILockService {
 	private cliLockService: ILockService;
 	private cliLockFile: any;
@@ -23,6 +25,14 @@ export class NsCouldLockService implements ILockService {
 		} finally {
 			this.cliLockFile.unlock(lockFilePath);
 		}
+	}
+
+	public lock(lockFilePath?: string, lockOpts?: ILockOptions): Promise<() => void> {
+		return this.cliLockService.lock(lockFilePath, lockOpts);
+	}
+
+	public unlock(lockFilePath?: string): void {
+		this.cliLockService.unlock(lockFilePath);
 	}
 }
 
