@@ -18,6 +18,10 @@
 		},
 		"project-service": {
 			"subdomain": "project"
+		},
+		"cloud-operation-service": {
+			"serverProto": "wss",
+			"subdomain": "cloud-operation"
 		}
 	},
 	"mBaaS": {
