@@ -5,6 +5,10 @@ interface ICleanupProjectResult {
 	cleanupTaskResults: ICleanupTaskResult[];
 }
 
+interface IDeleteRepositoryResponse {
+	repositoryId: string;
+}
+
 /**
  * Defines the properties of single cleanup task.
  */

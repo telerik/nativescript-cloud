@@ -47,7 +47,6 @@ $injector.require("nsCloudServerBuildService", path.join(__dirname, "services", 
 $injector.require("nsCloudServerServicesProxy", path.join(__dirname, "services", "server", "server-services-proxy"));
 $injector.require("nsCloudServerRequestService", path.join(__dirname, "services", "server", "server-request-service"));
 $injector.require("nsCloudServerEmulatorsService", path.join(__dirname, "services", "server", "server-emulators-service"));
-$injector.require("nsCloudServerCodeCommitService", path.join(__dirname, "services", "server", "server-code-commit-service"));
 $injector.require("nsCloudServerAccountsService", path.join(__dirname, "services", "server", "server-accounts-service"));
 $injector.require("nsCloudServerProjectService", path.join(__dirname, "services", "server", "server-project-service"));
 $injector.require("nsCloudKinveyRequestService", path.join(__dirname, "services", "server", "mbaas", "kinvey-request-service"));
