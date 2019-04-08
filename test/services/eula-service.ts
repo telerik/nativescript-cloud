@@ -35,7 +35,11 @@ describe("eulaService", () => {
 
 				testInfo.actualHttpRequestIfModifiedSinceHeader = options && options.headers && options.headers["If-Modified-Since"];
 
-				return null;
+				return <any>{
+					response: {
+						statusCode: testInfo.actualHttpRequestIfModifiedSinceHeader ? 304 : 200
+					}
+				};
 			}
 		});
 

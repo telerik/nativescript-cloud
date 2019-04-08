@@ -82,16 +82,14 @@ export abstract class EulaServiceBase implements IEulaService {
 
 			const eulaFstat = this.getEulaFsStat();
 
-			await this.$httpClient.httpRequest({
+			const result = await this.$httpClient.httpRequest({
 				url: this.getEulaUrl(),
 				pipeTo: this.$fs.createWriteStream(tempEulaPath),
 				headers: eulaFstat && !opts.forceDownload ? { "If-Modified-Since": eulaFstat.mtime.toUTCString() } : {},
 				timeout: EulaConstants.timeout
 			});
 
-			if (!this.$fs.exists(tempEulaPath)) {
-				this.$logger.trace(`The previously downloaded EULA is up-to-date`);
-			} else {
+			if (result.response.statusCode !== 304) {
 				const lockFilePath = this.getLockFilePath("download.lock");
 				await this.$nsCloudLockService.executeActionWithLock(async () => {
 					this.$logger.trace(`Successfully downloaded EULA to ${tempEulaPath}.`);
