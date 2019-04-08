@@ -3,7 +3,6 @@ import * as path from "path";
 $injector.require("nsCloudHttpServer", path.join(__dirname, "http-server"));
 $injector.require("nsCloudItmsServicesPlistHelper", path.join(__dirname, "itms-services-plist-helper"));
 $injector.require("nsCloudOutputFilter", path.join(__dirname, "cloud-output-filter"));
-$injector.require("nsCloudDeviceEmulator", path.join(__dirname, "cloud-device-emulator"));
 $injector.require("nsCloudOptionsProvider", path.join(__dirname, "cloud-options-provider"));
 $injector.require("nsCloudBuildHelper", path.join(__dirname, "cloud-build-helper"));
 $injector.require("nsAccountUtils", path.join(__dirname, "account-utils"));
@@ -20,15 +19,11 @@ $injector.require("nsCloudOperationFactory", path.join(__dirname, "cloud-operati
 $injector.require("nsCloudCommunicationChannelFactory", path.join(__dirname, "cloud-operation", "communication", "communication-channel-factory"));
 $injector.require("nsCloudWebSocketFactory", path.join(__dirname, "cloud-operation", "communication", "websocket-factory"));
 
-// Mobile.
-$injector.require("nsCloudEmulatorDeviceDiscovery", path.join(__dirname, "mobile", "mobile-core", "cloud-emulator-device-discovery"));
-
 // Public API.
 $injector.requirePublicClass("nsCloudApplicationService", path.join(__dirname, "services", "application-service"));
 $injector.requirePublicClass("nsCloudAuthenticationService", path.join(__dirname, "services", "authentication-service"));
 $injector.requirePublicClass("nsCloudBuildService", path.join(__dirname, "services", "cloud-build-service"));
 $injector.requirePublicClass("nsCloudCodesignService", path.join(__dirname, "services", "cloud-codesign-service"));
-$injector.requirePublicClass("nsCloudEmulatorLauncher", path.join(__dirname, "services", "cloud-emulator-emulator-launcher"));
 $injector.requirePublicClass("nsCloudPublishService", path.join(__dirname, "services", "cloud-publish-service"));
 $injector.requirePublicClass("nsCloudProjectService", path.join(__dirname, "services", "cloud-project-service"));
 $injector.requirePublicClass("nsCloudUserService", path.join(__dirname, "services", "user-service"));
@@ -46,7 +41,6 @@ $injector.require("nsCloudServerAuthService", path.join(__dirname, "services", "
 $injector.require("nsCloudServerBuildService", path.join(__dirname, "services", "server", "server-build-service"));
 $injector.require("nsCloudServerServicesProxy", path.join(__dirname, "services", "server", "server-services-proxy"));
 $injector.require("nsCloudServerRequestService", path.join(__dirname, "services", "server", "server-request-service"));
-$injector.require("nsCloudServerEmulatorsService", path.join(__dirname, "services", "server", "server-emulators-service"));
 $injector.require("nsCloudServerAccountsService", path.join(__dirname, "services", "server", "server-accounts-service"));
 $injector.require("nsCloudServerProjectService", path.join(__dirname, "services", "server", "server-project-service"));
 $injector.require("nsCloudKinveyRequestService", path.join(__dirname, "services", "server", "mbaas", "kinvey-request-service"));
@@ -76,7 +70,6 @@ $injector.requireCommand("logout", path.join(__dirname, "commands", "logout"));
 $injector.requireCommand("cloud|dev-apple-login", path.join(__dirname, "commands", "cloud-dev-apple-login"));
 
 $injector.requireCommand("user", path.join(__dirname, "commands", "user"));
-$injector.requireCommand("kill-server", path.join(__dirname, "commands", "kill-server"));
 
 $injector.requireCommand(["deploy|cloud", "cloud|deploy"], path.join(__dirname, "commands", "cloud-deploy"));
 $injector.requireCommand(["run|cloud|*all", "cloud|run|*all"], path.join(__dirname, "commands", "cloud-run"));
