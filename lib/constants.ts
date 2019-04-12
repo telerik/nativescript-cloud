@@ -21,8 +21,6 @@ export const PROVISION_TYPES = {
 
 export const AUTH_SERVICE_NAME = "auth-service";
 export const BUILD_SERVICE_NAME = "build-service";
-export const EMULATORS_SERVICE_NAME = "emulators-service";
-export const CODE_COMMIT_SERVICE_NAME = "code-commit-service";
 export const MISC_SERVICE_NAME = "misc-service";
 export const ACCOUNTS_SERVICE_NAME = "accounts-service";
 export const PROJECT_SERVICE_NAME = "project-service";
@@ -48,12 +46,6 @@ export const CLOUD_BUILD_CONFIGURATIONS = {
 export const CLOUD_BUILD_DIRECTORY_NAMES = {
 	DEVICE: "device",
 	EMULATOR: "emulator"
-};
-
-export const DEVICE_INFO = {
-	TYPE: "Emulator",
-	STATUS: "Connected",
-	VENDOR: "Cloud Emulator"
 };
 
 export const CONTENT_TYPES = {

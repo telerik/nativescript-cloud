@@ -16,6 +16,10 @@
 		},
 		"project-service": {
 			"fullHostName": "localhost:8006"
+		},
+		"cloud-operation-service": {
+			"serverProto": "wss",
+			"subdomain": "localhost:8007"
 		}
 	},
 	"mBaaS": {

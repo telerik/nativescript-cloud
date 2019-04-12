@@ -201,8 +201,7 @@ module.exports = function (grunt) {
 		const pathToIosDeviceLib = fs.existsSync(rootPathToIosDeviceLib) ? rootPathToIosDeviceLib : path.join(nodeModulesDirPath, nativescript, node_modules, iOSDeviceLib);
 
 		const pathsOfDtsFiles = getReferencesFromDir(path.join(nodeModulesDirPath, nativescript))
-			.concat(getReferencesFromDir(pathToIosDeviceLib))
-			.concat(getReferencesFromDir(path.join(nodeModulesDirPath, "cloud-device-emulator")));
+			.concat(getReferencesFromDir(pathToIosDeviceLib));
 
 		const lines = pathsOfDtsFiles.map(file => `/// <reference path="${fromWindowsRelativePathToUnix(path.relative(__dirname, file))}" />`);
 

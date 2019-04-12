@@ -15,6 +15,10 @@
 		},
 		"project-service": {
 			"subdomain": "test-project"
+		},
+		"cloud-operation-service": {
+			"serverProto": "wss",
+			"subdomain": "test-cloud-operation"
 		}
 	},
 	"mBaaS": {

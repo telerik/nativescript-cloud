@@ -39,7 +39,7 @@ tns.extensibilityService.installExtension("nativescript-cloud@latest")
 * [nsCloudApplicationService](#nscloudapplicationservice)
   * [shouldBuild](#shouldbuild)
   * [shouldInstall](#shouldinstall)
-* [nsCloudEmulatorLauncher](#nscloudemulatorlauncher)
+* [nsCloudAuthenticationService](#nsCloudAuthenticationService)
   * [login](#login)
   * [logout](#logout)
   * [isUserLoggedIn](#isuserloggedin)
@@ -461,58 +461,6 @@ tns.nsCloudPublishService
 		console.log("Should install?", shouldInstall);
 	})
 	.catch(err => console.error(err));
-```
-
-### nsCloudEmulatorLauncher
-The `nsCloudEmulatorLauncher` provides a way for initial interaction with cloud emulators. You can call the following methods:
-* `startEmulator` method - starts an cloud emulator and returns a url where an html page is located, containing an iframe with the actual emulator. </br>
-Definition:
-
-```TypeScript
-/**
- * Describes options that can be passed when starting a cloud emulator.
- */
-interface ICloudEmulatorStartData {
-	/**
-	 * Path to the package file (.apk or .zip) to load - can either be a local path or a url.
-	 */
-	packageFile: string;
-	/**
-	 * Platform for the emulator - android or ios
-	 */
-	platform: string;
-	/**
-	 * Model of the emulator - for example nexus5, iphone5s, iphone6 - etc
-	 */
-	model: string;
-}
-
-/**
- * Describes service for initial interaction with cloud emulators.
- */
-interface ICloudEmulatorLauncher {
-	/**
-	 * Starts a cloud emulator.
-	 * @param {ICloudEmulatorStartData} data Options for starting emulator.
-	 * @param optional {IConfigOptions} options The config options.
-	 * @returns {string} A url containing an html page with the emulator inside an iframe. The url's host is localhost.
-	 */
-	startEmulator(data: ICloudEmulatorStartData): Promise<string>;
-}
-
-```
-Usage:
-```JavaScript
-const tns = require("nativescript");
-
-tns.nsCloudEmulatorLauncher.startEmulator({
-			packageFile: "test.apk",
-			platform: "android",
-			model: "nexus5"
-		}).then(address => {
-			console.log("address is", address);
-			// http://localhost:56760/?publicKey=somekey&device=nexus5
-		});
 ```
 
 ### nsCloudAuthenticationService

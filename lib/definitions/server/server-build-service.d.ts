@@ -58,6 +58,14 @@ interface IBuildCredentialRequest extends IAppId {
 	fileNames: string[];
 }
 
+interface IGetRepositoryResponse {
+	cloneUrlHttp: string;
+	cloneUrlSsh: string;
+	repositoryName: string;
+	credentials: ICodeCommitCredentials;
+	isNewRepository: boolean;
+}
+
 interface IBuildCredentialResponse {
 	codeCommit: IGetRepositoryResponse;
 	urls: IAmazonStorageEntry[];
