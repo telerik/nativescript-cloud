@@ -22,12 +22,12 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		$logger: ILogger,
 		$nsCloudOperationFactory: ICloudOperationFactory,
 		$nsCloudOutputFilter: ICloudOutputFilter,
-		$processService: IProcessService,
+		$nsCloudProcessService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $nsCloudUploadService: IUploadService,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $processService);
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public async publishToItunesConnect(publishData: IItunesConnectPublishData): Promise<void> {

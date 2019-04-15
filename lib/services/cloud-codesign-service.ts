@@ -18,11 +18,11 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		$logger: ILogger,
 		$nsCloudOperationFactory: ICloudOperationFactory,
 		$nsCloudOutputFilter: ICloudOutputFilter,
-		$processService: IProcessService,
+		$nsCloudProcessService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $processService);
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public async generateCodesignFiles(codesignData: ICodesignData,

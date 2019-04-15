@@ -7,7 +7,7 @@ export abstract class InteractiveCloudCommand implements ICommand {
 	protected predefinedAnswers: IPredefinedAnswer[];
 
 	constructor(private interactiveService: ICloudService,
-		private $processService: IProcessService,
+		private $nsCloudProcessService: IProcessService,
 		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter) {
@@ -42,7 +42,7 @@ export abstract class InteractiveCloudCommand implements ICommand {
 
 		this.interactiveService.on(CloudCommunicationEvents.MESSAGE, messageHandler);
 
-		this.$processService.attachToProcessExitSignals(this, () => {
+		this.$nsCloudProcessService.attachToProcessExitSignals(this, () => {
 			this.interactiveService.removeListener(CloudCommunicationEvents.MESSAGE, messageHandler);
 		});
 

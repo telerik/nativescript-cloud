@@ -15,9 +15,9 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 		$logger: ILogger,
 		$nsCloudOperationFactory: ICloudOperationFactory,
 		$nsCloudOutputFilter: ICloudOutputFilter,
-		$processService: IProcessService,
+		$nsCloudProcessService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $processService);
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public async appleLogin(credentials: ICredentials): Promise<string> {

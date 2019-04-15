@@ -31,8 +31,8 @@ export class NsCouldLockService implements ILockService {
 		return this.cliLockService.lock(lockFilePath, lockOpts);
 	}
 
-	public unlock(lockFilePath?: string): void {
-		this.cliLockService.unlock(lockFilePath);
+	public async unlock(lockFilePath?: string): Promise<void> {
+		await this.cliLockService.unlock(lockFilePath);
 	}
 }
 
