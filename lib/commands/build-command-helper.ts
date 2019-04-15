@@ -134,7 +134,8 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 				keyStorePassword: this.$options.keyStorePassword,
 				keyStorePath: this.$options.keyStorePath,
 				useHotModuleReload: this.$options.hmr,
-				env: this.$options.env
+				env: this.$options.env,
+				iCloudContainerEnvironment: this.$options.iCloudContainerEnvironment
 			}, this.$options.platformTemplate);
 		} else {
 			const buildData = this.getCloudBuildData(platform);
