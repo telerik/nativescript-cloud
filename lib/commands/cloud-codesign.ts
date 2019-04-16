@@ -12,7 +12,7 @@ export class CloudCodesignCommand extends InteractiveCloudCommand implements ICo
 	private devices: Mobile.IDeviceInfo[];
 	public allowedParameters: ICommandParameter[];
 
-	constructor($processService: IProcessService,
+	constructor($nsCloudProcessService: IProcessService,
 		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
@@ -23,7 +23,7 @@ export class CloudCodesignCommand extends InteractiveCloudCommand implements ICo
 		private $options: ICloudOptions,
 		private $projectData: IProjectData,
 		private $nsCloudCodesignService: ICloudCodesignService) {
-		super($nsCloudCodesignService, $processService, $errors, $logger, $prompter);
+		super($nsCloudCodesignService, $nsCloudProcessService, $errors, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 

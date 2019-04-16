@@ -7,7 +7,7 @@ export class CloudBuildCommand extends InteractiveCloudCommand implements IComma
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
-	constructor($processService: IProcessService,
+	constructor($nsCloudProcessService: IProcessService,
 		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
@@ -18,7 +18,7 @@ export class CloudBuildCommand extends InteractiveCloudCommand implements IComma
 		private $options: ICloudOptions,
 		private $projectData: IProjectData,
 		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudBuildService, $processService, $errors, $logger, $prompter);
+		super($nsCloudBuildService, $nsCloudProcessService, $errors, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 

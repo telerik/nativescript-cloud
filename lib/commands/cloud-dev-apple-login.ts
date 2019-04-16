@@ -8,7 +8,7 @@ export class CloudDevAppleLogin extends InteractiveCloudCommand {
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
-	constructor($processService: IProcessService,
+	constructor($nsCloudProcessService: IProcessService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
@@ -18,7 +18,7 @@ export class CloudDevAppleLogin extends InteractiveCloudCommand {
 		protected $prompter: IPrompter,
 		protected $nsCloudAppleService: ICloudAppleService,
 		protected $nsCloudBuildCommandHelper: IBuildCommandHelper) {
-		super($nsCloudAppleService, $processService, $errors, $logger, $prompter);
+		super($nsCloudAppleService, $nsCloudProcessService, $errors, $logger, $prompter);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {

@@ -17,10 +17,10 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 		protected $logger: ILogger,
 		private $nsCloudOperationFactory: ICloudOperationFactory,
 		private $nsCloudOutputFilter: ICloudOutputFilter,
-		private $processService: IProcessService) {
+		private $nsCloudProcessService: IProcessService) {
 		super();
 		this.cloudOperations = Object.create(null);
-		this.$processService.attachToProcessExitSignals(this, this.cleanup.bind(this));
+		this.$nsCloudProcessService.attachToProcessExitSignals(this, this.cleanup.bind(this));
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {

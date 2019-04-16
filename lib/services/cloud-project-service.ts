@@ -17,10 +17,10 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		$logger: ILogger,
 		$nsCloudOperationFactory: ICloudOperationFactory,
 		$nsCloudOutputFilter: ICloudOutputFilter,
-		$processService: IProcessService,
+		$nsCloudProcessService: IProcessService,
 		private $nsCloudServerProjectService: IServerProjectService,
 		private $projectHelper: IProjectHelper) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $processService);
+		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
