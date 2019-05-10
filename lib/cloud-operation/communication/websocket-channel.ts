@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-
+import { join } from "path";
 import { CommunicationChannelBase } from "./communication-channel-base";
 import { CloudOperationWebSocketMessageActions, CloudCommunicationEvents, CloudCommunicationChannelExitCodes } from "../../constants";
 
@@ -9,7 +9,8 @@ export class WebSocketCommunicationChannel extends CommunicationChannelBase {
 	constructor(protected cloudOperationId: string,
 		protected data: ICloudCommunicationChannelData<IWebSocketCloudChannelConfigProperties>,
 		protected $logger: ILogger,
-		private $nsCloudWebSocketFactory: IWebSocketFactory) {
+		private $nsCloudWebSocketFactory: IWebSocketFactory,
+		private $cleanupService: ICleanupService) {
 		super(cloudOperationId, data, $logger);
 	}
 
@@ -45,6 +46,10 @@ export class WebSocketCommunicationChannel extends CommunicationChannelBase {
 	}
 
 	protected async connectCore(): Promise<void> {
+		const dataToSend: any = _.cloneDeep(this.data);
+		dataToSend.cloudOperationId = this.cloudOperationId;
+		this.$cleanupService.addCleanupJS(join(__dirname, "cleanup-websocket.js"), dataToSend);
+
 		this.ws = this.$nsCloudWebSocketFactory.create(this.data.config.url);
 		await new Promise<void>((resolve, reject) => {
 			const closeHandler = (c: number, r: string) => {

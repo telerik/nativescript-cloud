@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { CloudOperationMessageTypes, CloudCommunicationChannelExitCodes, CloudCommunicationEvents } from "../../constants";
+import { join } from "path";
 
 export abstract class CommunicationChannelBase extends EventEmitter implements ICloudCommunicationChannel {
 	protected static readonly COMMUNICATION_PROTOCOL_VERSION: string = "v2";
@@ -18,9 +19,11 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 
 	constructor(protected cloudOperationId: string,
 		protected data: ICloudCommunicationChannelData<any>,
-		protected $logger: ILogger) {
+		protected $logger: ILogger,
+		protected $cleanupService: ICleanupService) {
 		super();
 	}
+	//
 
 	public async connect(): Promise<void> {
 		if (!this.isConnected) {
@@ -83,6 +86,8 @@ export abstract class CommunicationChannelBase extends EventEmitter implements I
 			};
 			await this.sendMessage<ICloudOperationStop>(stopMsg);
 			await this.closeCore(code, reason);
+			// TODO: pass correct data
+			await this.$cleanupService.removeCleanupJS(join(__dirname, "cleanup-websocket.js"), {})
 		} catch (err) {
 			this.$logger.trace(err);
 		}

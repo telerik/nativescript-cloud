@@ -15,6 +15,10 @@ interface ICloudCommunicationChannelData<T> {
 	config: T;
 }
 
+interface ICleanupCloudCommunicationChannelData<T> extends ICloudCommunicationChannelData<T> {
+	cloudOperationId: string;
+}
+
 interface IWebSocketCloudChannelConfigProperties {
 	url: string;
 }
