@@ -55,6 +55,7 @@ $injector.require("nsCloudPolyfillService", path.join(__dirname, "services", "po
 $injector.require("nsCloudBuildPropertiesService", path.join(__dirname, "services", "cloud-build-properties-service"));
 $injector.require("nsCloudHashService", path.join(__dirname, "services", "hash-service"));
 $injector.require("nsCloudConfigurationService", path.join(__dirname, "services", "cloud-configuration-service"));
+$injector.require("nsCloudEncryptionSettingsService", path.join(__dirname, "services", "cloud-encryption-settings-service"));
 $injector.require("nsCloudEncryptionService", path.join(__dirname, "services", "cloud-encryption-service"));
 $injector.require("nsCloudAppleService", path.join(__dirname, "services", "cloud-apple-service"));
 
