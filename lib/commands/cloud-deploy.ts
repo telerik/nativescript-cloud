@@ -11,9 +11,8 @@ export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 		protected $errors: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
-		private $platformService: IPlatformService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		private $deployCommandHelper: IDeployCommandHelper,
+		private $nsCloudPlatformService: ICloudPlatformService,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudBuildService: ICloudBuildService,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
@@ -47,12 +46,7 @@ export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 			emulator: this.$options.emulator
 		});
 
-		const deployPlatformInfo = this.$deployCommandHelper.getDeployPlatformInfo(args[0]);
-		deployPlatformInfo.buildPlatform = this.$nsCloudBuildCommandHelper.buildPlatform.bind(this.$nsCloudBuildCommandHelper);
-		deployPlatformInfo.outputPath = outputDirectoryPath;
-		deployPlatformInfo.nativePrepare = { skipNativePrepare: true };
-
-		return this.$platformService.deployPlatform(deployPlatformInfo);
+		return this.$nsCloudPlatformService.deployPlatform(args[0], outputDirectoryPath);
 	}
 }
 
