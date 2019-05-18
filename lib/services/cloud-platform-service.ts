@@ -110,7 +110,7 @@ export class CloudPlatformService implements ICloudPlatformService {
 			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase(),
 			provision,
 			mobileProvisionData,
-			temaId: null,
+			teamId: null,
 			env: projectSettings.env
 		});
 	}
