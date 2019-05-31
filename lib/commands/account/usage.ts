@@ -66,7 +66,7 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 			output = tables.join(EOL);
 		}
 
-		this.$logger.out(output);
+		this.$logger.info(output);
 	}
 
 	private toPrettyDate(date: string): string {

@@ -15,6 +15,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 		protected $fs: IFileSystem,
 		protected $httpClient: Server.IHttpClient,
 		protected $logger: ILogger,
+		private $constants: IDictionary<any>,
 		private $nsCloudOperationFactory: ICloudOperationFactory,
 		private $nsCloudOutputFilter: ICloudOutputFilter,
 		private $nsCloudProcessService: IProcessService) {
@@ -74,9 +75,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 				}
 
 				if (body.pipe === "stdout") {
-					// Print the output on the same line to have cool effects like loading indicators.
-					// The cloud process will take care of the new lines.
-					this.$logger.printInfoMessageOnSameLine(log);
+					this.printMessageOnTheSameLine(log);
 				} else if (body.pipe === "stderr") {
 					this.$logger.error(log);
 				}
@@ -159,6 +158,18 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 			delete this.cloudOperations[cloudOperationId];
 		} catch (err) {
 			this.$logger.error(`Cloud operation ${cloudOperationId} failed with error: ${err.message}`);
+		}
+	}
+
+	private printMessageOnTheSameLine(msg: string): void {
+		const logger: any = this.$logger;
+		// Print the output on the same line to have cool effects like loading indicators.
+		// The cloud process will take care of the new lines.
+		if (logger.printInfoMessageOnSameLine) {
+			// Used in CLI before 6.0.0
+			logger.printInfoMessageOnSameLine(msg);
+		} else {
+			this.$logger.info(msg, {[this.$constants.LoggerConfigData.skipNewLine]: true });
 		}
 	}
 }

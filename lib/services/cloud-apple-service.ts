@@ -9,7 +9,8 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 		return "Failed to start Apple login.";
 	}
 
-	constructor($errors: IErrors,
+	constructor($constants: IDictionary<any>,
+		$errors: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -17,7 +18,7 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 		$nsCloudOutputFilter: ICloudOutputFilter,
 		$nsCloudProcessService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
+		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public async appleLogin(credentials: ICredentials): Promise<string> {

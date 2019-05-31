@@ -14,7 +14,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return "Failed to start cloud build.";
 	}
 
-	constructor($errors: IErrors,
+	constructor($constants: IDictionary<any>,
+		$errors: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -41,7 +42,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $staticConfig: IStaticConfig,
 		private $platformsData: IPlatformsData,
 		private $filesHashService: IFilesHashService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
+		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
