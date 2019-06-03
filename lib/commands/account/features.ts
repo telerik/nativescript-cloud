@@ -34,7 +34,7 @@ export class FeaturesCommand extends AccountCommandBase implements ICommand {
 			output = table.toString();
 		}
 
-		this.$logger.out(output);
+		this.$logger.info(output);
 	}
 }
 

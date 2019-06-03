@@ -12,7 +12,8 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		return "Failed to start generation of codesign files.";
 	}
 
-	constructor($errors: IErrors,
+	constructor($constants: IDictionary<any>,
+		$errors: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -22,7 +23,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
+		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public async generateCodesignFiles(codesignData: ICodesignData,

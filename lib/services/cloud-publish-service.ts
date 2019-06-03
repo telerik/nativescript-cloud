@@ -16,7 +16,8 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		return "Failed to start publishing.";
 	}
 
-	constructor($errors: IErrors,
+	constructor($constants: IDictionary<any>,
+		$errors: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -27,7 +28,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $nsCloudUploadService: IUploadService,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
+		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public async publishToItunesConnect(publishData: IItunesConnectPublishData): Promise<void> {
