@@ -63,7 +63,7 @@ export class CloudPlatformService implements ICloudPlatformService {
 		}
 
 		const $buildInfoFileService = this.$injector.resolve("buildInfoFileService");
-		return $buildInfoFileService.saveBuildInfoFile(platformData, buildInfoFileDirname);
+		return $buildInfoFileService.saveLocalBuildInfo(platformData, buildInfoFileDirname);
 	}
 
 	public async preparePlatform(projectSettings: INSCloudProjectSettings,
