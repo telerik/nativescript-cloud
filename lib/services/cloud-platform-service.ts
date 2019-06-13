@@ -111,7 +111,8 @@ export class CloudPlatformService implements ICloudPlatformService {
 			provision,
 			mobileProvisionData,
 			teamId: null,
-			env: projectSettings.env
+			env: projectSettings.env,
+			nativePrepare: { skipNativePrepare: true }
 		});
 	}
 }
