@@ -123,6 +123,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		if (projectSettings.useHotModuleReload) {
 			additionalCliFlags.push("--hmr");
+		} else {
+			additionalCliFlags.push("--no-hmr");
 		}
 
 		if (!projectSettings.bundle && !projectSettings.useHotModuleReload) {
