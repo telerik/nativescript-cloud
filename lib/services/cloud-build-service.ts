@@ -90,7 +90,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		await this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
 		await this.prepareProject(cloudOperationId, projectSettings, platform, buildConfiguration, iOSBuildData);
 		let buildFiles: IServerItemBase[] = [];
-		if (this.$mobileHelper.isAndroidPlatform(platform) && this.$nsCloudBuildHelper.isReleaseConfiguration(buildConfiguration)) {
+		const isReleaseBuild = this.$nsCloudBuildHelper.isReleaseConfiguration(buildConfiguration);
+		if (this.$mobileHelper.isAndroidPlatform(platform) && isReleaseBuild) {
 			buildFiles.push({
 				filename: uuid.v4(),
 				fullPath: androidBuildData.pathToCertificate,
@@ -119,7 +120,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			additionalCliFlags.push("--bundle");
 		}
 
-		if (projectSettings.useHotModuleReload) {
+		if (projectSettings.useHotModuleReload && !isReleaseBuild) {
 			additionalCliFlags.push("--hmr");
 		} else {
 			additionalCliFlags.push("--no-hmr");
