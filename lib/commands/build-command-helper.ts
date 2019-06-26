@@ -1,11 +1,18 @@
 import * as path from "path";
+import * as semver from "semver";
 import { CLOUD_BUILD_CONFIGURATIONS } from "../constants";
 import { getProjectId } from "../helpers";
 import { isInteractive } from "../helpers";
 
 export class BuildCommandHelper implements IBuildCommandHelper {
+	private shouldUseOldLocalBuildService = true;
+
 	private get $localBuildService(): ILocalBuildService {
-		return this.$injector.resolve<ILocalBuildService>("localBuildService");
+		if (this.shouldUseOldLocalBuildService) {
+			return this.$injector.resolve("localBuildService");
+		}
+
+		return this.$injector.resolve("buildController");
 	}
 
 	constructor(private $nsCloudBuildService: ICloudBuildService,
@@ -16,8 +23,11 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		private $projectData: IProjectData,
 		private $injector: IInjector,
 		private $options: ICloudOptions,
-		private $fs: IFileSystem) {
-		this.$projectData.initializeProjectData();
+		private $fs: IFileSystem,
+		private $staticConfig: IStaticConfig) {
+			this.$projectData.initializeProjectData();
+			const cliVersion = this.$staticConfig.version;
+			this.shouldUseOldLocalBuildService = semver.valid(cliVersion) && semver.lt(cliVersion, semver.prerelease(cliVersion) ? "5.4.0-2019-05-16-13277" : "6.0.0");
 	}
 
 	public async buildPlatform(platform: string, buildConfig: IBuildConfig, projectData: IProjectData): Promise<string> {
@@ -31,7 +41,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		return buildResultData.outputFilePath;
 	}
 
-	public getCloudBuildData(platformArg: string): IBuildData {
+	public getCloudBuildData(platformArg: string): ICloudBuildData {
 		const platform = this.$mobileHelper.validatePlatformName(platformArg);
 		this.$logger.info(`Executing cloud build with platform: ${platform}.`);
 		const nativescriptData = this.$fs.readJson(path.join(this.$projectData.projectDir, "package.json")).nativescript;
@@ -66,7 +76,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			projectSettings,
 			platform,
 			buildConfiguration,
-			androidBuildData: {
+			androidBuildData: <any>{
 				pathToCertificate,
 				certificatePassword: this.$options.keyStorePassword
 			},
@@ -120,6 +130,28 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		let packagePath: string;
 		const platform = this.$mobileHelper.validatePlatformName(platformArg);
 		if (this.$options.local) {
+			packagePath = await this.executeLocalBuild(platform);
+		} else {
+			const buildData = this.getCloudBuildData(platform);
+			buildData.buildConfiguration = CLOUD_BUILD_CONFIGURATIONS.RELEASE;
+			packagePath = (await this.$nsCloudBuildService.build(buildData.projectSettings,
+				buildData.platform, buildData.buildConfiguration,
+				this.$options.accountId,
+				buildData.androidBuildData,
+				buildData.iOSBuildData)).qrData.originalUrl;
+		}
+
+		return packagePath;
+	}
+
+	private getUsernameAndPasswordFromArgs(args: string[]): ICredentials {
+		return { username: args[0], password: args[1] };
+	}
+
+	private async executeLocalBuild(platform: string): Promise<string> {
+		let packagePath: string = null;
+
+		if (this.shouldUseOldLocalBuildService) {
 			packagePath = await this.$localBuildService.build(platform, {
 				release: true,
 				buildForDevice: true,
@@ -136,22 +168,14 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 				useHotModuleReload: this.$options.hmr,
 				env: this.$options.env,
 				iCloudContainerEnvironment: this.$options.iCloudContainerEnvironment
-			}, this.$options.platformTemplate);
+			}, (<any>this.$options).platformTemplate);
 		} else {
-			const buildData = this.getCloudBuildData(platform);
-			buildData.buildConfiguration = CLOUD_BUILD_CONFIGURATIONS.RELEASE;
-			packagePath = (await this.$nsCloudBuildService.build(buildData.projectSettings,
-				buildData.platform, buildData.buildConfiguration,
-				this.$options.accountId,
-				buildData.androidBuildData,
-				buildData.iOSBuildData)).qrData.originalUrl;
+			const $buildDataService = this.$injector.resolve("buildDataService");
+			const buildData = $buildDataService.getBuildData(this.$projectData.projectDir, platform, this.$options);
+			packagePath = await this.$localBuildService.build(buildData);
 		}
 
 		return packagePath;
-	}
-
-	private getUsernameAndPasswordFromArgs(args: string[]): ICredentials {
-		return { username: args[0], password: args[1] };
 	}
 }
 

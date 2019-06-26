@@ -80,7 +80,7 @@ export class CloudPlatformService implements ICloudPlatformService {
 				release: buildConfiguration && buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase()
 			};
 
-			const config: IPlatformOptions = {
+			const config: any = {
 				provision,
 				mobileProvisionData,
 				sdk: null,

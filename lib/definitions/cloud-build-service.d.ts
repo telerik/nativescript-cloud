@@ -60,7 +60,7 @@ interface IQrData {
 /**
  * Describes arguments that may be passed to the build action.
  */
-interface IBuildData {
+interface ICloudBuildData {
 	/**
 	 * Describes the current project - project dir, application identifier, name and nativescript data.
 	 */
@@ -196,6 +196,10 @@ interface IItmsPlistOptions extends IProjectNameComposition {
 	 * The aforementioned .ipa file's application identifier
 	 */
 	projectId: string;
+}
+
+interface IBundle {
+	bundle: boolean;
 }
 
 /**
