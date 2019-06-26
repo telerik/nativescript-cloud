@@ -5,9 +5,9 @@ interface IBuildCommandHelper extends IBuildPlatformAction {
 	/**
 	 * Retrieves data needed to perform a cloud build.
 	 * @param {string} platformArg The mobile platform for which the application should be built: Android or iOS.
-	 * @returns {Promise<IBuildData>} Data needed for building in cloud.
+	 * @returns {Promise<ICloudBuildData>} Data needed for building in cloud.
 	 */
-	getCloudBuildData(platformArg: string): IBuildData;
+	getCloudBuildData(platformArg: string): ICloudBuildData;
 
 	/**
 	 * Builds the specified application either in the cloud or locally based on --local flag.
@@ -30,4 +30,9 @@ interface IBuildCommandHelper extends IBuildPlatformAction {
 	 * @returns {Promise<ICredentials>} The credentials.
 	 */
 	getExtendedAppleCredentials(args: string[], options: ICloudOptions): Promise<IPublishCredentials>;
+}
+
+interface ILocalBuildService {
+	build(platform: string, config: any, platformTemplateOption: string): Promise<string>;
+	build(buildData: ICloudBuildData): Promise<string>;
 }

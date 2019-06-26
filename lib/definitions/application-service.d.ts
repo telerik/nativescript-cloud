@@ -1,7 +1,7 @@
 /**
  * Describes settings that can be passed to shouldBuild method
  */
-interface IApplicationBuildConfig extends IBuildConfig, IOptionalOutputPath, IProjectChangesOptions, IProjectDir, IPlatform { }
+interface IApplicationBuildConfig extends IBuildConfig, IBundle, IOptionalOutputPath, IProjectDir, IPlatform { }
 
 /**
  * Describes settings that can be passed to shouldInstall method

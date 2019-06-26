@@ -15,6 +15,8 @@ $injector.require("nsCloudProcessService", path.join(__dirname, "services", "pro
 $injector.require("nsCloudTelerikUserService", path.join(__dirname, "services", "telerik-user-service"));
 $injector.require("nsCloudS3Helper", path.join(__dirname, "s3-helper"));
 
+$injector.require("nsCloudPlatformsData", path.join(__dirname, "cloud-platforms-data"));
+
 // Cloud operation.
 $injector.require("nsCloudOperationFactory", path.join(__dirname, "cloud-operation", "cloud-operation-factory"));
 $injector.require("nsCloudCommunicationChannelFactory", path.join(__dirname, "cloud-operation", "communication", "communication-channel-factory"));
@@ -58,6 +60,7 @@ $injector.require("nsCloudConfigurationService", path.join(__dirname, "services"
 $injector.require("nsCloudEncryptionSettingsService", path.join(__dirname, "services", "cloud-encryption-settings-service"));
 $injector.require("nsCloudEncryptionService", path.join(__dirname, "services", "cloud-encryption-service"));
 $injector.require("nsCloudAppleService", path.join(__dirname, "services", "cloud-apple-service"));
+$injector.require("nsCloudPlatformService", path.join(__dirname, "services", "cloud-platform-service"));
 
 // Commands.
 $injector.requireCommand("config|*get", path.join(__dirname, "commands", "config", "config-get"));

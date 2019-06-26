@@ -1,5 +1,4 @@
 import * as path from "path";
-import * as semver from "semver";
 import * as uuid from "uuid";
 import { escape } from "querystring";
 import * as constants from "../constants";
@@ -35,12 +34,11 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $nsCloudUserService: IUserService,
 		private $nsCloudVersionService: IVersionService,
 		private $nsCloudEncryptionService: ICloudEncryptionService,
-		private $platformService: IPlatformService,
+		private $nsCloudPlatformService: ICloudPlatformService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService,
 		private $qr: IQrCodeGenerator,
-		private $staticConfig: IStaticConfig,
-		private $platformsData: IPlatformsData,
+		private $nsCloudPlatformsData: ICloudPlatformsData,
 		private $filesHashService: IFilesHashService) {
 		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
@@ -199,13 +197,13 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		// In case HMR is passed, do not save the hashes as the files generated in the cloud may differ from the local ones.
 		// We need to get the hashes from the cloud build, so until we have it, it is safer to execute fullSync after build.
 		// This way we'll be sure HMR is working with cloud builds as it will rely on the local files.
+		const platformData = this.$nsCloudPlatformsData.getPlatformData(platform, this.$projectDataService.getProjectData(projectSettings.projectDir));
 		if ((<any>this.$filesHashService).saveHashesForProject && !projectSettings.useHotModuleReload) {
-			const platformData = this.$platformsData.getPlatformData(platform, this.$projectDataService.getProjectData(projectSettings.projectDir));
 			await (<any>this.$filesHashService).saveHashesForProject(platformData, path.dirname(localBuildResult));
 		}
 
 		const buildInfoFileDirname = path.dirname(result.outputFilePath);
-		this.$platformService.saveBuildInfoFile(platform, projectSettings.projectDir, buildInfoFileDirname);
+		this.$nsCloudPlatformService.saveBuildInfoFile(projectSettings.projectDir, buildInfoFileDirname, platformData);
 		return result;
 	}
 
@@ -237,11 +235,6 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		iOSBuildData: IIOSBuildData): Promise<void> {
 
 		const projectData = this.$projectDataService.getProjectData(projectSettings.projectDir);
-		const appFilesUpdaterOptions: IAppFilesUpdaterOptions = {
-			bundle: projectSettings.bundle,
-			useHotModuleReload: projectSettings.useHotModuleReload,
-			release: buildConfiguration && buildConfiguration.toLowerCase() === constants.CLOUD_BUILD_CONFIGURATIONS.RELEASE.toLowerCase()
-		};
 
 		let mobileProvisionData: IMobileProvisionData;
 		let provision: string;
@@ -252,17 +245,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			provision = mobileProvisionData.UUID;
 		}
 
-		const config: IPlatformOptions = {
-			provision,
-			mobileProvisionData,
-			sdk: null,
-			frameworkPath: null,
-			ignoreScripts: false,
-			teamId: undefined
-		};
-
 		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.START);
-		const cliVersion = this.$staticConfig.version;
 
 		// HACK: Ensure __PACKAGE__ is interpolated in app.gradle file in the user project.
 		// In case we don't interpolate every other cloud android build is bound to fail because it would set the application's identifier to __PACKAGE__
@@ -275,23 +258,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			}
 		}
 
-		const shouldUseOldPrepare = semver.valid(cliVersion) && semver.lt(cliVersion, semver.prerelease(cliVersion) ? "3.4.0-2017-11-02-10045" : "3.4.0");
-		if (shouldUseOldPrepare) {
-			// Backwards compatibility as preparePlatform method has different args in old versions
-			this.$logger.trace(`Using old prepare as CLI version is ${cliVersion}.`);
-			await (<any>this.$platformService).preparePlatform(platform, appFilesUpdaterOptions, null, projectData, config, [], { skipNativePrepare: true });
-		} else {
-			await this.$platformService.preparePlatform({
-				platform,
-				appFilesUpdaterOptions,
-				projectData,
-				config,
-				filesToSync: [],
-				nativePrepare: { skipNativePrepare: true },
-				platformTemplate: null,
-				env: projectSettings.env
-			});
-		}
+		await this.$nsCloudPlatformService.preparePlatform(projectSettings, platform, buildConfiguration, projectData, provision, mobileProvisionData);
+
 		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.PREPARE, constants.BUILD_STEP_PROGRESS.END);
 	}
 
