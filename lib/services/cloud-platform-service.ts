@@ -52,7 +52,7 @@ export class CloudPlatformService implements ICloudPlatformService {
 		return $deployCommandHelper.deploy(platform, {
 			getOutputDirectory: () => outputDirectoryPath,
 			buildPlatform: this.$nsCloudBuildCommandHelper.buildPlatform.bind(this.$nsCloudBuildCommandHelper),
-			nativePrepare: { skipNativePrepare: true }
+			skipNativePrepare: true
 		});
 	}
 
