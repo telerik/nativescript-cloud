@@ -64,12 +64,14 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		buildConfiguration: string,
 		accountId: string,
 		androidBuildData?: IAndroidBuildData,
-		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
+		iOSBuildData?: IIOSBuildData,
+		buildOptions?: IBuildOptions): Promise<IBuildResultData> {
 		const result = await this.executeCloudOperation("Cloud build", async (cloudOperationId: string): Promise<IBuildResultData> => {
 			this.$logger.info("Getting accounts information...");
 			const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
 			this.$logger.info("Using account %s.", account.id);
-			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, cloudOperationId, account.id, androidBuildData, iOSBuildData);
+
+			const buildResult = await this.executeBuild(projectSettings, platform, buildConfiguration, cloudOperationId, account.id, androidBuildData, iOSBuildData, buildOptions);
 			return buildResult;
 		});
 
@@ -82,13 +84,16 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		cloudOperationId: string,
 		accountId: string,
 		androidBuildData?: IAndroidBuildData,
-		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData> {
+		iOSBuildData?: IIOSBuildData,
+		buildOptions?: IBuildOptions): Promise<IBuildResultData> {
 		const buildInformationString = `Cloud build of '${projectSettings.projectDir}', platform: '${platform}', ` +
 			`configuration: '${buildConfiguration}'`;
 		this.$logger.info(`${buildInformationString}.`);
 
 		await this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, projectSettings.projectId, androidBuildData, iOSBuildData);
-		await this.prepareProject(cloudOperationId, projectSettings, platform, buildConfiguration, iOSBuildData);
+		if (buildOptions && buildOptions.shouldPrepare) {
+			await this.prepareProject(cloudOperationId, projectSettings, platform, buildConfiguration, iOSBuildData);
+		}
 		let buildFiles: IServerItemBase[] = [];
 		const isReleaseBuild = this.$nsCloudBuildHelper.isReleaseConfiguration(buildConfiguration);
 		if (this.$mobileHelper.isAndroidPlatform(platform) && isReleaseBuild) {

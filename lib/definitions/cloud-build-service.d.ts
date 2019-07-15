@@ -112,7 +112,8 @@ interface ICloudBuildService extends ICloudService {
 		buildConfiguration: string,
 		accountId: string,
 		androidBuildData?: IAndroidBuildData,
-		iOSBuildData?: IIOSBuildData): Promise<IBuildResultData>;
+		iOSBuildData?: IIOSBuildData,
+		buildOptions?: IBuildOptions): Promise<IBuildResultData>;
 
 	/**
 	 * Validates the build properties for specified platform (Android or iOS).
@@ -278,4 +279,8 @@ interface IIOSBuildData extends IBuildForDevice {
  * Here only for backwards compatibility. Deleting this will require a major version change as it is used in NativeScript Sidekick.
  */
 interface ICloudBuildOutputDirectoryOptions extends IOutputDirectoryOptions {
+}
+
+interface IBuildOptions {
+	shouldPrepare: boolean;
 }
