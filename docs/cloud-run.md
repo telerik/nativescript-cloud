@@ -8,7 +8,7 @@ Runs your project on all connected iOS and Android devices, Android emulators an
 
 Usage | Synopsis
 ---|---
-Run on all connected devices | `$ tns cloud run --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--release] [--key-store-path <File Path> --key-store-password <Password>] [--justlaunch] [--bundle [<value>] [--env.*]]`
+Run on all connected devices | `$ tns cloud run --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--release] [--key-store-path <File Path> --key-store-password <Password>] [--justlaunch] [--env.*]`
 
 ### Options
 
@@ -23,7 +23,6 @@ Run on all connected devices | `$ tns cloud run --accountId <Account Identifier>
 * `--clean` - If set, forces the complete rebuild of the native application.
 * `--no-watch` - If set, changes in your code will not be reflected during the execution of this command.
 * `--release` - If set, produces a release build. Otherwise, produces a debug build.
-* `--bundle` - Specifies that the `webpack` bundler will be used to bundle the application.
 * `--hmr` - Enables the hot module replacement (HMR) feature.
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`.
 * `--syncAllFiles` - Watches all production dependencies inside node_modules for changes. Triggers project rebuild if necessary!

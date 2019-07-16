@@ -8,9 +8,9 @@ Runs your project on all connected iOS devices and in the iOS Simulators, if con
 
 Usage | Synopsis
 ---|---
-Run on all connected devices | `$ tns cloud run ios --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--release] [--justlaunch] [--bundle [<value>] [--env.*]]`
-Run on a selected connected device. Will start simulator with specified `Device Identifier`, if not already running. | `$ tns run ios [--device <Device ID>] [--release] [--justlaunch] [--bundle [<value>] [--env.*]]`
-Start an emulator and run the app inside it | `$ tns cloud run ios --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> --emulator [--release] [--bundle [<value>] [--env.*]]`
+Run on all connected devices | `$ tns cloud run ios --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--release] [--justlaunch] [--env.*]`
+Run on a selected connected device. Will start simulator with specified `Device Identifier`, if not already running. | `$ tns run ios [--device <Device ID>] [--release] [--justlaunch] [--env.*]`
+Start an emulator and run the app inside it | `$ tns cloud run ios --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> --emulator [--release] [--env.*]`
 Start an emulator with specified device name and sdk | `$ tns cloud run ios --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--device <Device Name>] [--sdk <sdk>]`
 Start an emulator with specified device identifier and sdk | `$ tns cloud run ios --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--device <Device Identifier>] [--sdk <sdk>]`
 
@@ -27,7 +27,6 @@ Start an emulator with specified device identifier and sdk | `$ tns cloud run io
 * `--clean` - If set, forces the complete rebuild of the native application.
 * `--no-watch` - If set, changes in your code will not be reflected during the execution of this command.
 * `--release` - If set, produces a release build. Otherwise, produces a debug build.
-* `--bundle` - Specifies that the `webpack` bundler will be used to bundle the application.
 * `--hmr` - Enables the hot module replacement (HMR) feature.
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`.
 * `--syncAllFiles` - Watches all production dependencies inside node_modules for changes. Triggers project rebuild if necessary!

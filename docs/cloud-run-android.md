@@ -8,9 +8,9 @@ Runs your project on all connected Android devices and running emulators. While 
 
 Usage | Synopsis
 ---|---
-Run on all connected devices and running emulators | `$ tns cloud run android --accountId <Account Identifier> [--key-store-path <File Path> --key-store-password <Password>] [--release] [--justlaunch] [--bundle [<value>] [--env.*]]`
-Run on a selected connected device or running emulator. Will start emulator with specified `Device Identifier`, if not already running. | `$ tns cloud run android --accountId <Account Identifier> --device <Device ID> [--key-store-path <File Path> --key-store-password <Password>] [--release] [--justlaunch] [--bundle [<value>] [--env.*]]`
-Start a default emulator if none are running, or run application on all connected emulators. | `$ tns cloud run android --accountId <Account Identifier> --emulator [--key-store-path <File Path> --key-store-password <Password>] [--release] [--justlaunch] [--bundle [<value>] [--env.*]]`
+Run on all connected devices and running emulators | `$ tns cloud run android --accountId <Account Identifier> [--key-store-path <File Path> --key-store-password <Password>] [--release] [--justlaunch] [--env.*]`
+Run on a selected connected device or running emulator. Will start emulator with specified `Device Identifier`, if not already running. | `$ tns cloud run android --accountId <Account Identifier> --device <Device ID> [--key-store-path <File Path> --key-store-password <Password>] [--release] [--justlaunch] [--env.*]`
+Start a default emulator if none are running, or run application on all connected emulators. | `$ tns cloud run android --accountId <Account Identifier> --emulator [--key-store-path <File Path> --key-store-password <Password>] [--release] [--justlaunch] [--env.*]`
 
 ### Options
 
@@ -23,7 +23,6 @@ Start a default emulator if none are running, or run application on all connecte
 * `--release` - If set, produces a release build. Otherwise, produces a debug build. When set, you must also specify the `--key-store-*` options.
 * `--key-store-path` - Specifies the file path to the keystore file (P12) which you want to use to code sign your APK. You can use the `--key-store-*` options along with `--release` to produce a signed release build. You need to specify all `--key-store-*` options.
 * `--key-store-password` - Provides the password for the keystore file specified with `--key-store-path`. You can use the `--key-store-*` options along with `--release` to produce a signed release build. You need to specify all `--key-store-*` options.
-* `--bundle` - Specifies that the `webpack` bundler will be used to bundle the application.
 * `--hmr` - Enables the hot module replacement (HMR) feature.
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`.
 * `--syncAllFiles` - Watches all production dependencies inside node_modules for changes. Triggers project rebuild if necessary!
