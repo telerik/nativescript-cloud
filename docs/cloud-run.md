@@ -4,8 +4,6 @@
 
 Runs your project on all connected iOS and Android devices, Android emulators and iOS Simulators, if configured. While your app is running, prints the output from the application in the console and watches for changes in your code. Once a change is detected, it synchronizes the change with all selected devices and restarts/refreshes the application.
 
-To enable Hot Module Replacement (HMR) in Angular projects, follow the steps outlined in this wiki: https://github.com/NativeScript/nativescript-angular/wiki/HMR.
-
 ### Commands
 
 Usage | Synopsis
