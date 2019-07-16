@@ -29,7 +29,6 @@ Start an emulator with specified device identifier and sdk | `$ tns cloud run io
 * `--release` - If set, produces a release build. Otherwise, produces a debug build.
 * `--hmr` - Enables the hot module replacement (HMR) feature.
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`.
-* `--syncAllFiles` - Watches all production dependencies inside node_modules for changes. Triggers project rebuild if necessary!
 * `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have access to the Private Cloud feature.
 
 <% if(isHtml) { %>
