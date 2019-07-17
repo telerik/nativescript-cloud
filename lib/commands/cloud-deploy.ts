@@ -4,7 +4,10 @@ export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
 	public get dashedOptions() {
-		return this.$nsCloudOptionsProvider.dashedOptions;
+		const result = this.$nsCloudOptionsProvider.dashedOptions;
+		result.hmr = { type: OptionType.Boolean, default: false, hasSensitiveValue: false };
+
+		return result;
 	}
 
 	constructor($nsCloudProcessService: IProcessService,
