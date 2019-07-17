@@ -4,6 +4,12 @@
 
 Builds your project, if necessary, and deploys it on all connected devices and running emulators that target the specified platform. In case there are no devices attached and no simulators/emulators are running, the command will start a new simulator/emulator and deploy the application on it.
 
+When running this command the HMR (Hot Module Replacement) is not enabled by default. In case you want to enable HMR, you can pass `--hmr` flag.
+
+<% if(isHtml) { %>
+> NOTE: When passing `--release` CLI will disable HMR.
+<% } %>
+
 ### Commands
 
 Usage | Synopsis
