@@ -43,7 +43,8 @@ export class CloudBuildCommand extends InteractiveCloudCommand implements IComma
 			buildData.platform, buildData.buildConfiguration,
 			this.$options.accountId,
 			buildData.androidBuildData,
-			buildData.iOSBuildData);
+			buildData.iOSBuildData,
+			{ shouldPrepare: true });
 	}
 }
 
