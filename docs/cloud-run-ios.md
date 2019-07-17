@@ -4,6 +4,10 @@
 
 Runs your project on all connected iOS devices and in the iOS Simulators, if configured. While your app is running, prints the output from the application in the console and watches for changes in your code. Once a change is detected, it synchronizes the change with all selected devices and restarts/refreshes the application.
 
+<% if(isHtml) { %>
+When running this command without passing --release flag, the HMR (Hot Module Replacement) is enabled by default. In case you want to disable HMR, you can pass --no-hmr flag. When --release is passed, CLI disables HMR.
+<% } %>
+
 ### Commands
 
 Usage | Synopsis
@@ -26,8 +30,8 @@ Start an emulator with specified device identifier and sdk | `$ tns cloud run io
 * `--justlaunch` - If set, does not print the application output in the console.
 * `--clean` - If set, forces the complete rebuild of the native application.
 * `--no-watch` - If set, changes in your code will not be reflected during the execution of this command.
-* `--release` - If set, produces a release build. Otherwise, produces a debug build.
-* `--hmr` - Enables the hot module replacement (HMR) feature.
+* `--release` - If set, produces a release build by running webpack in production mode and native build in release mode. Otherwise, produces a debug build.
+* `--no-hmr` - Disables Hot Module Replacement (HMR). In this case, when a change in the code is applied, CLI will transfer the modified files and restart the application.
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`.
 * `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have access to the Private Cloud feature.
 
