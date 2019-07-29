@@ -4,13 +4,33 @@
 
 Runs your project on all connected iOS and Android devices, Android emulators and iOS Simulators, if configured. While your app is running, prints the output from the application in the console and watches for changes in your code. Once a change is detected, it synchronizes the change with all selected devices and restarts/refreshes the application.
 
-To enable Hot Module Replacement (HMR) in Angular projects, follow the steps outlined in this wiki: https://github.com/NativeScript/nativescript-angular/wiki/HMR.
+<% if(isHtml) { %>
+When running this command without passing --release flag, the HMR (Hot Module Replacement) is enabled by default. In case you want to disable HMR, you can pass --no-hmr flag. When --release is passed, CLI disables HMR.
+
+#### How file changes are handled
+With HMR (Hot Module Replacement):
+* Changes in `.js`, `.ts`, `.less`, `.sass` and other file types that are accepted will cause a refresh of the application.
+* Changes in `App_Resources` will cause a rebuild of the application.
+* Changes in any `package.json` file inside the project will cause a rebuild of the application.
+* Changes in `node_modules/somePlugin` if accepted will cause a refresh of the application.
+* Changes in `node_modules/somePlugin/platforms` will cause a rebuild of the application.
+* Changes in `node_modules/somePlugin/package.json` file will cause a rebuild of the application.
+* Changes that are not accepted and HMR fails will cause a restart of the native application.
+
+With **no** HMR:
+* Changes in `.js`, `.ts`, `.less`, `.sass` and other file types will cause a restart of the native application.
+* Changes in `App_Resources` will cause a rebuild of the application.
+* Changes in any `package.json` file inside the project will cause a rebuild of the application.
+* Changes in `node_modules/somePlugin` will cause a restart of the native application.
+* Changes in `node_modules/somePlugin/platforms` will cause a rebuild of the application.
+* Changes in `node_modules/somePlugin/package.json` file will cause a rebuild of the application.
+<% } %>
 
 ### Commands
 
 Usage | Synopsis
 ---|---
-Run on all connected devices | `$ tns cloud run --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--release] [--key-store-path <File Path> --key-store-password <Password>] [--justlaunch] [--bundle [<value>] [--env.*]]`
+Run on all connected devices | `$ tns cloud run --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--release] [--key-store-path <File Path> --key-store-password <Password>] [--justlaunch] [--env.*]`
 
 ### Options
 
@@ -24,16 +44,12 @@ Run on all connected devices | `$ tns cloud run --accountId <Account Identifier>
 * `--justlaunch` - If set, does not print the application output in the console.
 * `--clean` - If set, forces the complete rebuild of the native application.
 * `--no-watch` - If set, changes in your code will not be reflected during the execution of this command.
-* `--release` - If set, produces a release build. Otherwise, produces a debug build.
-* `--bundle` - Specifies that the `webpack` bundler will be used to bundle the application.
-* `--hmr` - (Beta) Enables the hot module replacement (HMR) feature. HMR depends on `webpack` and adding the `--hmr` flag to the command will automatically enable the `--bundle` option as well. <% if(isConsole) { %> The HMR feature is currently in Beta. For more information about the current development state and any known issues, please check the relevant GitHub issue: https://github.com/NativeScript/NativeScript/issues/6398.<% } %>
+* `--release` - If set, produces a release build by running webpack in production mode and native build in release mode. Otherwise, produces a debug build.
+* `--no-hmr` - Disables Hot Module Replacement (HMR). In this case, when a change in the code is applied, CLI will transfer the modified files and restart the application.
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`.
-* `--syncAllFiles` - Watches all production dependencies inside node_modules for changes. Triggers project rebuild if necessary!
 * `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have Private Cloud feature enabled.
 
 <% if(isHtml) { %>
-
->Note: Hot Module Replacement (HMR) is currently in Beta. For more information about the current development state and any known issues, please check the relevant GitHub issue: https://github.com/NativeScript/NativeScript/issues/6398.
 
 ### Related Commands
 

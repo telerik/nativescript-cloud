@@ -8,7 +8,7 @@ Builds the project in the cloud and then uploads the produced application packag
 
 Usage | Synopsis
 ---|---
-General | `$ tns cloud publish ios [<Apple ID>] [<Apple Password>] --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--bundle [<value>] [--env.*]] --track <Track>`
+General | `$ tns cloud publish ios [<Apple ID>] [<Apple Password>] --accountId <Account Identifier> --certificate <Certificate Path> --certificatePassword <Certificate Password> --provision <Provision Path> [--env.*] --track <Track>`
 
 ### Arguments
 
@@ -21,7 +21,6 @@ General | `$ tns cloud publish ios [<Apple ID>] [<Apple Password>] --accountId <
 * `--certificate` - Specifies the local path to the certificate that will be used to codesign the application. `<Certificate Path>` is the full or relative to the current directory path to the certificate.
 * `--certificatePassword` - Specifies the password of the certificate passed with the `--certificate` option.
 * `--provision` - Specifies the path to the provision that will be used to codesign the application. `<Provision Path>` is the full or relative to the current directory path to the certificate.
-* `--bundle` - Specifies that the `webpack` bundler will be used to bundle the application.
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`
 * `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have access to the Private Cloud feature.
 

@@ -4,6 +4,12 @@
 
 Builds the project in the cloud for a specified platform. The produced build result (`.apk`, `.ipa` or `.zip` containing `.app` for iOS Simulator) is downloaded in the `.cloud` directory, which is located in the root of the project.
 
+When running this command the HMR (Hot Module Replacement) is not enabled by default. In case you want to enable HMR, you can pass `--hmr` flag.
+
+<% if(isHtml) { %>
+> NOTE: When passing `--release` CLI will disable HMR.
+<% } %>
+
 ### Commands
 
 Usage | Synopsis
