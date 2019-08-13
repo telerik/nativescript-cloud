@@ -10,7 +10,7 @@ abstract class CloudPublish extends InteractiveCloudCommand {
 
 	constructor($nsCloudProcessService: IProcessService,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
@@ -18,7 +18,7 @@ abstract class CloudPublish extends InteractiveCloudCommand {
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		protected $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
 		protected $nsCloudPublishService: ICloudPublishService) {
-		super($nsCloudPublishService, $nsCloudProcessService, $errors, $logger, $prompter);
+		super($nsCloudPublishService, $nsCloudProcessService, $nsCloudErrorsService, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 
@@ -35,7 +35,7 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 		$nsCloudProcessService: IProcessService,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $nsCloudPublishService: ICloudPublishService,
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
@@ -43,7 +43,7 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		protected $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper
 	) {
-		super($nsCloudProcessService, $nsCloudOptionsProvider, $errors, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
+		super($nsCloudProcessService, $nsCloudOptionsProvider, $nsCloudErrorsService, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -52,7 +52,7 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 		await super.canExecute(args);
 
 		if (args.length > 1 || (!isInteractive() && args.length < 1)) {
-			this.$errors.fail("The command accepts only one parameter - Path to authentication JSON");
+			this.$nsCloudErrorsService.failWithHelp("The command accepts only one parameter - Path to authentication JSON");
 		}
 
 		return true;
@@ -90,14 +90,14 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 		$nsCloudProcessService: IProcessService,
 		private $nsCloudBuildCommandHelper: IBuildCommandHelper,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $nsCloudPublishService: ICloudPublishService,
 		protected $prompter: IPrompter,
 		protected $projectData: IProjectData,
 		protected $options: ICloudOptions,
 		protected $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudProcessService, $nsCloudOptionsProvider, $errors, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
+		super($nsCloudProcessService, $nsCloudOptionsProvider, $nsCloudErrorsService, $logger, $prompter, $projectData, $options, $devicePlatformsConstants, $nsCloudAndroidBundleValidatorHelper, $nsCloudPublishService);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -106,7 +106,7 @@ export class CloudPublishIos extends CloudPublish implements ICommand {
 		await super.canExecute(args);
 
 		if (args.length > 2 || (!isInteractive() && args.length < 1)) {
-			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
+			this.$nsCloudErrorsService.failWithHelp(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
 		}
 
 		return true;

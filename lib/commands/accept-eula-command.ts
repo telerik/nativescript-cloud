@@ -2,12 +2,12 @@ export class AcceptEulaCommand implements ICommand {
 	public allowedParameters: ICommandParameter[];
 
 	constructor(private $nsCloudEulaCommandHelper: IEulaCommandHelper,
-		private $errors: IErrors) {
+		private $nsCloudErrorsService: IErrors) {
 
 	}
 	public async canExecute(args: string[]): Promise<boolean> {
 		if (args.length) {
-			this.$errors.failWithoutHelp("This command does not accept arguments.");
+			this.$nsCloudErrorsService.fail("This command does not accept arguments.");
 		}
 
 		return true;

@@ -4,7 +4,7 @@ import { isUrl } from "../helpers";
 export class PolicyService implements IPolicyService {
 	private static readonly NS_CLOUD_POLICIES: string = "nsCloudPolicies";
 
-	constructor(private $errors: IErrors,
+	constructor(private $nsCloudErrorsService: IErrors,
 		private $fs: IFileSystem,
 		private $httpClient: Server.IHttpClient,
 		private $nsCloudHashService: IHashService,
@@ -29,7 +29,7 @@ export class PolicyService implements IPolicyService {
 	public async accept(data: IAcceptPolicyData): Promise<void> {
 		const policyCloudContent = await this.getPolicyContentFromAcceptData(data);
 		if (!policyCloudContent) {
-			this.$errors.failWithoutHelp("Invalid policy.");
+			this.$nsCloudErrorsService.fail("Invalid policy.");
 		}
 
 		await this.setPolicyUserSetting(data.policyName, policyCloudContent);

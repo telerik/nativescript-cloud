@@ -4,7 +4,7 @@ import { EOL } from "os";
 
 export class CloudBuildPropertiesService implements ICloudBuildPropertiesService {
 	constructor(private $nsCloudBuildHelper: ICloudBuildHelper,
-		private $errors: IErrors,
+		private $nsCloudErrorsService: IErrors,
 		private $fs: IFileSystem,
 		private $mobileHelper: Mobile.IMobileHelper) { }
 
@@ -15,31 +15,31 @@ export class CloudBuildPropertiesService implements ICloudBuildPropertiesService
 		iOSBuildData?: IIOSBuildData): Promise<void> {
 		if (this.$mobileHelper.isAndroidPlatform(platform) && this.$nsCloudBuildHelper.isReleaseConfiguration(buildConfiguration)) {
 			if (!androidBuildData || !androidBuildData.pathToCertificate) {
-				this.$errors.failWithoutHelp("When building for Release configuration, you must specify valid Certificate and its password.");
+				this.$nsCloudErrorsService.fail("When building for Release configuration, you must specify valid Certificate and its password.");
 			}
 
 			if (!this.$fs.exists(androidBuildData.pathToCertificate)) {
-				this.$errors.failWithoutHelp(`The specified certificate: ${androidBuildData.pathToCertificate} does not exist. Verify the location is correct.`);
+				this.$nsCloudErrorsService.fail(`The specified certificate: ${androidBuildData.pathToCertificate} does not exist. Verify the location is correct.`);
 			}
 
 			if (!androidBuildData.certificatePassword) {
-				this.$errors.failWithoutHelp(`No password specified for certificate ${androidBuildData.pathToCertificate}.`);
+				this.$nsCloudErrorsService.fail(`No password specified for certificate ${androidBuildData.pathToCertificate}.`);
 			}
 
 			if (androidBuildData.certificatePassword.length < 6) {
-				this.$errors.failWithoutHelp("The password for Android certificate must be at least 6 characters long.");
+				this.$nsCloudErrorsService.fail("The password for Android certificate must be at least 6 characters long.");
 			}
 		} else if (this.$mobileHelper.isiOSPlatform(platform) && iOSBuildData.buildForDevice) {
 			if (!iOSBuildData || !iOSBuildData.pathToCertificate || !iOSBuildData.certificatePassword || !iOSBuildData.pathToProvision) {
-				this.$errors.failWithoutHelp("When building for iOS you must specify valid Mobile Provision, Certificate and its password.");
+				this.$nsCloudErrorsService.fail("When building for iOS you must specify valid Mobile Provision, Certificate and its password.");
 			}
 
 			if (!this.$fs.exists(iOSBuildData.pathToCertificate)) {
-				this.$errors.failWithoutHelp(`The specified certificate: ${iOSBuildData.pathToCertificate} does not exist. Verify the location is correct.`);
+				this.$nsCloudErrorsService.fail(`The specified certificate: ${iOSBuildData.pathToCertificate} does not exist. Verify the location is correct.`);
 			}
 
 			if (!this.$fs.exists(iOSBuildData.pathToProvision)) {
-				this.$errors.failWithoutHelp(`The specified provision: ${iOSBuildData.pathToProvision} does not exist. Verify the location is correct.`);
+				this.$nsCloudErrorsService.fail(`The specified provision: ${iOSBuildData.pathToProvision} does not exist. Verify the location is correct.`);
 			}
 
 			const certInfo = this.$nsCloudBuildHelper.getCertificateInfo(iOSBuildData.pathToCertificate, iOSBuildData.certificatePassword);
@@ -83,7 +83,7 @@ export class CloudBuildPropertiesService implements ICloudBuildPropertiesService
 			}
 
 			if (errors.length) {
-				this.$errors.failWithoutHelp(errors.join(EOL));
+				this.$nsCloudErrorsService.fail(errors.join(EOL));
 			}
 		}
 	}

@@ -4,13 +4,13 @@ import { createTable, stringifyWithIndentation } from "../../helpers";
 export class AccountListCommand extends AccountCommandBase implements ICommand {
 	public allowedParameters: ICommandParameter[] = [];
 
-	constructor($errors: IErrors,
+	constructor($nsCloudErrorsService: IErrors,
 		$nsCloudUserService: IUserService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudAccountsService: IAccountsService,
 		private $logger: ILogger,
 		private $options: IOptions) {
-		super($errors, $nsCloudUserService);
+		super($nsCloudErrorsService, $nsCloudUserService);
 	}
 
 	public async execute(args: string[]): Promise<void> {

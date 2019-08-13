@@ -8,13 +8,13 @@ export class CleanCloudWorkspace extends InteractiveCloudCommand implements ICom
 	public allowedParameters: ICommandParameter[] = [];
 
 	constructor($nsCloudProcessService: IProcessService,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudProjectService: ICloudProjectService,
 		private $projectData: IProjectData) {
-		super($nsCloudProjectService, $nsCloudProcessService, $errors, $logger, $prompter);
+		super($nsCloudProjectService, $nsCloudProcessService, $nsCloudErrorsService, $logger, $prompter);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
@@ -56,7 +56,7 @@ export class CleanCloudWorkspace extends InteractiveCloudCommand implements ICom
 
 	private async promptForProjectName(): Promise<string> {
 		if (!isInteractive()) {
-			this.$errors.failWithoutHelp(CleanCloudWorkspace.COMMAND_REQUIREMENTS_ERROR_MESSAGE);
+			this.$nsCloudErrorsService.fail(CleanCloudWorkspace.COMMAND_REQUIREMENTS_ERROR_MESSAGE);
 		}
 
 		return this.$prompter.getString("Project name:", { allowEmpty: false });
@@ -64,7 +64,7 @@ export class CleanCloudWorkspace extends InteractiveCloudCommand implements ICom
 
 	private async promptForAppId(): Promise<string> {
 		if (!isInteractive()) {
-			this.$errors.failWithoutHelp(CleanCloudWorkspace.COMMAND_REQUIREMENTS_ERROR_MESSAGE);
+			this.$nsCloudErrorsService.fail(CleanCloudWorkspace.COMMAND_REQUIREMENTS_ERROR_MESSAGE);
 		}
 
 		return this.$prompter.getString("App Id:", { allowEmpty: false });

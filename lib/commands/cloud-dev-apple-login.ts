@@ -12,20 +12,20 @@ export class CloudDevAppleLogin extends InteractiveCloudCommand {
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $fs: IFileSystem,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		protected $nsCloudAppleService: ICloudAppleService,
 		protected $nsCloudBuildCommandHelper: IBuildCommandHelper) {
-		super($nsCloudAppleService, $nsCloudProcessService, $errors, $logger, $prompter);
+		super($nsCloudAppleService, $nsCloudProcessService, $nsCloudErrorsService, $logger, $prompter);
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
 		if (args.length > 2 || (!isInteractive() && args.length < 1)) {
-			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
+			this.$nsCloudErrorsService.failWithHelp(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
 		}
 
 		return true;

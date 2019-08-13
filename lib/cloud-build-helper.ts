@@ -7,7 +7,7 @@ import * as minimatch from "minimatch";
 const plist = require("simple-plist");
 
 export class CloudBuildHelper implements ICloudBuildHelper {
-	constructor(private $errors: IErrors,
+	constructor(private $nsCloudErrorsService: IErrors,
 		private $fs: IFileSystem,
 		private $logger: ILogger) { }
 
@@ -51,7 +51,7 @@ export class CloudBuildHelper implements ICloudBuildHelper {
 			}
 		}
 
-		this.$errors.failWithoutHelp(`Could not read ${certificatePath}. Please make sure there is a certificate inside.`);
+		this.$nsCloudErrorsService.fail(`Could not read ${certificatePath}. Please make sure there is a certificate inside.`);
 	}
 
 	public isReleaseConfiguration(buildConfiguration: string): boolean {

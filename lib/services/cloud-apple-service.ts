@@ -10,7 +10,7 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 	}
 
 	constructor($constants: IDictionary<any>,
-		$errors: IErrors,
+		$nsCloudErrorsService: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -18,7 +18,7 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 		$nsCloudOutputFilter: ICloudOutputFilter,
 		$nsCloudProcessService: IProcessService,
 		private $nsCloudServerBuildService: IServerBuildService) {
-		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
+		super($nsCloudErrorsService, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public async appleLogin(credentials: ICredentials): Promise<string> {
@@ -29,7 +29,7 @@ export class CloudAppleService extends CloudService implements ICloudAppleServic
 			this.$logger.trace("Apple login response", response);
 			let appleLoginResult = await this.waitForCloudOperationToFinish(appleLoginData.cloudOperationId, response, { silent: true });
 			if (!appleLoginResult.data || !appleLoginResult.data.appleSessionBase64) {
-				this.$errors.failWithoutHelp(`Apple login failed. Reason is: ${appleLoginResult.errors}. Additional information: ${appleLoginResult.stderr || appleLoginResult.stdout}.`);
+				this.$nsCloudErrorsService.fail(`Apple login failed. Reason is: ${appleLoginResult.errors}. Additional information: ${appleLoginResult.stderr || appleLoginResult.stdout}.`);
 			}
 
 			return appleLoginResult.data.appleSessionBase64;

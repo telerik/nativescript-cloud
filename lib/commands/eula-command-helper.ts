@@ -2,7 +2,7 @@ import { EulaConstants } from "../constants";
 import { isInteractive } from "../helpers";
 
 export class EulaCommandHelper implements IEulaCommandHelper {
-	constructor(private $errors: IErrors,
+	constructor(private $nsCloudErrorsService: IErrors,
 		private $logger: ILogger,
 		private $nsCloudEulaService: IEulaService,
 		private $prompter: IPrompter) { }
@@ -21,7 +21,7 @@ export class EulaCommandHelper implements IEulaCommandHelper {
 
 		this.$logger.printMarkdown(`In order to use cloud services, you must accept our EULA. You can read it here: ${EulaConstants.eulaUrl}.`);
 
-		const actionOnError = () => this.$errors.failWithoutHelp("You cannot use cloud services without accepting the EULA.");
+		const actionOnError = () => this.$nsCloudErrorsService.fail("You cannot use cloud services without accepting the EULA.");
 
 		if (!isInteractive()) {
 			return actionOnError();

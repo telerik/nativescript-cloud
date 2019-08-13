@@ -14,7 +14,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 	}
 
 	constructor($constants: IDictionary<any>,
-		$errors: IErrors,
+		$nsCloudErrorsService: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -40,7 +40,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		private $qr: IQrCodeGenerator,
 		private $nsCloudPlatformsData: ICloudPlatformsData,
 		private $filesHashService: IFilesHashService) {
-		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
+		super($nsCloudErrorsService, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {
@@ -168,7 +168,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		if (!buildResult.buildItems || !buildResult.buildItems.length) {
 			// Something failed.
-			this.$errors.failWithoutHelp(`Build failed. Reason is: ${buildResult.errors}. Additional information: ${buildResult.stderr}.`);
+			this.$nsCloudErrorsService.fail(`Build failed. Reason is: ${buildResult.errors}. Additional information: ${buildResult.stderr}.`);
 		}
 
 		this.$logger.info(`Finished ${buildInformationString} successfully. Downloading result...`);
@@ -359,7 +359,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const result = _.find(buildResult.buildItems, b => b.disposition === constants.DISPOSITIONS.BUILD_RESULT);
 
 		if (!result) {
-			this.$errors.failWithoutHelp("No item with disposition BuildResult found in the build result items.");
+			this.$nsCloudErrorsService.fail("No item with disposition BuildResult found in the build result items.");
 		}
 
 		return [result];

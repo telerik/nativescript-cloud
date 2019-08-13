@@ -8,14 +8,14 @@ export class FeaturesCommand extends AccountCommandBase implements ICommand {
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
-	constructor($errors: IErrors,
+	constructor($nsCloudErrorsService: IErrors,
 		$nsCloudUserService: IUserService,
 		private $nsCloudAccountsService: IServerAccountsService,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
 		private $logger: ILogger) {
-		super($errors, $nsCloudUserService);
+		super($nsCloudErrorsService, $nsCloudUserService);
 	}
 
 	public async execute(args: string[]): Promise<void> {

@@ -12,7 +12,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 	}
 
 	constructor($constants: IDictionary<any>,
-		$errors: IErrors,
+		$nsCloudErrorsService: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -21,7 +21,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 		$nsCloudProcessService: IProcessService,
 		private $nsCloudServerProjectService: IServerProjectService,
 		private $projectHelper: IProjectHelper) {
-		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
+		super($nsCloudErrorsService, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public getServerOperationOutputDirectory(options: IOutputDirectoryOptions): string {

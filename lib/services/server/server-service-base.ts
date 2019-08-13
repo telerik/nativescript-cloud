@@ -3,7 +3,7 @@ import { CONTENT_TYPES } from "../../constants";
 export abstract class ServerServiceBase {
 	protected abstract serviceName: string;
 
-	protected get $errors(): IErrors {
+	protected get $nsCloudErrorsService(): IErrors {
 		return this.$injector.resolve<IErrors>("errors");
 	}
 
@@ -33,7 +33,7 @@ export abstract class ServerServiceBase {
 	protected async ensureEulaIsAccepted(): Promise<void> {
 		const eulaData = await this.$nsCloudEulaService.getEulaDataWithCache();
 		if (eulaData.shouldAcceptEula) {
-			this.$errors.failWithoutHelp(`EULA is not accepted, cannot use cloud services.`);
+			this.$nsCloudErrorsService.fail(`EULA is not accepted, cannot use cloud services.`);
 		}
 	}
 

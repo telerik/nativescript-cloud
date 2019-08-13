@@ -9,7 +9,7 @@ export class CloudRunCommand extends InteractiveCloudCommand implements ICommand
 
 	public platform: string;
 	constructor($nsCloudProcessService: IProcessService,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $liveSyncCommandHelper: ILiveSyncCommandHelper,
@@ -21,7 +21,7 @@ export class CloudRunCommand extends InteractiveCloudCommand implements ICommand
 		private $options: IOptions,
 		private $projectData: IProjectData,
 		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudBuildService, $nsCloudProcessService, $errors, $logger, $prompter);
+		super($nsCloudBuildService, $nsCloudProcessService, $nsCloudErrorsService, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 
 		if (!this.$options.justlaunch) {
@@ -35,7 +35,7 @@ export class CloudRunCommand extends InteractiveCloudCommand implements ICommand
 		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
 
 		if (args.length) {
-			this.$errors.fail("This input is not valid for the cloud run command");
+			this.$nsCloudErrorsService.failWithHelp("This input is not valid for the cloud run command");
 		}
 
 		return true;
@@ -68,11 +68,11 @@ export class CloudRunIosCommand extends CloudRunCommand implements ICommand {
 		$options: IOptions,
 		$projectData: IProjectData,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($nsCloudProcessService, $errors, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $nsCloudPolyfillService, $options, $projectData, $nsCloudAndroidBundleValidatorHelper);
+		super($nsCloudProcessService, $nsCloudErrorsService, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $nsCloudPolyfillService, $options, $projectData, $nsCloudAndroidBundleValidatorHelper);
 	}
 }
 
@@ -94,11 +94,11 @@ export class CloudRunAndroidCommand extends CloudRunCommand implements ICommand 
 		$options: IOptions,
 		$projectData: IProjectData,
 		$nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants) {
-		super($nsCloudProcessService, $errors, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $nsCloudPolyfillService, $options, $projectData, $nsCloudAndroidBundleValidatorHelper);
+		super($nsCloudProcessService, $nsCloudErrorsService, $logger, $prompter, $liveSyncCommandHelper, $nsCloudEulaCommandHelper, $nsCloudBuildService, $nsCloudBuildCommandHelper, $nsCloudOptionsProvider, $nsCloudPolyfillService, $options, $projectData, $nsCloudAndroidBundleValidatorHelper);
 	}
 }
 

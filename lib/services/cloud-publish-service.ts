@@ -17,7 +17,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 
 	constructor($constants: IDictionary<any>,
-		$errors: IErrors,
+		$nsCloudErrorsService: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -28,7 +28,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 		private $devicePlatformsConstants: Mobile.IDevicePlatformsConstants,
 		private $nsCloudUploadService: IUploadService,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
+		super($nsCloudErrorsService, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public async publishToItunesConnect(publishData: IItunesConnectPublishData): Promise<void> {
@@ -55,14 +55,14 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 			this.validatePublishData(publishData);
 
 			if (!publishData.pathToAuthJson || !this.$fs.exists(publishData.pathToAuthJson)) {
-				this.$errors.failWithoutHelp("Cannot perform publish - auth json file is not supplied or the provided path does not exist.");
+				this.$nsCloudErrorsService.fail("Cannot perform publish - auth json file is not supplied or the provided path does not exist.");
 			}
 
 			let authJson: string;
 			try {
 				authJson = JSON.stringify(this.$fs.readJson(publishData.pathToAuthJson));
 			} catch (ex) {
-				this.$errors.failWithoutHelp("Cannot perform publish - auth json file is not in JSON format.");
+				this.$nsCloudErrorsService.fail("Cannot perform publish - auth json file is not in JSON format.");
 			}
 
 			publishData.track = publishData.track || DEFAULT_ANDROID_PUBLISH_TRACK;
@@ -126,11 +126,11 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 
 	private validatePublishData(publishData: IPublishDataCore): void {
 		if (!publishData.packagePaths || !publishData.packagePaths.length) {
-			this.$errors.failWithoutHelp("Cannot upload without packages");
+			this.$nsCloudErrorsService.fail("Cannot upload without packages");
 		}
 
 		if (!publishData.projectDir) {
-			this.$errors.failWithoutHelp("Cannot perform publish - projectDir is required.");
+			this.$nsCloudErrorsService.fail("Cannot perform publish - projectDir is required.");
 		}
 	}
 

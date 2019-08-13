@@ -1,12 +1,12 @@
 import { ServerServicesProxy } from "../server-services-proxy";
 
 export class MBaasProxy extends ServerServicesProxy implements IServerServicesProxy {
-	constructor($errors: IErrors,
+	constructor($nsCloudErrorsService: IErrors,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
 		$nsCloudConfigManager: ICloudConfigManager,
 		$nsCloudUserService: IUserService) {
-		super($errors, $httpClient, $logger, $nsCloudConfigManager, $nsCloudUserService);
+		super($nsCloudErrorsService, $httpClient, $logger, $nsCloudConfigManager, $nsCloudUserService);
 	}
 
 	public getUrlPath(serviceName: string, urlPath: string): string {

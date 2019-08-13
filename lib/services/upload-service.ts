@@ -8,7 +8,7 @@ export class UploadService implements IUploadService {
 
 	constructor(private $nsCloudServerBuildService: IServerBuildService,
 		private $httpClient: Server.IHttpClient,
-		private $errors: IErrors,
+		private $nsCloudErrorsService: IErrors,
 		private $fs: IFileSystem) {
 	}
 
@@ -38,7 +38,7 @@ export class UploadService implements IUploadService {
 		try {
 			await this.$httpClient.httpRequest(requestOpts);
 		} catch (err) {
-			this.$errors.fail({ formatStr: `Error while uploading ${filePathOrContent} to S3. Errors is: ${err.message}`, proxyAuthenticationRequired: err.proxyAuthenticationRequired, suppressCommandHelp: true });
+			this.$nsCloudErrorsService.failWithHelp(<any>{ formatStr: `Error while uploading ${filePathOrContent} to S3. Errors is: ${err.message}`, proxyAuthenticationRequired: err.proxyAuthenticationRequired, suppressCommandHelp: true });
 		}
 
 		return preSignedUrlData && preSignedUrlData.publicDownloadUrl;

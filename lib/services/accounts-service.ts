@@ -1,5 +1,5 @@
 export class AccountsService implements IAccountsService {
-	constructor(private $errors: IErrors,
+	constructor(private $nsCloudErrorsService: IErrors,
 		private $nsCloudPolicyService: IPolicyService,
 		private $nsCloudServerAccountsService: IServerAccountsService) { }
 
@@ -15,7 +15,7 @@ export class AccountsService implements IAccountsService {
 	public async getAccountFromOption(accountIdOption: string): Promise<IAccount> {
 		const accounts = await this.getMyAccounts();
 		if (!accountIdOption) {
-			this.$errors.failWithoutHelp("Please provide accountId.");
+			this.$nsCloudErrorsService.fail("Please provide accountId.");
 		}
 
 		let selectedAccount = _.find(accounts, a => a.id === accountIdOption);
@@ -25,7 +25,7 @@ export class AccountsService implements IAccountsService {
 			const accountIndex = Number.parseInt(accountIdOption);
 			selectedAccount = accounts[accountIndex - 1];
 			if (!selectedAccount) {
-				this.$errors.failWithoutHelp("Invalid accountId index provided.");
+				this.$nsCloudErrorsService.fail("Invalid accountId index provided.");
 			}
 
 			return selectedAccount;
