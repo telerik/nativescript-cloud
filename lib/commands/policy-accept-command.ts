@@ -6,7 +6,7 @@ export class PolicyAcceptCommand implements ICommand {
 		this.$stringParameter
 	];
 
-	constructor(private $errors: IErrors,
+	constructor(private $nsCloudErrorsService: IErrors,
 		private $nsCloudPolicyService: IPolicyService,
 		private $nsCloudServicesPolicyService: ICloudServicesPolicyService,
 		private $stringParameter: ICommandParameter,
@@ -22,7 +22,7 @@ export class PolicyAcceptCommand implements ICommand {
 
 		const policyUri = args[1];
 		if (!policyUri || policyUri.length === 0) {
-			this.$errors.failWithoutHelp("Please provide policy path.");
+			this.$nsCloudErrorsService.fail("Please provide policy path.");
 		}
 
 		await this.$nsCloudPolicyService.accept({ policyName, policyUri });

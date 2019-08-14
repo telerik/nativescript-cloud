@@ -8,7 +8,7 @@ export abstract class InteractiveCloudCommand implements ICommand {
 
 	constructor(private interactiveService: ICloudService,
 		private $nsCloudProcessService: IProcessService,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter) {
 		this.predefinedAnswers = [];
@@ -19,7 +19,7 @@ export abstract class InteractiveCloudCommand implements ICommand {
 			if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
 				const predefinedAnswer = _.find(this.predefinedAnswers, a => msg.body.message.indexOf(a.searchString) >= 0);
 				if (!isInteractive() && !predefinedAnswer) {
-					this.$errors.failWithoutHelp(`Input is required but the process is not interactive. "${msg.body.message}"`);
+					this.$nsCloudErrorsService.fail(`Input is required but the process is not interactive. "${msg.body.message}"`);
 				}
 
 				let input = "";

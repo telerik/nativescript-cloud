@@ -8,7 +8,7 @@ export class DevLoginCommand implements ICommand {
 		return this.$nsCloudOptionsProvider.dashedOptions;
 	}
 
-	constructor(private $errors: IErrors,
+	constructor(private $nsCloudErrorsService: IErrors,
 		private $logger: ILogger,
 		private $options: ICloudOptions,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
@@ -24,7 +24,7 @@ export class DevLoginCommand implements ICommand {
 		try {
 			await this.$nsCloudAuthenticationService.devLogin(args[0], args[1], this.$options.instanceId || "");
 		} catch (err) {
-			this.$errors.failWithoutHelp(err.message);
+			this.$nsCloudErrorsService.fail(err.message);
 		}
 
 		this.$logger.info("Successfully logged in.");

@@ -13,7 +13,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 	}
 
 	constructor($constants: IDictionary<any>,
-		$errors: IErrors,
+		$nsCloudErrorsService: IErrors,
 		$fs: IFileSystem,
 		$httpClient: Server.IHttpClient,
 		$logger: ILogger,
@@ -23,7 +23,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 		private $nsCloudServerBuildService: IServerBuildService,
 		private $projectHelper: IProjectHelper,
 		private $projectDataService: IProjectDataService) {
-		super($errors, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
+		super($nsCloudErrorsService, $fs, $httpClient, $logger, $constants, $nsCloudOperationFactory, $nsCloudOutputFilter, $nsCloudProcessService);
 	}
 
 	public async generateCodesignFiles(codesignData: ICodesignData,
@@ -43,7 +43,7 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 			|| b.disposition === constants.DISPOSITIONS.PROVISION);
 
 		if (!result) {
-			this.$errors.failWithoutHelp(
+			this.$nsCloudErrorsService.fail(
 				`No item with disposition ${constants.DISPOSITIONS.CERTIFICATE} or ${constants.DISPOSITIONS.PROVISION} found in the server result items.`);
 		}
 
@@ -57,11 +57,11 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 	private validateParameters(codesignData: ICodesignData,
 		projectDir: string): void {
 		if (!codesignData || !codesignData.username || !codesignData.password) {
-			this.$errors.failWithoutHelp(`Codesign failed. Reason is missing code sign data. Apple Id and Apple Id password are required..`);
+			this.$nsCloudErrorsService.fail(`Codesign failed. Reason is missing code sign data. Apple Id and Apple Id password are required..`);
 		}
 
 		if (!projectDir) {
-			this.$errors.failWithoutHelp(`Codesign failed. Reason is invalid project path.`);
+			this.$nsCloudErrorsService.fail(`Codesign failed. Reason is invalid project path.`);
 		}
 	}
 

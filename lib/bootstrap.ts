@@ -14,6 +14,7 @@ $injector.require("nsCloudLockService", path.join(__dirname, "services", "lock-s
 $injector.require("nsCloudProcessService", path.join(__dirname, "services", "process-service"));
 $injector.require("nsCloudTelerikUserService", path.join(__dirname, "services", "telerik-user-service"));
 $injector.require("nsCloudS3Helper", path.join(__dirname, "s3-helper"));
+$injector.require("nsCloudErrorsService", path.join(__dirname, "services", "errors-service"));
 
 $injector.require("nsCloudPlatformsData", path.join(__dirname, "cloud-platforms-data"));
 

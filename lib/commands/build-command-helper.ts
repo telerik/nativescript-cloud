@@ -16,7 +16,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 	}
 
 	constructor(private $nsCloudBuildService: ICloudBuildService,
-		private $errors: IErrors,
+		private $nsCloudErrorsService: IErrors,
 		private $logger: ILogger,
 		private $prompter: IPrompter,
 		private $mobileHelper: Mobile.IMobileHelper,
@@ -25,9 +25,9 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		private $options: ICloudOptions,
 		private $fs: IFileSystem,
 		private $staticConfig: IStaticConfig) {
-			this.$projectData.initializeProjectData();
-			const cliVersion = this.$staticConfig.version;
-			this.shouldUseOldLocalBuildService = semver.valid(cliVersion) && semver.lt(cliVersion, semver.prerelease(cliVersion) ? "5.4.0-2019-05-16-13277" : "6.0.0");
+		this.$projectData.initializeProjectData();
+		const cliVersion = this.$staticConfig.version;
+		this.shouldUseOldLocalBuildService = semver.valid(cliVersion) && semver.lt(cliVersion, semver.prerelease(cliVersion) ? "5.4.0-2019-05-16-13277" : "6.0.0");
 	}
 
 	public async buildPlatform(platform: string, buildConfig: IBuildConfig, projectData: IProjectData): Promise<string> {
@@ -51,7 +51,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
 			pathToCertificate = this.$options.certificate ? path.resolve(this.$options.certificate) : "";
 		} else {
-			this.$errors.failWithoutHelp(`Currently only ${this.$mobileHelper.platformNames.join(' ')} platforms are supported.`);
+			this.$nsCloudErrorsService.fail(`Currently only ${this.$mobileHelper.platformNames.join(' ')} platforms are supported.`);
 		}
 
 		const pathToProvision = this.$options.provision ? path.resolve(this.$options.provision) : "";
@@ -119,7 +119,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			credentials = this.getUsernameAndPasswordFromArgs(args);
 			if (!isInteractive() && (!credentials.username || !credentials.password)) {
 				// We are in the CI/CD scenario but we don't have all credentials.
-				this.$errors.failWithoutHelp("Please provide Apple ID and Apple ID password");
+				this.$nsCloudErrorsService.fail("Please provide Apple ID and Apple ID password");
 			}
 		}
 

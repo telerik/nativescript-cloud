@@ -4,7 +4,7 @@ import { URL } from "url";
 export class ServerServicesProxy implements IServerServicesProxy {
 	protected serverConfig: IServerConfig;
 
-	constructor(private $errors: IErrors,
+	constructor(private $nsCloudErrorsService: IErrors,
 		private $httpClient: Server.IHttpClient,
 		private $logger: ILogger,
 		private $nsCloudConfigManager: ICloudConfigManager,
@@ -60,7 +60,7 @@ export class ServerServicesProxy implements IServerServicesProxy {
 			response = await this.$httpClient.httpRequest(requestOpts);
 		} catch (err) {
 			if (err.response && err.response.statusCode === 402) {
-				this.$errors.failWithoutHelp(JSON.parse(err.body).message);
+				this.$nsCloudErrorsService.fail(JSON.parse(err.body).message);
 			}
 
 			throw err;

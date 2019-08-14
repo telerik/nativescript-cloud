@@ -8,7 +8,7 @@ export abstract class UserServiceBase {
 	constructor(private $injector: IInjector,
 		private $logger: ILogger,
 		private $fs: IFileSystem,
-		private $errors: IErrors) { }
+		private $nsCloudErrorsService: IErrors) { }
 
 	public hasUser(): boolean {
 		try {
@@ -31,7 +31,7 @@ export abstract class UserServiceBase {
 		} catch (err) {
 			this.$logger.trace("Error while getting current user info:");
 			this.$logger.trace(err);
-			this.$errors.failWithoutHelp("Not logged in.");
+			this.$nsCloudErrorsService.fail("Not logged in.");
 		}
 	}
 

@@ -14,8 +14,8 @@ describe("eulaCommandHelper", () => {
 
 	const createTestInjector = (): IInjector => {
 		const testInjector = new Yok();
-		testInjector.register("errors", {
-			failWithoutHelp: (message: string, ...args: any[]): never => { throw new Error(message); }
+		testInjector.register("nsCloudErrorsService", {
+			fail: (message: string, ...args: any[]): never => { throw new Error(message); }
 		});
 
 		testInjector.register("logger", {

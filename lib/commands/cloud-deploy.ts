@@ -8,7 +8,7 @@ export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 	}
 
 	constructor($nsCloudProcessService: IProcessService,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
@@ -19,7 +19,7 @@ export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 		private $options: ICloudOptions,
 		private $projectData: IProjectData,
 		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
-		super($nsCloudBuildService, $nsCloudProcessService, $errors, $logger, $prompter);
+		super($nsCloudBuildService, $nsCloudProcessService, $nsCloudErrorsService, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 
@@ -28,11 +28,11 @@ export class CloudDeploy extends InteractiveCloudCommand implements ICommand {
 		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
 
 		if (!args || !args.length) {
-			this.$errors.fail("Provide platform.");
+			this.$nsCloudErrorsService.failWithHelp("Provide platform.");
 		}
 
 		if (args.length > 1) {
-			this.$errors.fail("Only a single platform is supported.");
+			this.$nsCloudErrorsService.failWithHelp("Only a single platform is supported.");
 		}
 
 		return true;

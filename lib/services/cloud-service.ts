@@ -11,7 +11,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 
 	private cloudOperations: IDictionary<{ cloudOperation: ICloudOperation, children: ICloudOperation[] }>;
 
-	constructor(protected $errors: IErrors,
+	constructor(protected $nsCloudErrorsService: IErrors,
 		protected $fs: IFileSystem,
 		protected $httpClient: Server.IHttpClient,
 		protected $logger: ILogger,
@@ -31,7 +31,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 	public async sendCloudMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
 		const cloudOperation = this.cloudOperations[message.cloudOperationId];
 		if (!cloudOperation) {
-			this.$errors.failWithoutHelp(`Cloud operation with id: ${message.cloudOperationId} not found.`);
+			this.$nsCloudErrorsService.fail(`Cloud operation with id: ${message.cloudOperationId} not found.`);
 		}
 
 		await cloudOperation.cloudOperation.sendMessage(message);
@@ -169,7 +169,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 			// Used in CLI before 6.0.0
 			logger.printInfoMessageOnSameLine(msg);
 		} else {
-			this.$logger.info(msg, {[this.$constants.LoggerConfigData.skipNewLine]: true });
+			this.$logger.info(msg, { [this.$constants.LoggerConfigData.skipNewLine]: true });
 		}
 	}
 }

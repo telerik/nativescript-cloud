@@ -8,16 +8,16 @@ export class TelerikUserService extends UserServiceBase implements IUserService 
 		$injector: IInjector,
 		$logger: ILogger,
 		$fs: IFileSystem,
-		$errors: IErrors) {
-		super($injector, $logger, $fs, $errors);
+		$nsCloudErrorsService: IErrors) {
+		super($injector, $logger, $fs, $nsCloudErrorsService);
 		this.userFilePath = this.getUserFilePath();
 	}
 
 	private getUserFilePath(): string {
 		return join(this.$hostInfo.isWindows ? process.env.LocalAppData : join(home(), ".local", "share"),
-		"Telerik",
-		"NativeScript",
-		".nativescript-user");
+			"Telerik",
+			"NativeScript",
+			".nativescript-user");
 	}
 }
 

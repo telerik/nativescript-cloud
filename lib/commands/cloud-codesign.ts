@@ -13,7 +13,7 @@ export class CloudCodesignCommand extends InteractiveCloudCommand implements ICo
 	public allowedParameters: ICommandParameter[];
 
 	constructor($nsCloudProcessService: IProcessService,
-		protected $errors: IErrors,
+		protected $nsCloudErrorsService: IErrors,
 		protected $logger: ILogger,
 		protected $prompter: IPrompter,
 		private $nsCloudEulaCommandHelper: IEulaCommandHelper,
@@ -23,7 +23,7 @@ export class CloudCodesignCommand extends InteractiveCloudCommand implements ICo
 		private $options: ICloudOptions,
 		private $projectData: IProjectData,
 		private $nsCloudCodesignService: ICloudCodesignService) {
-		super($nsCloudCodesignService, $nsCloudProcessService, $errors, $logger, $prompter);
+		super($nsCloudCodesignService, $nsCloudProcessService, $nsCloudErrorsService, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 
@@ -31,7 +31,7 @@ export class CloudCodesignCommand extends InteractiveCloudCommand implements ICo
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
 		if (args.length > 2 || (!isInteractive() && args.length < 2)) {
-			this.$errors.fail(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
+			this.$nsCloudErrorsService.failWithHelp(ERROR_MESSAGES.COMMAND_REQUIRES_APPLE_USERNAME_PASS);
 		}
 
 		await this.$devicesService.initialize({ shouldReturnImmediateResult: false, platform: this.platform, skipEmulatorStart: true });
@@ -39,7 +39,7 @@ export class CloudCodesignCommand extends InteractiveCloudCommand implements ICo
 			.filter(d => !d.isEmulator && d.deviceInfo.platform.toLowerCase() === this.platform.toLowerCase())
 			.map(d => d.deviceInfo);
 		if (!this.devices || this.devices.length === 0) {
-			this.$errors.fail("Please attach iOS devices for which to generate codesign files.");
+			this.$nsCloudErrorsService.failWithHelp("Please attach iOS devices for which to generate codesign files.");
 		}
 
 		return true;
