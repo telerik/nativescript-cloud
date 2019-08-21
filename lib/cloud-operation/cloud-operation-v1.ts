@@ -13,6 +13,7 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 	private statusCheckInterval: NodeJS.Timer;
 	private logsCheckInterval: NodeJS.Timer;
 	private snoozeLogPoll: Boolean;
+	private hasLogPollCompleted: Boolean;
 
 	constructor(public id: string,
 		protected serverResponse: IServerResponse,
@@ -55,7 +56,15 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 	protected async waitForResultCore(): Promise<ICloudOperationResult> {
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
 			this.statusCheckInterval = setInterval(async () => {
-				this.serverStatus = await this.$nsCloudS3Helper.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
+				const status = this.serverStatus.status;
+				if (status !== CloudOperationV1.OPERATION_COMPLETE_STATUS && status !== CloudOperationV1.OPERATION_FAILED_STATUS) {
+					this.serverStatus = await this.$nsCloudS3Helper.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
+				}
+
+				if (!this.hasLogPollCompleted) {
+					return;
+				}
+
 				if (this.serverStatus.status === CloudOperationV1.OPERATION_COMPLETE_STATUS) {
 					clearInterval(this.statusCheckInterval);
 					this.result = await this.$nsCloudS3Helper.getJsonObjectFromS3File<ICloudOperationResult>(this.serverResponse.resultUrl);
@@ -84,15 +93,16 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 				return;
 			}
 
+			const status = this.serverStatus.status;
+			const hasCompleted = status === CloudOperationBase.OPERATION_COMPLETE_STATUS || status === CloudOperationBase.OPERATION_FAILED_STATUS;
+			if (hasCompleted) {
+				clearInterval(this.logsCheckInterval);
+			}
+
 			this.snoozeLogPoll = true;
 			await this.getCloudOperationLogs();
 			this.snoozeLogPoll = false;
-
-			const status = this.serverStatus.status;
-			if (status === CloudOperationBase.OPERATION_COMPLETE_STATUS || status === CloudOperationBase.OPERATION_FAILED_STATUS) {
-				clearInterval(this.logsCheckInterval);
-				return;
-			}
+			this.hasLogPollCompleted = hasCompleted;
 		}, CloudOperationV1.OPERATION_STATUS_CHECK_INTERVAL);
 	}
 
