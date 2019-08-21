@@ -12,6 +12,7 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 	private serverStatus: IServerStatus;
 	private statusCheckInterval: NodeJS.Timer;
 	private logsCheckInterval: NodeJS.Timer;
+	private snoozeLogPoll: Boolean;
 
 	constructor(public id: string,
 		protected serverResponse: IServerResponse,
@@ -79,7 +80,13 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 
 	private pollForLogs(): void {
 		this.logsCheckInterval = setInterval(async () => {
+			if (this.snoozeLogPoll) {
+				return;
+			}
+
+			this.snoozeLogPoll = true;
 			await this.getCloudOperationLogs();
+			this.snoozeLogPoll = false;
 
 			const status = this.serverStatus.status;
 			if (status === CloudOperationBase.OPERATION_COMPLETE_STATUS || status === CloudOperationBase.OPERATION_FAILED_STATUS) {
