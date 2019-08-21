@@ -135,6 +135,10 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			additionalCliFlags.push("--no-bundle");
 		}
 
+		if (projectSettings.aab) {
+			additionalCliFlags.push("--aab");
+		}
+
 		if (projectSettings.env) {
 			const envOptions = _.map(projectSettings.env, (value, key) => `--env.${key}=${value}`);
 			additionalCliFlags.push(...envOptions);

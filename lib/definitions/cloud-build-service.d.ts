@@ -203,10 +203,14 @@ interface IBundle {
 	bundle: boolean;
 }
 
+interface IAndroidBundleOptions {
+	aab: boolean;
+}
+
 /**
  * Describes the project settings required for different operations.
  */
-interface INSCloudProjectSettings extends IEnvOptions, IBundle, ISharedCloud, IProjectNameComposition, IWorkflowRequestData, IHasUseHotModuleReloadOption {
+interface INSCloudProjectSettings extends IEnvOptions, IBundle, IAndroidBundleOptions, ISharedCloud, IProjectNameComposition, IWorkflowRequestData, IHasUseHotModuleReloadOption {
 	/**
 	 * The directory where the project is located. This should be the path to the directory where application's package.json is located.
 	 */

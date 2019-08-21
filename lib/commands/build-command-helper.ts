@@ -68,7 +68,8 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			workflowUrl: this.$options.workflow && this.$options.workflow.url,
 			clean: this.$options.clean,
 			env: this.$options.env,
-			useHotModuleReload: this.$options.hmr
+			useHotModuleReload: this.$options.hmr,
+			aab: this.$options.aab
 		};
 
 		const buildConfiguration = this.$options.release ? CLOUD_BUILD_CONFIGURATIONS.RELEASE : CLOUD_BUILD_CONFIGURATIONS.DEBUG;
