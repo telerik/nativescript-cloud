@@ -180,7 +180,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		const localBuildResult = await this.downloadServerResult(cloudOperationId, buildResult, {
 			projectDir: projectSettings.projectDir,
 			platform,
-			emulator: iOSBuildData && !iOSBuildData.buildForDevice
+			emulator: iOSBuildData && !iOSBuildData.buildForDevice,
+			extension: projectSettings.aab ? "aab" : null
 		});
 
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. OutputFilePath: ${localBuildResult}`);
@@ -369,7 +370,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return [result];
 	}
 
-	private async downloadServerResult(cloudOperationId: string, buildResult: ICloudOperationResult, buildOutputOptions: IOutputDirectoryOptions): Promise<string> {
+	private async downloadServerResult(cloudOperationId: string, buildResult: ICloudOperationResult, buildOutputOptions: ICloudBuildOutputOptions): Promise<string> {
 		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.START);
 		const targetFileNames = await super.downloadServerResults(buildResult, buildOutputOptions);
 		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.END);

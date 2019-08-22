@@ -285,6 +285,10 @@ interface IIOSBuildData extends IBuildForDevice {
 interface ICloudBuildOutputDirectoryOptions extends IOutputDirectoryOptions {
 }
 
+interface ICloudBuildOutputOptions extends IOutputDirectoryOptions {
+	extension?: string;
+}
+
 interface IBuildOptions {
 	shouldPrepare: boolean;
 }
