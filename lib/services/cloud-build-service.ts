@@ -135,7 +135,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			additionalCliFlags.push("--no-bundle");
 		}
 
-		if (projectSettings.aab) {
+		if (androidBuildData.aab) {
 			additionalCliFlags.push("--aab");
 		}
 
@@ -181,7 +181,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			projectDir: projectSettings.projectDir,
 			platform,
 			emulator: iOSBuildData && !iOSBuildData.buildForDevice,
-			extension: projectSettings.aab ? "aab" : null
+			extension: androidBuildData.aab ? "aab" : null
 		});
 
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. OutputFilePath: ${localBuildResult}`);

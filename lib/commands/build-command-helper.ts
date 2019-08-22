@@ -68,8 +68,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			workflowUrl: this.$options.workflow && this.$options.workflow.url,
 			clean: this.$options.clean,
 			env: this.$options.env,
-			useHotModuleReload: this.$options.hmr,
-			aab: this.$options.aab
+			useHotModuleReload: this.$options.hmr
 		};
 
 		const buildConfiguration = this.$options.release ? CLOUD_BUILD_CONFIGURATIONS.RELEASE : CLOUD_BUILD_CONFIGURATIONS.DEBUG;
@@ -79,7 +78,8 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			buildConfiguration,
 			androidBuildData: <any>{
 				pathToCertificate,
-				certificatePassword: this.$options.keyStorePassword
+				certificatePassword: this.$options.keyStorePassword,
+				aab: this.$options.aab
 			},
 			iOSBuildData: {
 				pathToCertificate,
