@@ -135,7 +135,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			additionalCliFlags.push("--no-bundle");
 		}
 
-		if (androidBuildData.aab) {
+		if (androidBuildData && androidBuildData.aab) {
 			additionalCliFlags.push("--aab");
 		}
 
@@ -181,7 +181,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			projectDir: projectSettings.projectDir,
 			platform,
 			emulator: iOSBuildData && !iOSBuildData.buildForDevice,
-			extension: androidBuildData.aab ? "aab" : null
+			extension: androidBuildData && androidBuildData.aab ? "aab" : null
 		});
 
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. OutputFilePath: ${localBuildResult}`);
@@ -370,7 +370,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		return [result];
 	}
 
-	private async downloadServerResult(cloudOperationId: string, buildResult: ICloudOperationResult, buildOutputOptions: ICloudBuildOutputOptions): Promise<string> {
+	private async downloadServerResult(cloudOperationId: string, buildResult: ICloudOperationResult, buildOutputOptions: ICloudOperationOutputOptions): Promise<string> {
 		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.START);
 		const targetFileNames = await super.downloadServerResults(buildResult, buildOutputOptions);
 		this.emitStepChanged(cloudOperationId, constants.BUILD_STEP_NAME.DOWNLOAD, constants.BUILD_STEP_PROGRESS.END);

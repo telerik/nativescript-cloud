@@ -250,7 +250,7 @@ interface IAndroidBuildData {
 	/**
 	 * Android App Bundle (--aab) option.
 	 */
-	aab?: string;
+	aab?: boolean;
 }
 
 /**
@@ -286,7 +286,7 @@ interface IIOSBuildData extends IBuildForDevice {
 interface ICloudBuildOutputDirectoryOptions extends IOutputDirectoryOptions {
 }
 
-interface ICloudBuildOutputOptions extends IOutputDirectoryOptions {
+interface ICloudOperationOutputOptions extends IOutputDirectoryOptions {
 	extension?: string;
 }
 

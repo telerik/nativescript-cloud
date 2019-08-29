@@ -12,8 +12,8 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 	private serverStatus: IServerStatus;
 	private statusCheckInterval: NodeJS.Timer;
 	private logsCheckInterval: NodeJS.Timer;
-	private snoozeLogPoll: Boolean;
-	private hasLogPollCompleted: Boolean;
+	private snoozeLogPoll: boolean;
+	private hasLogPollCompleted: boolean;
 
 	constructor(public id: string,
 		protected serverResponse: IServerResponse,
@@ -56,8 +56,8 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 	protected async waitForResultCore(): Promise<ICloudOperationResult> {
 		return new Promise<ICloudOperationResult>((resolve, reject) => {
 			this.statusCheckInterval = setInterval(async () => {
-				const status = this.serverStatus.status;
-				if (status !== CloudOperationV1.OPERATION_COMPLETE_STATUS && status !== CloudOperationV1.OPERATION_FAILED_STATUS) {
+				const status = this.serverStatus && this.serverStatus.status;
+				if (status === CloudOperationV1.OPERATION_IN_PROGRESS_STATUS) {
 					this.serverStatus = await this.$nsCloudS3Helper.getJsonObjectFromS3File<IServerStatus>(this.serverResponse.statusUrl);
 				}
 
@@ -93,8 +93,7 @@ class CloudOperationV1 extends CloudOperationBase implements ICloudOperation {
 				return;
 			}
 
-			const status = this.serverStatus.status;
-			const hasCompleted = status === CloudOperationBase.OPERATION_COMPLETE_STATUS || status === CloudOperationBase.OPERATION_FAILED_STATUS;
+			const hasCompleted = this.serverStatus.status !== CloudOperationBase.OPERATION_IN_PROGRESS_STATUS;
 			if (hasCompleted) {
 				clearInterval(this.logsCheckInterval);
 			}
