@@ -78,7 +78,8 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 			buildConfiguration,
 			androidBuildData: <any>{
 				pathToCertificate,
-				certificatePassword: this.$options.keyStorePassword
+				certificatePassword: this.$options.keyStorePassword,
+				aab: this.$options.aab
 			},
 			iOSBuildData: {
 				pathToCertificate,

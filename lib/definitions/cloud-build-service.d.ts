@@ -246,6 +246,11 @@ interface IAndroidBuildData {
 	 * Password of the specified certificate. Required and used only for release builds.
 	 */
 	certificatePassword: string;
+
+	/**
+	 * Android App Bundle (--aab) option.
+	 */
+	aab?: boolean;
 }
 
 /**
@@ -279,6 +284,10 @@ interface IIOSBuildData extends IBuildForDevice {
  * Here only for backwards compatibility. Deleting this will require a major version change as it is used in NativeScript Sidekick.
  */
 interface ICloudBuildOutputDirectoryOptions extends IOutputDirectoryOptions {
+}
+
+interface ICloudOperationOutputOptions extends IOutputDirectoryOptions {
+	extension?: string;
 }
 
 interface IBuildOptions {

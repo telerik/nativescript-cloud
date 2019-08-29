@@ -110,8 +110,8 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 		}
 	}
 
-	protected async downloadServerResults(serverResult: ICloudOperationResult, serverOutputOptions: IOutputDirectoryOptions): Promise<string[]> {
-		const destinationDir = this.getServerOperationOutputDirectory(serverOutputOptions);
+	protected async downloadServerResults(serverResult: ICloudOperationResult, outputOptions: ICloudOperationOutputOptions): Promise<string[]> {
+		const destinationDir = this.getServerOperationOutputDirectory(outputOptions);
 		this.$fs.ensureDirectoryExists(destinationDir);
 
 		const serverResultObjs = this.getServerResults(serverResult);
@@ -119,7 +119,13 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 		let targetFileNames: string[] = [];
 		for (const serverResultObj of serverResultObjs) {
 			this.$logger.info(`Result url: ${serverResultObj.fullPath}`);
-			const targetFileName = path.join(destinationDir, serverResultObj.filename);
+
+			let filename = serverResultObj.filename;
+			if (outputOptions.extension) {
+				filename = `${path.parse(filename).name}.${outputOptions.extension}`;
+			}
+
+			const targetFileName = path.join(destinationDir, filename);
 			targetFileNames.push(targetFileName);
 			const targetFile = this.$fs.createWriteStream(targetFileName);
 

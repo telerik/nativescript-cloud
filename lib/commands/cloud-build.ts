@@ -16,15 +16,13 @@ export class CloudBuildCommand extends InteractiveCloudCommand implements IComma
 		private $nsCloudBuildService: ICloudBuildService,
 		private $nsCloudOptionsProvider: ICloudOptionsProvider,
 		private $options: ICloudOptions,
-		private $projectData: IProjectData,
-		private $nsCloudAndroidBundleValidatorHelper: IAndroidBundleValidatorHelper) {
+		private $projectData: IProjectData) {
 		super($nsCloudBuildService, $nsCloudProcessService, $nsCloudErrorsService, $logger, $prompter);
 		this.$projectData.initializeProjectData();
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
-		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
 
 		if (!args || !args.length) {
 			this.$nsCloudErrorsService.failWithHelp("Provide platform.");
