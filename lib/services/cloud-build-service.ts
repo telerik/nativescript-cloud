@@ -96,7 +96,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		}
 		let buildFiles: IServerItemBase[] = [];
 		const isReleaseBuild = this.$nsCloudBuildHelper.isReleaseConfiguration(buildConfiguration);
-		if (this.$mobileHelper.isAndroidPlatform(platform) && isReleaseBuild) {
+		const isAndroidBuild = this.$mobileHelper.isAndroidPlatform(platform);
+		if (isAndroidBuild && isReleaseBuild) {
 			buildFiles.push({
 				filename: uuid.v4(),
 				fullPath: androidBuildData.pathToCertificate,
@@ -135,7 +136,8 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			additionalCliFlags.push("--no-bundle");
 		}
 
-		if (androidBuildData && androidBuildData.aab) {
+		const useAabFlag = isAndroidBuild && androidBuildData && androidBuildData.aab;
+		if (useAabFlag) {
 			additionalCliFlags.push("--aab");
 		}
 
@@ -154,7 +156,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			additionalCliFlags,
 			accountId
 		});
-		if (this.$mobileHelper.isAndroidPlatform(platform)) {
+		if (isAndroidBuild) {
 			buildProps = await this.$nsCloudBuildPropertiesService.getAndroidBuildProperties(projectSettings, buildProps, filesToUpload, androidBuildData);
 		} else if (this.$mobileHelper.isiOSPlatform(platform)) {
 			buildProps = await this.$nsCloudBuildPropertiesService.getiOSBuildProperties(projectSettings, buildProps, filesToUpload, iOSBuildData);
@@ -181,7 +183,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 			projectDir: projectSettings.projectDir,
 			platform,
 			emulator: iOSBuildData && !iOSBuildData.buildForDevice,
-			extension: androidBuildData && androidBuildData.aab ? "aab" : null
+			extension: useAabFlag ? "aab" : null
 		});
 
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. OutputFilePath: ${localBuildResult}`);
