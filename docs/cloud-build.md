@@ -2,7 +2,7 @@
 
 ### Description
 
-Builds the project in the cloud for a specified platform. The produced build result (`.apk`, `.ipa` or `.zip` containing `.app` for iOS Simulator) is downloaded in the `.cloud` directory, which is located in the root of the project.
+Builds the project in the cloud for a specified platform. The produced build result (`.apk`, `.aab`, `.ipa` or `.zip` containing `.app` for iOS Simulator) is downloaded in the `.cloud` directory, which is located in the root of the project.
 
 When running this command the HMR (Hot Module Replacement) is not enabled by default. In case you want to enable HMR, you can pass `--hmr` flag.
 
@@ -30,6 +30,7 @@ Build app in release for iOS | `$ tns cloud build ios --accountId <Account Ident
 * `--key-store-password` - Provides the password for the keystore file specified with `--key-store-path`. You can use the `--key-store-*` options along with `--release` to produce a signed release build. You need to specify all `--key-store-*` options.
 * `--emulator` - Specifies that the build will be for a virtual device - Android emulator or iOS simulator.
 * `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have access to the Private Cloud feature.
+* `--aab` - Specifies that the build will produce an Android App Bundle(`.aab`) file.
 
 <% if(isHtml) { %>
 

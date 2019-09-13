@@ -85,7 +85,7 @@ tns.extensibilityService.installExtension("nativescript-cloud@latest")
 The `nsCloudBuildService` allows build of applications in the cloud. You can call the following methods:
 
 #### build method
-`build` method validates passed arguments and tries to build the application in the cloud. In case of successful build, the build result (.apk, .ipa or .zip) is downloaded. The result contains information about the whole build process, path to the downloaded build result and information used to generate a QR code, pointing to the latest build result (in S3). </br>
+`build` method validates passed arguments and tries to build the application in the cloud. In case of successful build, the build result (.apk, .aab, .ipa or .zip) is downloaded. The result contains information about the whole build process, path to the downloaded build result and information used to generate a QR code, pointing to the latest build result (in S3). </br>
 Definition:
 
 ```TypeScript
