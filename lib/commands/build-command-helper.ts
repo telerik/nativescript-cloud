@@ -135,11 +135,13 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 		} else {
 			const buildData = this.getCloudBuildData(platform);
 			buildData.buildConfiguration = CLOUD_BUILD_CONFIGURATIONS.RELEASE;
-			packagePath = (await this.$nsCloudBuildService.build(buildData.projectSettings,
+			const cloudResult = await this.$nsCloudBuildService.build(buildData.projectSettings,
 				buildData.platform, buildData.buildConfiguration,
 				this.$options.accountId,
 				buildData.androidBuildData,
-				buildData.iOSBuildData)).qrData.originalUrl;
+				buildData.iOSBuildData);
+
+			packagePath = cloudResult.qrData ? cloudResult.qrData.originalUrl : cloudResult.outputFilePath;
 		}
 
 		return packagePath;
