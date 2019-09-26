@@ -188,23 +188,28 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 
 		this.$logger.info(`The result of ${buildInformationString} successfully downloaded. OutputFilePath: ${localBuildResult}`);
 
-		const buildResultUrl = this.getBuildResultUrl(buildResult);
-		const itmsOptions = {
-			pathToProvision: iOSBuildData && iOSBuildData.pathToProvision,
-			projectId: projectSettings.projectId,
-			projectName: projectSettings.projectName,
-			url: buildResultUrl
-		};
+		let qrData: IQrData = null;
+		if (!useAabFlag) {
+			const buildResultUrl = this.getBuildResultUrl(buildResult);
+			const itmsOptions = {
+				pathToProvision: iOSBuildData && iOSBuildData.pathToProvision,
+				projectId: projectSettings.projectId,
+				projectName: projectSettings.projectName,
+				url: buildResultUrl
+			};
+
+			qrData = {
+				originalUrl: buildResultUrl,
+				imageData: await this.getImageData(buildResultUrl, itmsOptions)
+			};
+		}
 
 		const result = {
 			cloudOperationId: cloudOperationId,
 			stderr: buildResult.stderr,
 			stdout: buildResult.stdout,
 			outputFilePath: localBuildResult,
-			qrData: {
-				originalUrl: buildResultUrl,
-				imageData: await this.getImageData(buildResultUrl, itmsOptions)
-			}
+			qrData
 		};
 
 		// In case HMR is passed, do not save the hashes as the files generated in the cloud may differ from the local ones.
