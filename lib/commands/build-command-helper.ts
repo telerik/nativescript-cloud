@@ -139,7 +139,8 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 				buildData.platform, buildData.buildConfiguration,
 				this.$options.accountId,
 				buildData.androidBuildData,
-				buildData.iOSBuildData);
+				buildData.iOSBuildData,
+				{ shouldPrepare: true });
 
 			packagePath = cloudResult.qrData ? cloudResult.qrData.originalUrl : cloudResult.outputFilePath;
 		}
