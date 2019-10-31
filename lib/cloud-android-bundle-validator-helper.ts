@@ -18,7 +18,7 @@ export class CloudAndroidBundleValidatorHelper implements IAndroidBundleValidato
 	}
 
 	validateDeviceApiLevel(device: Mobile.IDevice, buildData: IBuildData): void {
-		return this.$bundleValidatorHelper.validateDeviceApiLevel(device, buildData);
+		throw new Error("validateDeviceApiLevel method is not implemented.");
 	}
 }
 
