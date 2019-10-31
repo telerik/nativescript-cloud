@@ -2,7 +2,8 @@ export class CloudAndroidBundleValidatorHelper implements IAndroidBundleValidato
 	protected get $bundleValidatorHelper(): IAndroidBundleValidatorHelper {
 		return this.$nsCloudPolyfillService.getPolyfillObject<IAndroidBundleValidatorHelper>("androidBundleValidatorHelper", {
 			validateNoAab: () => { /* Mock */ },
-			validateRuntimeVersion: () => { /* Mock */ }
+			validateRuntimeVersion: () => { /* Mock */ },
+			validateDeviceApiLevel: () => { /* Mock */ }
 		});
 	}
 
@@ -14,6 +15,10 @@ export class CloudAndroidBundleValidatorHelper implements IAndroidBundleValidato
 
 	validateRuntimeVersion(projectData: IProjectData) {
 		return this.$bundleValidatorHelper.validateRuntimeVersion(projectData);
+	}
+
+	validateDeviceApiLevel(device: Mobile.IDevice, buildData: IBuildData): void {
+		throw new Error("validateDeviceApiLevel method is not implemented.");
 	}
 }
 
