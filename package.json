@@ -53,7 +53,7 @@
     "cookie": "0.3.1",
     "lodash": "4.17.4",
     "minimatch": "3.0.4",
-    "nativescript-doctor": "0.9.0",
+    "nativescript-doctor": "1.12.0",
     "node-forge": "0.7.0",
     "osenv": "0.1.4",
     "promise-retry": "1.1.1",
