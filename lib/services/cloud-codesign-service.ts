@@ -68,6 +68,8 @@ export class CloudCodesignService extends CloudService implements ICloudCodesign
 	private async executeGeneration(codesignData: ICodesignData,
 		projectDir: string,
 		cloudOperationId: string): Promise<ICodesignResultData> {
+		throw new Error("Auto Generation is currently not available. Please follow the GitHub issue for further information: https://github.com/NativeScript/sidekick-feedback/issues/435");
+
 		const codesignInformationString = "generation of iOS certificate and provision files";
 		this.$logger.info(`Starting ${codesignInformationString}.`);
 
