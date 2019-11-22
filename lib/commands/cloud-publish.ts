@@ -78,6 +78,7 @@ export class CloudPublishAndroid extends CloudPublish implements ICommand {
 			packagePaths: [packagePath],
 			sharedCloud: this.$options.sharedCloud,
 			projectDir: this.$projectData.projectDir,
+			androidReleaseStatus: this.$options.androidReleaseStatus
 		});
 	}
 }

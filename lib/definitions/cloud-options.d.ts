@@ -2,6 +2,7 @@
  * Describes additional -- flags that can be passed to cloud commands.
  */
 interface ICloudOptions extends IOptions, ISharedCloud {
+	androidReleaseStatus: string;
 	accountId: string;
 	apiVersion: string;
 	local: boolean;

@@ -86,6 +86,7 @@ interface IPublishCredentials extends IApple2FAOptions {
 }
 
 interface IPublishRequestData extends IPlatform, IPackagePaths, IOptionalAndroidTrack, IOptionalTeamIdentifier, ICloudOperationId {
+	androidReleaseStatus?: string;
 	credentials: IPublishCredentials;
 	appIdentifier?: string;
 	sharedCloud?: boolean;

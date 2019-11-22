@@ -66,6 +66,11 @@ interface IGooglePlayPublishData extends IPublishDataCore, IOptionalAndroidTrack
 	 * Path to local json file generated through Google API Console.
 	 */
 	pathToAuthJson: string;
+
+	/**
+	 * The desired status of this release. Acceptable values are: completed, draft, halted, inProgress.
+	 */
+	androidReleaseStatus?: string;
 }
 
 /**

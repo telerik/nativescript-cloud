@@ -76,7 +76,8 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 				},
 				packagePaths: publishData.packagePaths,
 				platform: this.$devicePlatformsConstants.Android,
-				track: publishData.track
+				track: publishData.track,
+				androidReleaseStatus: publishData.androidReleaseStatus,
 			}, publishData, this.getAndroidError.bind(this));
 		});
 	}
