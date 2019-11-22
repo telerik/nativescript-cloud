@@ -13,6 +13,7 @@ export class CloudOptionsProvider implements ICloudOptionsProvider {
 			workflow: { type: OptionType.Object, hasSensitiveValue: true },
 			vmTemplateName: { type: OptionType.String, hasSensitiveValue: false },
 			track: { type: OptionType.String, default: DEFAULT_ANDROID_PUBLISH_TRACK, hasSensitiveValue: false },
+			androidReleaseStatus: { type: OptionType.String, hasSensitiveValue: false },
 			appleApplicationSpecificPassword: { type: OptionType.String, hasSensitiveValue: true },
 			appleSessionBase64: { type: OptionType.String, hasSensitiveValue: true },
 			otp: { type: OptionType.String, hasSensitiveValue: false },

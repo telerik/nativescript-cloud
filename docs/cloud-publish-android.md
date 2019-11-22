@@ -8,7 +8,7 @@ Builds the project in the cloud and then uploads the produced application packag
 
 Usage | Synopsis
 ---|---
-General | `$ tns cloud publish android <path to authentication.json> --accountId <Account Identifier> --key-store-path <File Path> --key-store-password <Password> [--env.*] --track <Track>`
+General | `$ tns cloud publish android <path to authentication.json> --accountId <Account Identifier> --key-store-path <File Path> --key-store-password <Password> [--env.*] --track <Track> [--androidReleaseStatus <Status>]`
 
 ### Arguments
 
@@ -22,6 +22,7 @@ General | `$ tns cloud publish android <path to authentication.json> --accountId
 * `--env.*` - Specifies additional flags that the bundler may process. May be passed multiple times. For example: `--env.uglify --env.snapshot`.
 * `--sharedCloud` - Builds the application in the shared cloud instead of the private one. This option is valid only for users who have Private Cloud feature enabled.
 * `--track` - Specifies the Google Play release track for which to publish the application. In case the flag is not passed, the CLI will prompt you to specify it. In a non-interactive terminal, CLI defaults to 'beta' track.
+* `--androidReleaseStatus` - Specifies the Google Play release status. Acceptable values are `completed`, `draft`, `halted` and `inProgress`. The default value which will be used it `completed`.
 
 <% if(isHtml) { %>
 
