@@ -4,6 +4,8 @@ import { Yok } from "nativescript/lib/common/yok";
 import { assert } from "chai";
 import { EulaConstants } from "../../lib/constants";
 import { NsCouldLockService } from "../../lib/services/lock-service";
+import * as temp from "temp";
+temp.track();
 
 interface IEulaTestData {
 	testName: string;
@@ -78,6 +80,11 @@ describe("eulaService", () => {
 		testInjector.register("nsCloudLockService", NsCouldLockService);
 
 		testInjector.register("nsCloudHashService", HashService);
+
+		testInjector.register("nsCloudTempService", {
+			mkdirSync: async (affixes: string): Promise<string> => temp.mkdirSync(affixes),
+			path: async (options: ITempPathOptions): Promise<string> => temp.path(options)
+		});
 
 		return testInjector;
 	};

@@ -9,8 +9,9 @@ export class KinveyEulaService extends EulaServiceBase implements IEulaService {
 		$logger: ILogger,
 		$nsCloudHashService: IHashService,
 		$settingsService: ISettingsService,
-		$userSettingsService: IUserSettingsService) {
-		super($fs, $httpClient, $nsCloudLockService, $logger, $nsCloudHashService, $settingsService, $userSettingsService);
+		$userSettingsService: IUserSettingsService,
+		$nsCloudTempService: ITempService) {
+		super($fs, $httpClient, $nsCloudLockService, $logger, $nsCloudHashService, $settingsService, $userSettingsService, $nsCloudTempService);
 	}
 
 	protected getAcceptedEulaHashPropertyName(): string {
