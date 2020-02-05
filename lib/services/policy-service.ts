@@ -1,4 +1,3 @@
-import * as temp from "temp";
 import { isUrl } from "../helpers";
 
 export class PolicyService implements IPolicyService {
@@ -8,7 +7,8 @@ export class PolicyService implements IPolicyService {
 		private $fs: IFileSystem,
 		private $httpClient: Server.IHttpClient,
 		private $nsCloudHashService: IHashService,
-		private $userSettingsService: IUserSettingsService) { }
+		private $userSettingsService: IUserSettingsService,
+		private $nsCloudTempService: ITempService) { }
 
 	public async shouldAcceptPolicy(data: IAcceptPolicyData): Promise<boolean> {
 		const shouldAskToAccept = await this.shouldAskToAcceptPolicy(data.policyName);
@@ -58,8 +58,7 @@ export class PolicyService implements IPolicyService {
 		} else if (data.policyUri) {
 			let fileHash = data.policyUri;
 			if (isUrl(data.policyUri)) {
-				const tempPolicyFile = temp.path({ prefix: data.policyName, suffix: ".txt" });
-				temp.track();
+				const tempPolicyFile = await this.$nsCloudTempService.path({ prefix: data.policyName, suffix: ".txt" });
 				await this.$httpClient.httpRequest({
 					url: data.policyUri,
 					pipeTo: this.$fs.createWriteStream(tempPolicyFile)

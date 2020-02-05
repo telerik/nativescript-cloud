@@ -1,6 +1,5 @@
 import * as path from "path";
 import { EulaConstants } from "../constants";
-import * as temp from "temp";
 
 export abstract class EulaServiceBase implements IEulaService {
 	private isEulaDownloadedInCurrentProcess = false;
@@ -11,7 +10,8 @@ export abstract class EulaServiceBase implements IEulaService {
 		private $logger: ILogger,
 		private $nsCloudHashService: IHashService,
 		private $settingsService: ISettingsService,
-		private $userSettingsService: IUserSettingsService) { }
+		private $userSettingsService: IUserSettingsService,
+		private $nsCloudTempService: ITempService) { }
 
 	// Exposed for Sidekick
 	public getEulaData(): Promise<IEulaData> {
@@ -75,8 +75,7 @@ export abstract class EulaServiceBase implements IEulaService {
 		}
 
 		try {
-			const tempEulaPath = temp.path({ prefix: "eula", suffix: ".pdf" });
-			temp.track();
+			const tempEulaPath = await this.$nsCloudTempService.path({ prefix: "eula", suffix: ".pdf" });
 
 			this.$logger.trace(`Downloading EULA to ${this.getPathToEula()}.`);
 
