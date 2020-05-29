@@ -28,6 +28,7 @@ export class CloudCodesignCommand extends InteractiveCloudCommand implements ICo
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
 		if (args.length > 2 || (!isInteractive() && args.length < 2)) {

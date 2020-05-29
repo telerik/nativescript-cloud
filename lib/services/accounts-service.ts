@@ -3,16 +3,22 @@ export class AccountsService implements IAccountsService {
 		private $nsCloudPolicyService: IPolicyService,
 		private $nsCloudServerAccountsService: IServerAccountsService) { }
 
-	public getMyAccounts(): Promise<IAccount[]> {
+	public async getMyAccounts(): Promise<IAccount[]> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.$nsCloudServerAccountsService.getAccounts();
 	}
 
 	public async getUsageInfo(accountIdOption: string): Promise<IUsageInfo[]> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		const account = await this.getAccountFromOption(accountIdOption);
 		return this.$nsCloudServerAccountsService.getUsageInfo(account.id);
 	}
 
 	public async getAccountFromOption(accountIdOption: string): Promise<IAccount> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		const accounts = await this.getMyAccounts();
 		if (!accountIdOption) {
 			this.$nsCloudErrorsService.fail("Please provide accountId.");
@@ -33,6 +39,8 @@ export class AccountsService implements IAccountsService {
 	}
 
 	public async getAccountFeatures(accountIdOption: string): Promise<IDictionary<IFeatureInfo>> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		const account = await this.getAccountFromOption(accountIdOption);
 		return this.$nsCloudServerAccountsService.getAccountFeatures(account.id);
 	}

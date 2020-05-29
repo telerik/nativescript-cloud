@@ -10,6 +10,7 @@ export class CloudEncryptionService implements ICloudEncryptionService {
 	}
 
 	public async getWorkspacePassword(projectSettings: INSCloudProjectSettings): Promise<string> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		const propertyName = this.$nsCloudHashService.getHash(`${this.$nsCloudUserService.getUser().email}_${projectSettings.projectId}`);
 		const imageSettings = await this.getNsCloudEncryptionSettings();
 		let value = imageSettings[propertyName];

@@ -10,14 +10,19 @@ export class ServerAccountsService extends ServerServiceBase implements IServerA
 	}
 
 	public getAccounts(): Promise<IAccount[]> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		return this.sendRequest<IAccount[]>(HTTP_METHODS.GET, "api/accounts", null);
 	}
 
 	public getUsageInfo(accountId: string): Promise<IUsageInfo[]> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.sendRequest<IUsageInfo[]>(HTTP_METHODS.GET, `api/usage?accountId=${accountId}`, null);
 	}
 
 	public getAccountFeatures(accountId: string): Promise<IDictionary<IFeatureInfo>> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.sendRequest<IDictionary<IFeatureInfo>>(HTTP_METHODS.GET, `api/features?accountId=${accountId}`, null);
 	}
 

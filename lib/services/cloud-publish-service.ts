@@ -32,6 +32,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 
 	public async publishToItunesConnect(publishData: IItunesConnectPublishData): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		await this.executeCloudOperation("Cloud publish iOS", async (cloudOperationId: string): Promise<void> => {
 			this.validatePublishData(publishData);
 
@@ -51,6 +52,7 @@ export class CloudPublishService extends CloudService implements ICloudPublishSe
 	}
 
 	public async publishToGooglePlay(publishData: IGooglePlayPublishData): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		await this.executeCloudOperation("Cloud publish Android", async (cloudOperationId: string): Promise<void> => {
 			this.validatePublishData(publishData);
 

@@ -29,6 +29,7 @@ export class CloudProjectService extends CloudService implements ICloudProjectSe
 	}
 
 	public async cleanupProject(cleanupRequestData: ICleanupRequestDataBase): Promise<ICleanupProjectResult> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		let identifiers: string[];
 		const cleanupTaskResults = [];
 

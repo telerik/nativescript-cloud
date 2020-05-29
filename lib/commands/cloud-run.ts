@@ -31,6 +31,7 @@ export class CloudRunCommand extends InteractiveCloudCommand implements ICommand
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
 

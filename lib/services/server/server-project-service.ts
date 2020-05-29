@@ -10,6 +10,8 @@ export class ServerProjectService extends ServerServiceBase implements IServerPr
 	}
 
 	public cleanupProjectData(projectData: ICleanupProjectData): Promise<ICleanupProjectResponse> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.sendRequest<ICleanupProjectResponse>(HTTP_METHODS.POST, "api/cleanup-data", projectData);
 	}
 }
