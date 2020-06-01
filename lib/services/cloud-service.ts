@@ -29,6 +29,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 	}
 
 	public async sendCloudMessage<T>(message: ICloudOperationMessage<T>): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		const cloudOperation = this.cloudOperations[message.cloudOperationId];
 		if (!cloudOperation) {
 			this.$nsCloudErrorsService.fail(`Cloud operation with id: ${message.cloudOperationId} not found.`);
@@ -38,10 +39,12 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 	}
 
 	protected getServerResults(serverResult: ICloudOperationResult): IServerItem[] {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		return [];
 	}
 
 	protected async executeCloudOperation<T>(cloudOperationName: string, action: (cloudOperationId: string) => Promise<T>): Promise<T> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		const cloudOperationId: string = v4();
 		try {
 			this.$logger.info(`Starting ${cloudOperationName}. Cloud operation id: ${cloudOperationId}`);
@@ -58,6 +61,7 @@ export abstract class CloudService extends EventEmitter implements ICloudService
 	}
 
 	protected async waitForCloudOperationToFinish(cloudOperationId: string, serverResponse: IServerResponse, options: ICloudOperationExecutionOptions): Promise<ICloudOperationResult> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		const cloudOperationVersion = serverResponse.cloudOperationVersion || CloudService.CLOUD_OPERATION_VERSION_1;
 		const cloudOperation: ICloudOperation = this.$nsCloudOperationFactory.create(cloudOperationVersion, cloudOperationId, serverResponse);
 		if (options.parentCloudOperationId) {

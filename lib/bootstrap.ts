@@ -97,3 +97,10 @@ $injector.requireCommand("accept|eula", path.join(__dirname, "commands", "accept
 $injector.requireCommand("policy|accept", path.join(__dirname, "commands", "policy-accept-command"));
 
 $injector.requireCommand("cloud|clean|workspace", path.join(__dirname, "commands", "clean", "clean-cloud-workspace"));
+
+(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds = (): never => {
+	const errors = $injector.resolve<IErrors>("errors");
+	return errors.fail("Cloud builds were shut down on May 31st, 2020. " +
+		"If you need to continue building in the cloud you can follow this tutorial " +
+		"to migrate to CircleCI: https://www.nativescript.org/blog/migration-of-nativescript-cloud-builds-to-circle-ci");
+};

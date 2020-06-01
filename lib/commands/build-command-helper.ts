@@ -31,6 +31,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 	}
 
 	public async buildPlatform(platform: string, buildConfig: IBuildConfig, projectData: IProjectData): Promise<string> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		const buildData = this.getCloudBuildData(platform);
 		buildData.iOSBuildData.buildForDevice = buildConfig.buildForDevice;
 		const buildResultData = await this.$nsCloudBuildService.build(buildData.projectSettings,
@@ -42,6 +43,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 	}
 
 	public getCloudBuildData(platformArg: string): ICloudBuildData {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		const platform = this.$mobileHelper.validatePlatformName(platformArg);
 		this.$logger.info(`Executing cloud build with platform: ${platform}.`);
 		const nativescriptData = this.$fs.readJson(path.join(this.$projectData.projectDir, "package.json")).nativescript;
@@ -91,6 +93,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 	}
 
 	public async getAppleCredentials(args: string[]): Promise<ICredentials> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		let { username, password } = this.getUsernameAndPasswordFromArgs(args);
 
 		if (!username) {
@@ -108,6 +111,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 	}
 
 	public async getExtendedAppleCredentials(args: string[], options: ICloudOptions): Promise<IPublishCredentials> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		const extendedCredentials = {
 			appleApplicationSpecificPassword: options.appleApplicationSpecificPassword,
 			appleSession: options.appleSessionBase64 ? Buffer.from(options.appleSessionBase64, "base64").toString() : undefined
@@ -128,6 +132,7 @@ export class BuildCommandHelper implements IBuildCommandHelper {
 	}
 
 	public async buildForPublishingPlatform(platformArg: string): Promise<string> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		let packagePath: string;
 		const platform = this.$mobileHelper.validatePlatformName(platformArg);
 		if (this.$options.local) {

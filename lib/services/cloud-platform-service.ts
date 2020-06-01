@@ -17,6 +17,7 @@ export class CloudPlatformService implements ICloudPlatformService {
 	}
 
 	public async shouldBuild(config: IApplicationBuildConfig, projectData: IProjectData): Promise<boolean> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		if (this.shouldUseOldPlatformService) {
 			const $platformService = this.$injector.resolve("platformService");
 			return $platformService.shouldBuild(config.platform, projectData, config, config.outputPath);
@@ -27,6 +28,7 @@ export class CloudPlatformService implements ICloudPlatformService {
 	}
 
 	public async shouldInstall(config: IApplicationInstallConfig, projectData: IProjectData, device: Mobile.IDevice): Promise<boolean> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		if (this.shouldUseOldPlatformService) {
 			const $platformService = this.$injector.resolve("platformService");
 			return $platformService.shouldInstall(device, projectData, config, config.outputPath);
@@ -37,6 +39,7 @@ export class CloudPlatformService implements ICloudPlatformService {
 	}
 
 	public async deployPlatform(platform: string, outputDirectoryPath: string): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		const $deployCommandHelper = this.$injector.resolve("deployCommandHelper");
 
 		if (this.shouldUseOldPlatformService) {
@@ -57,6 +60,7 @@ export class CloudPlatformService implements ICloudPlatformService {
 	}
 
 	public async saveBuildInfoFile(projectDir: string, buildInfoFileDirname: string, platformData: IPlatformData): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		if (this.shouldUseOldPlatformService) {
 			const $platformService = this.$injector.resolve("platformService");
 			return $platformService.saveBuildInfoFile(platformData.normalizedPlatformName.toLowerCase(), projectDir, buildInfoFileDirname);
@@ -72,7 +76,7 @@ export class CloudPlatformService implements ICloudPlatformService {
 		projectData: IProjectData,
 		provision: string,
 		mobileProvisionData: any): Promise<void> {
-
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		if (this.shouldUseOldPlatformService) {
 			const appFilesUpdaterOptions = {
 				bundle: projectSettings.bundle,

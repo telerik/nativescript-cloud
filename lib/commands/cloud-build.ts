@@ -22,6 +22,7 @@ export class CloudBuildCommand extends InteractiveCloudCommand implements IComma
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
 		if (!args || !args.length) {

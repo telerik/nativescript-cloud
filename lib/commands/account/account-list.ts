@@ -14,6 +14,7 @@ export class AccountListCommand extends AccountCommandBase implements ICommand {
 	}
 
 	public async execute(args: string[]): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
 		const myAccounts = await this.$nsCloudAccountsService.getMyAccounts();

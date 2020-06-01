@@ -19,6 +19,7 @@ export class FeaturesCommand extends AccountCommandBase implements ICommand {
 	}
 
 	public async execute(args: string[]): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
 		const features = await this.$nsCloudAccountsService.getAccountFeatures(this.$options.accountId);

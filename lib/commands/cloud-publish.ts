@@ -23,6 +23,7 @@ abstract class CloudPublish extends InteractiveCloudCommand {
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		this.$nsCloudAndroidBundleValidatorHelper.validateNoAab();
 
 		return true;

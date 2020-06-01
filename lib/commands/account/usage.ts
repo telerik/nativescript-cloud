@@ -21,6 +21,7 @@ export class UsageCommand extends AccountCommandBase implements ICommand {
 	}
 
 	public async execute(args: string[]): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
 		const usage = await this.$nsCloudAccountsService.getUsageInfo(this.$options.accountId);

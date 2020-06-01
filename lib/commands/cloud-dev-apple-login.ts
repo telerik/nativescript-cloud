@@ -22,6 +22,7 @@ export class CloudDevAppleLogin extends InteractiveCloudCommand {
 	}
 
 	public async canExecute(args: string[]): Promise<boolean> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		await this.$nsCloudEulaCommandHelper.ensureEulaIsAccepted();
 
 		if (args.length > 2 || (!isInteractive() && args.length < 1)) {

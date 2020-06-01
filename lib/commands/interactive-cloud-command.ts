@@ -15,6 +15,7 @@ export abstract class InteractiveCloudCommand implements ICommand {
 	}
 
 	public async execute(args: string[]): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		const messageHandler = async (msg: ICloudOperationMessage<ICloudOperationInputRequest>) => {
 			if (msg.type === CloudOperationMessageTypes.CLOUD_OPERATION_INPUT_REQUEST) {
 				const predefinedAnswer = _.find(this.predefinedAnswers, a => msg.body.message.indexOf(a.searchString) >= 0);

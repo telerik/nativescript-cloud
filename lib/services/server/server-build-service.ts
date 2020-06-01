@@ -11,26 +11,38 @@ export class ServerBuildService extends ServerServiceBase implements IServerBuil
 	}
 
 	public startBuild(buildRequest: IBuildRequestData): Promise<IServerResponse> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/build", buildRequest);
 	}
 
 	public getPresignedUploadUrlObject(fileName: string): Promise<IAmazonStorageEntry> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.sendRequest<IAmazonStorageEntry>(HTTP_METHODS.GET, `api/upload-url?${querystring.stringify({ fileName })}`, null);
 	}
 
 	public getBuildCredentials(buildCredentialRequest: IBuildCredentialRequest): Promise<IBuildCredentialResponse> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.sendRequest<IBuildCredentialResponse>(HTTP_METHODS.POST, "api/build-credentials", buildCredentialRequest);
 	}
 
 	public generateCodesignFiles(codesignRequestData: ICodeSignRequestData): Promise<IServerResponse> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/codesign", codesignRequestData);
 	}
 
 	public publish(publishRequestData: IPublishRequestData): Promise<IServerResponse> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/publish", publishRequestData);
 	}
 
 	public appleLogin(appleLoginRequestData: IAppleLoginRequestData): Promise<IServerResponse> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		return this.sendRequest<IServerResponse>(HTTP_METHODS.POST, "api/apple-login", appleLoginRequestData);
 	}
 }

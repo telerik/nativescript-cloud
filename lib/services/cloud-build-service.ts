@@ -66,6 +66,9 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData,
 		buildOptions?: IBuildOptions): Promise<IBuildResultData> {
+
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		const result = await this.executeCloudOperation("Cloud build", async (cloudOperationId: string): Promise<IBuildResultData> => {
 			this.$logger.info("Getting accounts information...");
 			const account = await this.$nsCloudAccountsService.getAccountFromOption(accountId);
@@ -86,6 +89,9 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData,
 		buildOptions?: IBuildOptions): Promise<IBuildResultData> {
+
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
+
 		const buildInformationString = `Cloud build of '${projectSettings.projectDir}', platform: '${platform}', ` +
 			`configuration: '${buildConfiguration}'`;
 		this.$logger.info(`${buildInformationString}.`);
@@ -230,6 +236,7 @@ export class CloudBuildService extends CloudService implements ICloudBuildServic
 		appId: string,
 		androidBuildData?: IAndroidBuildData,
 		iOSBuildData?: IIOSBuildData): Promise<void> {
+		(<INSCloudGlobal>global).showErrorForStoppedCloudBuilds();
 		return this.$nsCloudBuildPropertiesService.validateBuildProperties(platform, buildConfiguration, appId, androidBuildData, iOSBuildData);
 	}
 
