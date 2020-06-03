@@ -108,8 +108,8 @@ export const ERROR_MESSAGES = {
 };
 
 export class EulaConstants {
-	public static eulaUrl = "https://github.com/ProgressNS/sidekick-eula/blob/master/EULA.pdf";
-	public static kinveyEulaUrl = "https://github.com/ProgressNS/sidekick-eula/blob/master/kinvey-free-eula.pdf";
+	public static eulaUrl = "https://github.com/ProgressNS/sidekick-eula/raw/master/EULA.pdf";
+	public static kinveyEulaUrl = "https://github.com/ProgressNS/sidekick-eula/raw/master/kinvey-free-eula.pdf";
 	public static acceptedEulaHashKey = "acceptedEulaHash";
 	public static acceptedKinveyEulaHashKey = "acceptedKinveyEulaHash";
 	public static timeout = 60000;
